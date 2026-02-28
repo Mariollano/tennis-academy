@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Trophy, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/ri-tennis-logo_3de51834.jpg";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -35,10 +37,12 @@ export default function Navbar() {
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center">
-            <Trophy className="w-5 h-5 text-primary" />
-          </div>
-          <div className="leading-tight">
+          <img
+            src={LOGO_URL}
+            alt="RI Tennis Academy"
+            className="w-12 h-12 rounded-full object-cover border-2 border-accent shadow-sm"
+          />
+          <div className="leading-tight hidden sm:block">
             <div className="text-accent font-bold text-sm tracking-wide">RI TENNIS</div>
             <div className="text-primary-foreground/80 text-xs tracking-widest uppercase">Academy</div>
           </div>
@@ -113,7 +117,10 @@ onClick={() => (window.location.href = getLoginUrl())}
           </SheetTrigger>
           <SheetContent side="right" className="bg-primary text-primary-foreground w-64 p-0">
             <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <div className="flex items-center gap-2">
+              <img src={LOGO_URL} alt="RI Tennis Academy" className="w-8 h-8 rounded-full object-cover border border-accent" />
               <span className="font-bold text-accent">RI Tennis Academy</span>
+            </div>
               <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => setOpen(false)}>
                 <X className="w-4 h-4" />
               </Button>

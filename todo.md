@@ -88,3 +88,5 @@
 
 ## Fixes & Updates
 - [x] Update private lesson price to $120/hour everywhere (pages, routers, master prompt)
+- [x] Upload RI Tennis Academy logo to CDN and display in navbar
+- [x] Retheme entire app to brand colors: black, royal blue (#2563EB), light blue, white, tennis ball yellow (#CCFF00)

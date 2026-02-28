@@ -87,14 +87,14 @@ export default function Home() {
       <section
         className="relative overflow-hidden text-white"
         style={{
-          background: "linear-gradient(135deg, oklch(0.18 0.08 260) 0%, oklch(0.22 0.06 250) 50%, oklch(0.28 0.05 240) 100%)",
+          background: "linear-gradient(135deg, #0a0a0a 0%, #0d1b3e 50%, #1a2f5e 100%)",
         }}
       >
-        {/* Tennis ball decorative circles */}
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5"
-          style={{ background: "oklch(0.72 0.12 80)", transform: "translate(30%, -30%)" }} />
-        <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-5"
-          style={{ background: "oklch(0.72 0.12 80)", transform: "translate(-30%, 30%)" }} />
+        {/* Decorative tennis ball circles */}
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10"
+          style={{ background: "oklch(0.90 0.20 120)", transform: "translate(30%, -30%)" }} />
+        <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10"
+          style={{ background: "oklch(0.49 0.22 264)", transform: "translate(-30%, 30%)" }} />
 
         <div className="container relative py-24 md:py-32">
           <div className="max-w-3xl">
@@ -103,7 +103,7 @@ export default function Home() {
             </Badge>
             <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
               Elevate Your Game.<br />
-              <span style={{ color: "oklch(0.72 0.12 80)" }}>Master Your Mind.</span>
+              <span style={{ color: "oklch(0.90 0.20 120)" }}>Master Your Mind.</span>
             </h1>
             <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl leading-relaxed">
               Coach Mario Llano brings world-class tennis technique and mental performance coaching

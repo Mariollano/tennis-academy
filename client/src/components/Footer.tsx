@@ -1,5 +1,7 @@
 import { Link } from "wouter";
-import { Trophy, Youtube, Instagram, Facebook, Twitter } from "lucide-react";
+import { Youtube, Instagram, Facebook, Twitter } from "lucide-react";
+
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/ri-tennis-logo_3de51834.jpg";
 
 export default function Footer() {
   return (
@@ -9,9 +11,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center">
-                <Trophy className="w-5 h-5 text-primary" />
-              </div>
+              <img src={LOGO_URL} alt="RI Tennis Academy" className="w-12 h-12 rounded-full object-cover border-2 border-accent" />
               <div>
                 <div className="text-accent font-bold text-sm">RI TENNIS</div>
                 <div className="text-primary-foreground/70 text-xs tracking-widest uppercase">Academy</div>
