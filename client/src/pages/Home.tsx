@@ -11,7 +11,7 @@ const programs = [
   {
     icon: <Trophy className="w-6 h-6" />,
     title: "Private Lessons",
-    desc: "One-on-one personalized coaching tailored to your skill level and goals.",
+    desc: "One-on-one personalized coaching tailored to your skill level and goals. $120/hour.",
     badge: "All Levels",
     href: "/book/private_lesson",
     color: "bg-blue-50 text-blue-700",

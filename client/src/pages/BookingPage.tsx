@@ -25,8 +25,8 @@ const PROGRAM_CONFIG: Record<string, {
   private_lesson: {
     title: "Private Lesson",
     type: "private_lesson",
-    description: "One-on-one session with Coach Mario.",
-    pricing: [{ label: "Per Session", value: "per_session", cents: 0 }],
+    description: "One-on-one session with Coach Mario — $120/hour.",
+    pricing: [{ label: "$120 per hour", value: "per_hour", cents: 12000 }],
     timeInfo: "Flexible scheduling — contact Mario for available times.",
   },
   clinic_105: {

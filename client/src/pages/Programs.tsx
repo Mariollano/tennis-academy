@@ -14,7 +14,7 @@ const programs = [
     badge: "All Levels",
     badgeColor: "bg-blue-100 text-blue-800",
     description: "One-on-one personalized coaching sessions with Coach Mario. Tailored to your specific needs — whether you're a beginner learning the fundamentals or an advanced player fine-tuning your game.",
-    pricing: [{ label: "Per Session", price: "Contact for pricing" }],
+    pricing: [{ label: "Per Hour", price: "$120/hour" }],
     highlights: [
       "Personalized technique analysis",
       "Custom drill programs",

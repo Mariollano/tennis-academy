@@ -85,3 +85,6 @@
 
 ## Tests
 - [x] Vitest tests: auth, programs, bookings, admin, SMS, AI chat, pricing validation (36 tests passing)
+
+## Fixes & Updates
+- [x] Update private lesson price to $120/hour everywhere (pages, routers, master prompt)
