@@ -1,0 +1,172 @@
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, X, Trophy, User, LogOut } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/programs", label: "Programs" },
+  { href: "/social", label: "Media" },
+  { href: "/mental-coaching", label: "Mental Coaching" },
+  { href: "/services", label: "Services" },
+];
+
+export default function Navbar() {
+  const [location] = useLocation();
+  const [open, setOpen] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess: () => {
+      window.location.href = "/";
+    },
+    onError: () => toast.error("Logout failed"),
+  });
+
+  const isActive = (href: string) =>
+    href === "/" ? location === "/" : location.startsWith(href);
+
+  return (
+    <header className="sticky top-0 z-50 bg-primary shadow-md">
+      <div className="container flex items-center justify-between h-16">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center">
+            <Trophy className="w-5 h-5 text-primary" />
+          </div>
+          <div className="leading-tight">
+            <div className="text-accent font-bold text-sm tracking-wide">RI TENNIS</div>
+            <div className="text-primary-foreground/80 text-xs tracking-widest uppercase">Academy</div>
+          </div>
+        </Link>
+
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href}>
+              <span
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                  isActive(link.href)
+                    ? "bg-accent text-accent-foreground"
+                    : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10"
+                }`}
+              >
+                {link.label}
+              </span>
+            </Link>
+          ))}
+          {user?.role === "admin" && (
+            <Link href="/admin">
+              <span
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                  isActive("/admin")
+                    ? "bg-accent text-accent-foreground"
+                    : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10"
+                }`}
+              >
+                Admin
+              </span>
+            </Link>
+          )}
+        </nav>
+
+        {/* Auth Buttons */}
+        <div className="hidden md:flex items-center gap-2">
+          {isAuthenticated ? (
+            <>
+              <Link href="/profile">
+                <Button variant="ghost" size="sm" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10">
+                  <User className="w-4 h-4 mr-1" />
+                  {user?.name?.split(" ")[0] || "Profile"}
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10"
+                onClick={() => logoutMutation.mutate()}
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="sm"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold"
+onClick={() => (window.location.href = getLoginUrl())}
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
+
+        {/* Mobile Menu */}
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon" className="text-primary-foreground">
+              <Menu className="w-5 h-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="bg-primary text-primary-foreground w-64 p-0">
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <span className="font-bold text-accent">RI Tennis Academy</span>
+              <Button variant="ghost" size="icon" className="text-primary-foreground" onClick={() => setOpen(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <nav className="flex flex-col p-4 gap-1">
+              {navLinks.map((link) => (
+                <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>
+                  <span
+                    className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                      isActive(link.href)
+                        ? "bg-accent text-accent-foreground"
+                        : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10"
+                    }`}
+                  >
+                    {link.label}
+                  </span>
+                </Link>
+              ))}
+              {user?.role === "admin" && (
+                <Link href="/admin" onClick={() => setOpen(false)}>
+                  <span className="block px-3 py-2 rounded-md text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10 cursor-pointer">
+                    Admin
+                  </span>
+                </Link>
+              )}
+              <div className="mt-4 pt-4 border-t border-white/10">
+                {isAuthenticated ? (
+                  <>
+                    <Link href="/profile" onClick={() => setOpen(false)}>
+                      <span className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10 cursor-pointer">
+                        <User className="w-4 h-4" /> Profile
+                      </span>
+                    </Link>
+                    <button
+                      className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10"
+                      onClick={() => logoutMutation.mutate()}
+                    >
+                      <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Button
+                    className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-semibold"
+                    onClick={() => (window.location.href = getLoginUrl())}
+                  >
+                    Sign In
+                  </Button>
+                )}
+              </div>
+            </nav>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </header>
+  );
+}
