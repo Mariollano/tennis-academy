@@ -34,22 +34,22 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-primary shadow-md">
-      <div className="container flex items-center justify-between h-16">
+      <div className="container flex items-center justify-between h-16 gap-2">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
+        <Link href="/" className="flex items-center gap-2 group shrink-0">
           <img
             src={LOGO_URL}
             alt="RI Tennis Academy"
-            className="w-12 h-12 rounded-full object-cover border-2 border-accent shadow-sm"
+            className="w-11 h-11 rounded-full object-contain bg-white border-2 border-accent shadow-sm"
           />
-          <div className="leading-tight hidden sm:block">
+          <div className="leading-tight hidden lg:block">
             <div className="text-accent font-bold text-sm tracking-wide">RI TENNIS</div>
             <div className="text-primary-foreground/80 text-xs tracking-widest uppercase">Academy</div>
           </div>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-0.5 flex-1 justify-center">
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href}>
               <span
