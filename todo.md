@@ -95,3 +95,4 @@
 - [x] Fix navbar wrapping on medium screens
 - [x] Fix program name display in My Bookings (shows "Program #1" instead of "Private Lesson")
 - [x] Wire Stripe checkout into booking flow - pay immediately at booking time
+- [x] Add social media sharing section to booking confirmation screen (Facebook, X/Twitter, WhatsApp, copy link)
