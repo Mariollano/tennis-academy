@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowLeft, ChevronLeft, ChevronRight, Plus, Ban, Zap,
   Users, CalendarDays, CalendarRange, LayoutGrid, Loader2, Trash2, Edit2, Eye,
+  CreditCard, CheckCircle,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -90,6 +91,19 @@ function EventDetailDialog({
     onSuccess: () => { toast.success("Session updated!"); onRefetch(); onClose(); },
     onError: () => toast.error("Update failed."),
   });
+  const confirmNow = trpc.booking.confirmNow.useMutation({
+    onSuccess: () => { toast.success("Booking confirmed!"); onRefetch(); onClose(); },
+    onError: (e) => toast.error(e.message || "Failed to confirm."),
+  });
+  const sendPaymentLink = trpc.booking.sendPaymentLink.useMutation({
+    onSuccess: (data) => {
+      if (data.url) {
+        window.open(data.url, "_blank");
+        toast.success("Stripe checkout opened — share this link with the student or complete payment now.");
+      }
+    },
+    onError: (e) => toast.error(e.message || "Failed to create payment link."),
+  });
   const [editCap, setEditCap] = useState<number | null>(null);
 
   if (!ev) return null;
@@ -140,10 +154,49 @@ function EventDetailDialog({
                 <div><span className="text-muted-foreground">Student:</span> {r.studentName || "—"}</div>
                 <div><span className="text-muted-foreground">Email:</span> {r.studentEmail || "—"}</div>
                 <div><span className="text-muted-foreground">Program:</span> {r.programName || r.programType || "—"}</div>
-                <div><span className="text-muted-foreground">Status:</span> <Badge className="text-xs">{r.status}</Badge></div>
-                <div><span className="text-muted-foreground">Amount:</span> ${((r.totalAmountCents || 0) / 100).toFixed(0)}</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-muted-foreground">Status:</span>
+                  <Badge className={`text-xs ${
+                    r.status === "confirmed" ? "bg-green-100 text-green-800" :
+                    r.status === "pending" ? "bg-amber-100 text-amber-800" :
+                    r.status === "cancelled" ? "bg-red-100 text-red-800" : ""
+                  }`}>{r.status}</Badge>
+                </div>
+                <div><span className="text-muted-foreground">Amount:</span> <span className="font-semibold">${((r.totalAmountCents || 0) / 100).toFixed(2)}</span></div>
               </div>
               {r.notes && <div className="text-muted-foreground text-xs">Notes: {r.notes}</div>}
+              {r.status === "pending" && (
+                <div className="border border-amber-200 bg-amber-50 rounded-lg p-3 space-y-2">
+                  <p className="text-xs font-semibold text-amber-800">This booking is pending payment.</p>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white w-full gap-1.5"
+                      onClick={() => sendPaymentLink.mutate({ bookingId: r.id, origin: window.location.origin })}
+                      disabled={sendPaymentLink.isPending || confirmNow.isPending}
+                    >
+                      {sendPaymentLink.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
+                      Charge via Stripe
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full gap-1.5 border-green-300 text-green-700 hover:bg-green-50"
+                      onClick={() => confirmNow.mutate({ id: r.id })}
+                      disabled={confirmNow.isPending || sendPaymentLink.isPending}
+                    >
+                      {confirmNow.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                      Mark Confirmed (cash/check paid)
+                    </Button>
+                  </div>
+                  <p className="text-[10px] text-amber-700">“Charge via Stripe” opens a checkout page you can share with the student or complete yourself. “Mark Confirmed” is for cash or check payments already received.</p>
+                </div>
+              )}
+              {r.status === "confirmed" && (
+                <div className="border border-green-200 bg-green-50 rounded-lg p-2 text-xs text-green-800 flex items-center gap-1.5">
+                  <CheckCircle className="w-3.5 h-3.5" /> Booking confirmed and paid.
+                </div>
+              )}
             </>
           )}
           {ev.kind === "blocked" && (

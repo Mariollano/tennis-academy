@@ -213,6 +213,72 @@ export const appRouter = router({
         await db.update(bookings).set({ status: input.status, updatedAt: new Date() }).where(eq(bookings.id, input.id));
         return { success: true };
       }),
+
+    // Admin: confirm a booking immediately (no charge) — marks it confirmed
+    confirmNow: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.update(bookings)
+          .set({ status: "confirmed", paidAt: new Date(), updatedAt: new Date() })
+          .where(eq(bookings.id, input.id));
+        return { success: true };
+      }),
+
+    // Admin: create a Stripe checkout link to charge the student, then confirm on payment
+    sendPaymentLink: adminProcedure
+      .input(z.object({
+        bookingId: z.number(),
+        origin: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const Stripe = (await import("stripe")).default;
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2026-02-25.clover" as any });
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        // Fetch booking + user + program
+        const rows = await db.select({
+          booking: bookings,
+          user: { id: users.id, name: users.name, email: users.email },
+          programName: programs.name,
+        })
+          .from(bookings)
+          .leftJoin(users, eq(bookings.userId, users.id))
+          .leftJoin(programs, eq(bookings.programId, programs.id))
+          .where(eq(bookings.id, input.bookingId))
+          .limit(1);
+        if (!rows.length) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+        const { booking, user, programName } = rows[0];
+        if (booking.totalAmountCents < 50) throw new TRPCError({ code: "BAD_REQUEST", message: "Amount too small to charge (minimum $0.50)" });
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          mode: "payment",
+          customer_email: user?.email || undefined,
+          allow_promotion_codes: true,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: programName || "Tennis Session",
+                description: `RI Tennis Academy — Booking #${booking.id}`,
+              },
+              unit_amount: booking.totalAmountCents,
+            },
+            quantity: 1,
+          }],
+          client_reference_id: String(user?.id || ""),
+          metadata: {
+            user_id: String(user?.id || ""),
+            booking_id: String(booking.id),
+            customer_email: user?.email || "",
+            customer_name: user?.name || "",
+          },
+          success_url: `${input.origin}/profile?payment=success`,
+          cancel_url: `${input.origin}/profile?payment=cancelled`,
+        });
+        return { url: session.url };
+      }),
   }),
 
    // ─── Schedule ────────────────────────────────────────────────────────────
