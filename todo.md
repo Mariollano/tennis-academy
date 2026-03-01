@@ -93,3 +93,5 @@
 - [x] Fix /dashboard 404 - add redirect to /admin
 - [x] Fix logo cropping in navbar - adjust sizing and object-fit
 - [x] Fix navbar wrapping on medium screens
+- [x] Fix program name display in My Bookings (shows "Program #1" instead of "Private Lesson")
+- [x] Wire Stripe checkout into booking flow - pay immediately at booking time

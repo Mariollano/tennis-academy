@@ -206,7 +206,7 @@ export default function Profile() {
                       <div key={booking.id} className="flex items-center justify-between p-4 border border-border rounded-xl hover:bg-muted/30 transition-colors">
                         <div>
                           <div className="font-semibold text-foreground text-sm capitalize">
-                            {booking.programId ? `Program #${booking.programId}` : "Booking"}
+                            {booking.programName || "Booking"}
                           </div>
                           <div className="text-xs text-muted-foreground mt-0.5">
                             {booking.sessionDate

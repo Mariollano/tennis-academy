@@ -1,14 +1,13 @@
-import { useState } from "react";
-import { useParams, Link } from "wouter";
+import { useState, useEffect } from "react";
+import { useParams, Link, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, DollarSign, ArrowLeft, CheckCircle } from "lucide-react";
+import { Calendar, Clock, CreditCard, ArrowLeft, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -91,10 +90,44 @@ export default function BookingPage() {
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const createBookingMutation = trpc.booking.create.useMutation({
-    onSuccess: () => {
+  const searchString = useSearch();
+  const searchParams = new URLSearchParams(searchString);
+  const paymentStatus = searchParams.get("payment");
+
+  // Show payment result if redirected back from Stripe
+  useEffect(() => {
+    if (paymentStatus === "success") {
       setSubmitted(true);
-      toast.success("Booking request submitted! Mario will confirm shortly.");
+    } else if (paymentStatus === "cancelled") {
+      toast.info("Payment was cancelled. Your booking was not confirmed.");
+    }
+  }, [paymentStatus]);
+
+  const createCheckoutMutation = trpc.stripe.createCheckout.useMutation({
+    onSuccess: (data) => {
+      if (data.url) {
+        toast.success("Redirecting to secure payment...");
+        window.open(data.url, "_blank");
+      }
+    },
+    onError: (err) => toast.error(err.message || "Payment setup failed. Please try again."),
+  });
+
+  const createBookingMutation = trpc.booking.create.useMutation({
+    onSuccess: (_, variables) => {
+      // After booking is created, immediately launch Stripe checkout
+      if (variables.totalAmountCents > 0) {
+        createCheckoutMutation.mutate({
+          bookingId: 0, // will be updated by webhook
+          programName: config.title,
+          amountCents: variables.totalAmountCents,
+          origin: window.location.origin,
+        });
+      } else {
+        // Free / contact-for-pricing: just show confirmation
+        setSubmitted(true);
+        toast.success("Booking request submitted! Mario will be in touch shortly.");
+      }
     },
     onError: (err) => toast.error(err.message || "Booking failed. Please try again."),
   });
@@ -123,10 +156,12 @@ export default function BookingPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center p-8">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-foreground mb-2">Booking Submitted!</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Booking Confirmed!</h2>
           <p className="text-muted-foreground mb-6">
-            Your booking request for <strong>{config.title}</strong> has been sent to Coach Mario.
-            You'll receive a confirmation soon.
+            {paymentStatus === "success"
+              ? <>Payment received! Your <strong>{config.title}</strong> booking is confirmed. Mario will be in touch with session details.</>
+              : <>Your <strong>{config.title}</strong> booking request has been submitted. Mario will be in touch shortly.</>
+            }
           </p>
           <div className="flex gap-3 justify-center">
             <Link href="/programs">
@@ -260,10 +295,16 @@ export default function BookingPage() {
 
                     <Button
                       type="submit"
-                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-3 text-base"
-                      disabled={createBookingMutation.isPending}
+                      className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-bold py-3 text-base"
+                      disabled={createBookingMutation.isPending || createCheckoutMutation.isPending}
                     >
-                      {createBookingMutation.isPending ? "Submitting..." : "Submit Booking Request"}
+                      {createBookingMutation.isPending || createCheckoutMutation.isPending ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                      ) : totalCents > 0 ? (
+                        <><CreditCard className="w-4 h-4 mr-2" /> Book & Pay ${(totalCents / 100).toFixed(0)}</>
+                      ) : (
+                        "Submit Booking Request"
+                      )}
                     </Button>
                   </form>
                 )}
@@ -307,9 +348,9 @@ export default function BookingPage() {
                     </div>
                   )}
                 </div>
-                <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
-                  <DollarSign className="w-3.5 h-3.5 inline mr-1" />
-                  Payment will be collected after Mario confirms your booking.
+                <div className="bg-accent/10 border border-accent/30 rounded-lg p-3 text-xs text-foreground">
+                  <CreditCard className="w-3.5 h-3.5 inline mr-1 text-accent" />
+                  <strong>Secure payment via Stripe.</strong> You'll be redirected to complete payment after submitting.
                 </div>
               </CardContent>
             </Card>

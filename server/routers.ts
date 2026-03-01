@@ -51,10 +51,21 @@ export const appRouter = router({
     getMyBookings: protectedProcedure.query(async ({ ctx }) => {
       const db = await getDb();
       if (!db) return [];
-      return db.select().from(bookings)
+      const rows = await db.select({
+        id: bookings.id,
+        status: bookings.status,
+        totalAmountCents: bookings.totalAmountCents,
+        sessionDate: bookings.sessionDate,
+        createdAt: bookings.createdAt,
+        programName: programs.name,
+        programType: programs.type,
+      })
+        .from(bookings)
+        .leftJoin(programs, eq(bookings.programId, programs.id))
         .where(eq(bookings.userId, ctx.user.id))
         .orderBy(desc(bookings.createdAt))
         .limit(50);
+      return rows;
     }),
   }),
 
