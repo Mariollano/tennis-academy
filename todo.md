@@ -129,3 +129,4 @@
 - [x] Persist last-used start/end time in session generator (localStorage)
 - [x] Add publish reminder banner to Admin dashboard
 - [x] Remove "Book a Lesson" button from homepage hero section
+- [x] Wire Twilio SMS: install SDK, add credentials, send real texts on broadcast and booking notifications

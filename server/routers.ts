@@ -6,6 +6,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "./_core/llm";
+import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
 import { getDb } from "./db";
 import {
   users, bookings, programs, scheduleSlots, payments,
@@ -181,6 +182,16 @@ export const appRouter = router({
           await db.update(scheduleSlots)
             .set({ currentParticipants: sql`${scheduleSlots.currentParticipants} + 1`, updatedAt: new Date() })
             .where(eq(scheduleSlots.id, input.scheduleSlotId));
+        }
+
+        // Send SMS confirmation to the student
+        if (isTwilioConfigured() && ctx.user.phone) {
+          const programLabel = input.programType.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+          const dateStr = input.sessionDate
+            ? new Date(input.sessionDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+            : "";
+          const msg = `Hi ${ctx.user.name || "there"}! Your booking for ${programLabel}${dateStr ? " on " + dateStr : ""} has been received. Mario will confirm your spot shortly. - RI Tennis Academy`;
+          await sendSms(ctx.user.phone, msg).catch(() => {}); // non-blocking
         }
 
         return { success: true };
@@ -760,17 +771,26 @@ export const appRouter = router({
           .from(users)
           .where(and(eq(users.smsOptIn, true), sql`${users.phone} IS NOT NULL`));
 
+        // Send real SMS via Twilio
+        let sent = 0;
+        let failed = 0;
+        if (isTwilioConfigured() && subscribers.length > 0) {
+          const validSubscribers = subscribers.filter(s => s.phone) as { phone: string; name: string | null }[];
+          const result = await sendBulkSms(validSubscribers, input.message);
+          sent = result.sent;
+          failed = result.failed;
+        }
+
         // Log the broadcast
         await db.insert(smsBroadcasts).values({
           sentBy: ctx.user.id,
           message: input.message,
           recipientCount: subscribers.length,
-          status: "sent",
+          status: isTwilioConfigured() ? "sent" : "draft",
           sentAt: new Date(),
         });
 
-        // Note: actual SMS sending requires Twilio credentials (configured separately)
-        return { success: true, recipientCount: subscribers.length };
+        return { success: true, recipientCount: subscribers.length, sent, failed };
       }),
 
     getBroadcasts: adminProcedure.query(async () => {
