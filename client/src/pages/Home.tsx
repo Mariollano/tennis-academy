@@ -116,11 +116,7 @@ export default function Home() {
                   View Programs <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
-              <Link href="/book/private_lesson">
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 font-semibold text-base px-8">
-                  Book a Lesson
-                </Button>
-              </Link>
+
             </div>
           </div>
         </div>

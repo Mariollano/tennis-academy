@@ -128,3 +128,4 @@
 - [x] Seed DB with 105 Clinic sessions for March & April (Mon/Wed/Fri=12, Sun=24)
 - [x] Persist last-used start/end time in session generator (localStorage)
 - [x] Add publish reminder banner to Admin dashboard
+- [x] Remove "Book a Lesson" button from homepage hero section
