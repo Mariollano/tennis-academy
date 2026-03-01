@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+import { VitePWA } from "vite-plugin-pwa";
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -150,7 +151,34 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+  VitePWA({
+    registerType: "autoUpdate",
+    injectRegister: "auto",
+    manifest: false, // We use our own manifest.webmanifest in public/
+    workbox: {
+      globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
+      runtimeCaching: [
+        {
+          urlPattern: /^\/api\//,
+          handler: "NetworkFirst",
+          options: {
+            cacheName: "api-cache",
+            expiration: { maxEntries: 50, maxAgeSeconds: 300 },
+          },
+        },
+      ],
+    },
+    devOptions: {
+      enabled: false, // Only active in production build
+    },
+  }),
+];
 
 export default defineConfig({
   plugins,

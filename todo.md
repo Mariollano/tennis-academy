@@ -97,3 +97,5 @@
 - [x] Wire Stripe checkout into booking flow - pay immediately at booking time
 - [x] Add social media sharing section to booking confirmation screen (Facebook, X/Twitter, WhatsApp, copy link)
 - [x] Add admin booking notifications - Mario gets instant alert when anyone signs up for anything (via Manus notification system, triggered on Stripe webhook checkout.session.completed)
+- [x] Make Admin dashboard stat cards clickable - link to relevant sections (students, bookings, pending, SMS)
+- [x] Add PWA support (manifest, service worker, icons) so app is installable on iOS and Android

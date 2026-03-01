@@ -28,6 +28,7 @@ export default function AdminDashboard() {
   const { user, isAuthenticated, loading } = useAuth();
   const [bookingFilter, setBookingFilter] = useState("all");
   const [smsMessage, setSmsMessage] = useState("");
+  const [activeTab, setActiveTab] = useState("bookings");
 
   const { data: stats } = trpc.admin.stats.useQuery(undefined, { enabled: user?.role === "admin" });
   const { data: bookings, refetch: refetchBookings } = trpc.booking.adminList.useQuery(
@@ -105,14 +106,25 @@ export default function AdminDashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Total Students", value: stats?.totalStudents ?? "—", icon: <Users className="w-5 h-5" />, color: "text-blue-600" },
-            { label: "Total Bookings", value: stats?.totalBookings ?? "—", icon: <Calendar className="w-5 h-5" />, color: "text-green-600" },
-            { label: "Pending Bookings", value: stats?.pendingBookings ?? "—", icon: <Clock className="w-5 h-5" />, color: "text-amber-600" },
-            { label: "SMS Subscribers", value: stats?.smsSubscribers ?? "—", icon: <MessageSquare className="w-5 h-5" />, color: "text-purple-600" },
+            { label: "Total Students", value: stats?.totalStudents ?? "—", icon: <Users className="w-5 h-5" />, color: "text-blue-600", tab: "students", hint: "View all students" },
+            { label: "Total Bookings", value: stats?.totalBookings ?? "—", icon: <Calendar className="w-5 h-5" />, color: "text-green-600", tab: "bookings", hint: "View all bookings" },
+            { label: "Pending Bookings", value: stats?.pendingBookings ?? "—", icon: <Clock className="w-5 h-5" />, color: "text-amber-600", tab: "bookings", hint: "View pending bookings", filter: "pending" },
+            { label: "SMS Subscribers", value: stats?.smsSubscribers ?? "—", icon: <MessageSquare className="w-5 h-5" />, color: "text-purple-600", tab: "sms", hint: "Go to SMS broadcast" },
           ].map((stat) => (
-            <Card key={stat.label} className="border border-border">
+            <Card
+              key={stat.label}
+              className="border border-border cursor-pointer hover:shadow-md hover:border-primary/40 transition-all group"
+              onClick={() => {
+                if (stat.filter) setBookingFilter(stat.filter);
+                setActiveTab(stat.tab);
+                setTimeout(() => document.getElementById('admin-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+              }}
+            >
               <CardContent className="p-4">
-                <div className={`${stat.color} mb-2`}>{stat.icon}</div>
+                <div className={`${stat.color} mb-2 flex items-center justify-between`}>
+                  {stat.icon}
+                  <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity font-medium">{stat.hint} →</span>
+                </div>
                 <div className="text-2xl font-extrabold text-foreground">{stat.value}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{stat.label}</div>
               </CardContent>
@@ -120,11 +132,12 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        <Tabs defaultValue="bookings">
+        <div id="admin-tabs" />
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 flex flex-wrap gap-1 h-auto bg-muted p-1 rounded-xl">
-            <TabsTrigger value="bookings"><Calendar className="w-4 h-4 mr-1.5" />Bookings</TabsTrigger>
-            <TabsTrigger value="students"><Users className="w-4 h-4 mr-1.5" />Students</TabsTrigger>
-            <TabsTrigger value="sms"><MessageSquare className="w-4 h-4 mr-1.5" />SMS Broadcast</TabsTrigger>
+            <TabsTrigger value="bookings" onClick={() => setActiveTab("bookings")}><Calendar className="w-4 h-4 mr-1.5" />Bookings</TabsTrigger>
+            <TabsTrigger value="students" onClick={() => setActiveTab("students")}><Users className="w-4 h-4 mr-1.5" />Students</TabsTrigger>
+            <TabsTrigger value="sms" onClick={() => setActiveTab("sms")}><MessageSquare className="w-4 h-4 mr-1.5" />SMS Broadcast</TabsTrigger>
           </TabsList>
 
           {/* Bookings Tab */}
