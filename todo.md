@@ -124,3 +124,4 @@
 - [x] Waitlist: show waitlist count on Admin calendar session events
 - [x] Auto-confirm booking on Stripe webhook payment success (already implemented in webhook handler)
 - [x] Current-time red line indicator in Day and Week calendar views
+- [x] Fix 105 Clinic days everywhere: delete wrong-day DB sessions, fix generator, fix all UI labels (Mon/Wed/Fri/Sun only)

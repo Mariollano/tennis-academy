@@ -34,7 +34,7 @@ const PROGRAM_CONFIG: Record<string, {
     type: "clinic_105",
     description: "Signature adult group play session — 1.5 hours.",
     pricing: [{ label: "$30 per 1.5-hour session", value: "session", cents: 3000 }],
-    timeInfo: "Sessions scheduled weekly — check with Mario for next available date.",
+    timeInfo: "Runs Monday, Wednesday, Friday & Sunday — select an available session below.",
   },
   junior_daily: {
     title: "Junior Program — Daily",

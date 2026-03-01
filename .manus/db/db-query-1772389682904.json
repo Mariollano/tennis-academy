@@ -1,0 +1,34 @@
+{
+  "query": "SELECT id, programId, title, slotDate, DAYOFWEEK(slotDate) as dow_mysql, maxParticipants FROM schedule_slots ORDER BY slotDate;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, programId, title, slotDate, DAYOFWEEK(slotDate) as dow_mysql, maxParticipants FROM schedule_slots ORDER BY slotDate;",
+  "rows": [
+    {
+      "id": "1",
+      "programId": "1",
+      "title": "105 Clinic – Monday Mar 2, 2026",
+      "slotDate": "2026-03-02",
+      "dow_mysql": "2",
+      "maxParticipants": "8"
+    },
+    {
+      "id": "2",
+      "programId": "1",
+      "title": "105 Clinic – Wednesday Mar 4, 2026",
+      "slotDate": "2026-03-04",
+      "dow_mysql": "4",
+      "maxParticipants": "8"
+    },
+    {
+      "id": "3",
+      "programId": "1",
+      "title": "105 Clinic – Friday Mar 6, 2026",
+      "slotDate": "2026-03-06",
+      "dow_mysql": "6",
+      "maxParticipants": "8"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tprogramId\ttitle\tslotDate\tdow_mysql\tmaxParticipants\n1\t1\t105 Clinic – Monday Mar 2, 2026\t2026-03-02\t2\t8\n2\t1\t105 Clinic – Wednesday Mar 4, 2026\t2026-03-04\t4\t8\n3\t1\t105 Clinic – Friday Mar 6, 2026\t2026-03-06\t6\t8\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

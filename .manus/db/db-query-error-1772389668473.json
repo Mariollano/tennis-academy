@@ -1,0 +1,8 @@
+{
+  "query": "\n-- First let's see what days are currently in the schedule_slots table\nSELECT id, slot_date, DAYOFWEEK(slot_date) as dow, slot_type, title, capacity\nFROM schedule_slots\nWHERE slot_type = 'clinic_105'\nORDER BY slot_date\nLIMIT 30;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \n-- First let's see what days are currently in the schedule_slots table\nSELECT id, slot_date, DAYOFWEEK(slot_date) as dow, slot_type, title, capacity\nFROM schedule_slots\nWHERE slot_type = 'clinic_105'\nORDER BY slot_date\nLIMIT 30;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 3: Unknown column 'slot_type' in 'where clause'"
+  ]
+}

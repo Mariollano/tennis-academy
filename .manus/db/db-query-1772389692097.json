@@ -1,0 +1,9 @@
+{
+  "query": "\n-- MySQL DAYOFWEEK: 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday, 7=Saturday\n-- Keep: Sunday(1), Monday(2), Wednesday(4), Friday(6)\n-- Delete: Tuesday(3), Thursday(5), Saturday(7)\nDELETE FROM schedule_slots\nWHERE DAYOFWEEK(slotDate) NOT IN (1, 2, 4, 6);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \n-- MySQL DAYOFWEEK: 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday, 7=Saturday\n-- Keep: Sunday(1), Monday(2), Wednesday(4), Friday(6)\n-- Delete: Tuesday(3), Thursday(5), Saturday(7)\nDELETE FROM schedule_slots\nWHERE DAYOFWEEK(slotDate) NOT IN (1, 2, 4, 6);\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 56
+}

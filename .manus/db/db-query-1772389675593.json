@@ -1,0 +1,40 @@
+{
+  "query": "\nSELECT id, programId, title, slotDate, DAYOFWEEK(slotDate) as dow, maxParticipants, currentParticipants, isAvailable\nFROM schedule_slots\nORDER BY slotDate\nLIMIT 30;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \nSELECT id, programId, title, slotDate, DAYOFWEEK(slotDate) as dow, maxParticipants, currentParticipants, isAvailable\nFROM schedule_slots\nORDER BY slotDate\nLIMIT 30;\n",
+  "rows": [
+    {
+      "id": "1",
+      "programId": "1",
+      "title": "105 Clinic – Monday Mar 2, 2026",
+      "slotDate": "2026-03-02",
+      "dow": "2",
+      "maxParticipants": "8",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "2",
+      "programId": "1",
+      "title": "105 Clinic – Wednesday Mar 4, 2026",
+      "slotDate": "2026-03-04",
+      "dow": "4",
+      "maxParticipants": "8",
+      "currentParticipants": "1",
+      "isAvailable": "1"
+    },
+    {
+      "id": "3",
+      "programId": "1",
+      "title": "105 Clinic – Friday Mar 6, 2026",
+      "slotDate": "2026-03-06",
+      "dow": "6",
+      "maxParticipants": "8",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tprogramId\ttitle\tslotDate\tdow\tmaxParticipants\tcurrentParticipants\tisAvailable\n1\t1\t105 Clinic – Monday Mar 2, 2026\t2026-03-02\t2\t8\t0\t1\n2\t1\t105 Clinic – Wednesday Mar 4, 2026\t2026-03-04\t4\t8\t1\t1\n3\t1\t105 Clinic – Friday Mar 6, 2026\t2026-03-06\t6\t8\t0\t1\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}
