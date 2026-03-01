@@ -96,3 +96,4 @@
 - [x] Fix program name display in My Bookings (shows "Program #1" instead of "Private Lesson")
 - [x] Wire Stripe checkout into booking flow - pay immediately at booking time
 - [x] Add social media sharing section to booking confirmation screen (Facebook, X/Twitter, WhatsApp, copy link)
+- [x] Add admin booking notifications - Mario gets instant alert when anyone signs up for anything (via Manus notification system, triggered on Stripe webhook checkout.session.completed)

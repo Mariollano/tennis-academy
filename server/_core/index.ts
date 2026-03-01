@@ -9,8 +9,9 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import Stripe from "stripe";
 import { getDb } from "../db";
-import { bookings, payments } from "../../drizzle/schema";
+import { bookings, payments, programs, users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
+import { notifyOwner } from "./notification";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -60,6 +61,36 @@ async function startServer() {
         if (db) {
           await db.update(bookings).set({ status: "confirmed", paidAt: new Date(), stripePaymentIntentId: session.payment_intent as string }).where(eq(bookings.id, bookingId));
           await db.insert(payments).values({ bookingId, userId, amountCents: session.amount_total || 0, status: "succeeded", stripePaymentIntentId: session.payment_intent as string });
+
+          // Notify Mario of the new booking
+          try {
+            const bookingRows = await db.select({
+              sessionDate: bookings.sessionDate,
+              totalAmountCents: bookings.totalAmountCents,
+              programName: programs.name,
+              programType: programs.type,
+              studentName: users.name,
+              studentEmail: users.email,
+              studentPhone: users.phone,
+            })
+              .from(bookings)
+              .leftJoin(programs, eq(bookings.programId, programs.id))
+              .leftJoin(users, eq(bookings.userId, users.id))
+              .where(eq(bookings.id, bookingId))
+              .limit(1);
+
+            const b = bookingRows[0];
+            if (b) {
+              const amountDollars = ((b.totalAmountCents || 0) / 100).toFixed(2);
+              const dateStr = b.sessionDate ? new Date(b.sessionDate as any).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }) : "TBD";
+              await notifyOwner({
+                title: `New Booking: ${b.programName || b.programType || "Program"}`,
+                content: `Student: ${b.studentName || "Unknown"}\nEmail: ${b.studentEmail || "N/A"}\nPhone: ${b.studentPhone || "N/A"}\nProgram: ${b.programName || b.programType || "N/A"}\nDate: ${dateStr}\nAmount Paid: $${amountDollars}`,
+              });
+            }
+          } catch (notifyErr) {
+            console.warn("[Webhook] Failed to send owner notification:", notifyErr);
+          }
         }
       }
     }
