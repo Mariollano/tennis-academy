@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -503,13 +503,42 @@ function HourLabels() {
   );
 }
 
-// ─── Hour grid lines ──────────────────────────────────────────────────────────
+//// ─── Hour grid lines ──────────────────────────────────────────────────
 function HourLines() {
   return (
     <div className="absolute inset-0 pointer-events-none">
       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
         <div key={i} className="absolute w-full border-t border-border/50" style={{ top: i * HOUR_HEIGHT }} />
       ))}
+    </div>
+  );
+}
+
+// ─── Current time red line ──────────────────────────────────────────────
+function CurrentTimeLine({ forDate }: { forDate: Date }) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Only show on today's column
+  const todayKey = isoDate(new Date());
+  const colKey = isoDate(forDate);
+  if (colKey !== todayKey) return null;
+
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const startMins = DAY_START * 60;
+  const endMins = DAY_END * 60;
+  if (nowMins < startMins || nowMins > endMins) return null;
+
+  const top = ((nowMins - startMins) / 60) * HOUR_HEIGHT;
+  return (
+    <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top }}>
+      <div className="relative flex items-center">
+        <div className="w-2.5 h-2.5 rounded-full bg-red-500 -ml-1.5 shrink-0" />
+        <div className="flex-1 h-px bg-red-500" />
+      </div>
     </div>
   );
 }
@@ -553,6 +582,7 @@ function WeekView({ anchor, events, onEventClick }: { anchor: Date; events: CalE
             const dayEvs = evByDate[key] || [];
             return (
               <div key={i} className="flex-1 border-l border-border first:border-l-0 relative">
+                <CurrentTimeLine forDate={day} />
                 <TimeGridColumn dayEvs={dayEvs} onEventClick={onEventClick} compact />
               </div>
             );
@@ -580,6 +610,7 @@ function DayView({ anchor, events, onEventClick }: { anchor: Date; events: CalEv
         <HourLabels />
         <div className="flex-1 relative border-l border-border">
           <HourLines />
+          <CurrentTimeLine forDate={anchor} />
           <TimeGridColumn dayEvs={dayEvs} onEventClick={onEventClick} />
         </div>
       </div>

@@ -119,3 +119,8 @@
 - [x] Day/Week view: render events as tall blocks spanning their actual start-to-end hours (like Google Calendar)\n
 - [x] Calendar event popup: Charge & Confirm button for pending bookings — sends Stripe payment link and marks booking confirmed
 - [x] Fix 105 Clinic schedule: Mon/Wed/Fri = 12 spots, Sun = 24 spots (remove any other days from generator)
+- [x] Waitlist: add waitlist table, join/leave procedures, admin notification on join
+- [x] Waitlist: show "Join Waitlist" button on full sessions in student booking page
+- [x] Waitlist: show waitlist count on Admin calendar session events
+- [x] Auto-confirm booking on Stripe webhook payment success (already implemented in webhook handler)
+- [x] Current-time red line indicator in Day and Week calendar views

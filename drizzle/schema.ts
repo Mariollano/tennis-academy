@@ -220,3 +220,18 @@ export const blockedTimes = mysqlTable("blocked_times", {
 
 export type BlockedTime = typeof blockedTimes.$inferSelect;
 export type InsertBlockedTime = typeof blockedTimes.$inferInsert;
+
+// ─── Session Waitlist ─────────────────────────────────────────────────────────
+// When a session slot is full, students can join the waitlist
+export const sessionWaitlist = mysqlTable("session_waitlist", {
+  id: int("id").autoincrement().primaryKey(),
+  scheduleSlotId: int("scheduleSlotId").notNull(),
+  userId: int("userId").notNull(),
+  programId: int("programId").notNull(),
+  status: mysqlEnum("status", ["waiting", "notified", "converted", "removed"]).default("waiting").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  notifiedAt: timestamp("notifiedAt"),
+});
+export type SessionWaitlist = typeof sessionWaitlist.$inferSelect;
+export type InsertSessionWaitlist = typeof sessionWaitlist.$inferInsert;

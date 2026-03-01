@@ -10,7 +10,7 @@ import { getDb } from "./db";
 import {
   users, bookings, programs, scheduleSlots, payments,
   smsBroadcasts, mentalCoachingResources, merchandise, tournamentBookings, tournamentParticipants,
-  blockedTimes
+  blockedTimes, sessionWaitlist
 } from "../drizzle/schema";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
 
@@ -612,6 +612,104 @@ export const appRouter = router({
             lte(blockedTimes.blockedDate, toDate as any),
           ))
           .orderBy(blockedTimes.blockedDate);
+      }),
+  }),
+
+  // ─── Waitlist ─────────────────────────────────────────────────────────────
+  waitlist: router({
+    // Student: join the waitlist for a full session
+    join: protectedProcedure
+      .input(z.object({ scheduleSlotId: z.number(), programId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        // Check not already on waitlist
+        const existing = await db.select().from(sessionWaitlist)
+          .where(and(
+            eq(sessionWaitlist.scheduleSlotId, input.scheduleSlotId),
+            eq(sessionWaitlist.userId, ctx.user.id),
+            sql`${sessionWaitlist.status} IN ('waiting','notified')`,
+          )).limit(1);
+        if (existing.length) throw new TRPCError({ code: "CONFLICT", message: "You are already on the waitlist for this session." });
+        await db.insert(sessionWaitlist).values({
+          scheduleSlotId: input.scheduleSlotId,
+          userId: ctx.user.id,
+          programId: input.programId,
+          status: "waiting",
+        });
+        // Notify Mario
+        const { notifyOwner } = await import("./_core/notification");
+        const slot = await db.select().from(scheduleSlots).where(eq(scheduleSlots.id, input.scheduleSlotId)).limit(1);
+        const slotTitle = slot[0]?.title || `Session #${input.scheduleSlotId}`;
+        await notifyOwner({
+          title: "New Waitlist Entry",
+          content: `${ctx.user.name || ctx.user.email || "A student"} joined the waitlist for: ${slotTitle}`,
+        });
+        return { success: true };
+      }),
+
+    // Student: leave the waitlist
+    leave: protectedProcedure
+      .input(z.object({ scheduleSlotId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.update(sessionWaitlist)
+          .set({ status: "removed" })
+          .where(and(
+            eq(sessionWaitlist.scheduleSlotId, input.scheduleSlotId),
+            eq(sessionWaitlist.userId, ctx.user.id),
+          ));
+        return { success: true };
+      }),
+
+    // Student: check if on waitlist for a slot
+    myStatus: protectedProcedure
+      .input(z.object({ scheduleSlotId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const rows = await db.select().from(sessionWaitlist)
+          .where(and(
+            eq(sessionWaitlist.scheduleSlotId, input.scheduleSlotId),
+            eq(sessionWaitlist.userId, ctx.user.id),
+            sql`${sessionWaitlist.status} IN ('waiting','notified')`,
+          )).limit(1);
+        return rows[0] || null;
+      }),
+
+    // Public: count of waitlist entries for a slot
+    countForSlot: publicProcedure
+      .input(z.object({ scheduleSlotId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return 0;
+        const rows = await db.select({ count: sql<number>`count(*)` })
+          .from(sessionWaitlist)
+          .where(and(
+            eq(sessionWaitlist.scheduleSlotId, input.scheduleSlotId),
+            sql`${sessionWaitlist.status} IN ('waiting','notified')`,
+          ));
+        return Number(rows[0]?.count || 0);
+      }),
+
+    // Admin: list all waitlist entries for a slot
+    listForSlot: adminProcedure
+      .input(z.object({ scheduleSlotId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        return db.select({
+          waitlist: sessionWaitlist,
+          user: { id: users.id, name: users.name, email: users.email, phone: users.phone },
+        })
+          .from(sessionWaitlist)
+          .leftJoin(users, eq(sessionWaitlist.userId, users.id))
+          .where(and(
+            eq(sessionWaitlist.scheduleSlotId, input.scheduleSlotId),
+            sql`${sessionWaitlist.status} IN ('waiting','notified')`,
+          ))
+          .orderBy(sessionWaitlist.createdAt);
       }),
   }),
 

@@ -77,17 +77,75 @@ const PROGRAM_CONFIG: Record<string, {
     description: "Dedicated mental performance coaching with Mario.",
     pricing: [{ label: "Per Session — contact for pricing", value: "session", cents: 0 }],
   },
-};
+}// ── Waitlist button for a single full slot ──────────────────────────────────────────────
+function WaitlistButton({ slotId, programId, isAuthenticated }: { slotId: number; programId: number; isAuthenticated: boolean }) {
+  const utils = trpc.useUtils();
+  const { data: myStatus, isLoading: statusLoading } = trpc.waitlist.myStatus.useQuery(
+    { scheduleSlotId: slotId },
+    { enabled: isAuthenticated }
+  );
+  const { data: count } = trpc.waitlist.countForSlot.useQuery({ scheduleSlotId: slotId });
+  const joinWaitlist = trpc.waitlist.join.useMutation({
+    onSuccess: () => {
+      toast.success("You're on the waitlist! Mario will notify you if a spot opens.");
+      utils.waitlist.myStatus.invalidate({ scheduleSlotId: slotId });
+      utils.waitlist.countForSlot.invalidate({ scheduleSlotId: slotId });
+    },
+    onError: (e) => toast.error(e.message || "Could not join waitlist."),
+  });
+  const leaveWaitlist = trpc.waitlist.leave.useMutation({
+    onSuccess: () => {
+      toast.success("You've been removed from the waitlist.");
+      utils.waitlist.myStatus.invalidate({ scheduleSlotId: slotId });
+      utils.waitlist.countForSlot.invalidate({ scheduleSlotId: slotId });
+    },
+    onError: (e) => toast.error(e.message || "Could not leave waitlist."),
+  });
 
-// ── Availability Panel (for clinic_105 and private_lesson) ──────────────────
+  if (!isAuthenticated) {
+    return (
+      <a href={getLoginUrl()} className="text-xs text-primary underline mt-1 block">Sign in to join waitlist</a>
+    );
+  }
+  if (statusLoading) return <div className="text-xs text-muted-foreground mt-1">Checking waitlist…</div>;
+  if (myStatus) {
+    return (
+      <div className="mt-2 flex items-center gap-2">
+        <Badge className="bg-blue-100 text-blue-700 text-xs">On waitlist ({count || 1} waiting)</Badge>
+        <button
+          className="text-xs text-red-500 underline"
+          onClick={(e) => { e.stopPropagation(); leaveWaitlist.mutate({ scheduleSlotId: slotId }); }}
+          disabled={leaveWaitlist.isPending}
+        >
+          {leaveWaitlist.isPending ? "Leaving…" : "Leave"}
+        </button>
+      </div>
+    );
+  }
+  return (
+    <button
+      className="mt-2 w-full text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg py-1.5 px-3 transition-colors"
+      onClick={(e) => { e.stopPropagation(); joinWaitlist.mutate({ scheduleSlotId: slotId, programId }); }}
+      disabled={joinWaitlist.isPending}
+    >
+      {joinWaitlist.isPending ? <><Loader2 className="w-3 h-3 animate-spin inline mr-1" />Joining…</> : `🔔 Join Waitlist${count ? ` (${count} waiting)` : ""}`}
+    </button>
+  );
+}
+
+// ── Availability Panel (for clinic_105 and private_lesson) ──────────────────────
 function AvailabilityPanel({
   programType,
   onSelectSlot,
   selectedSlotId,
+  programId,
+  isAuthenticated,
 }: {
   programType: string;
   onSelectSlot: (slotId: number, date: string) => void;
   selectedSlotId: number | null;
+  programId: number;
+  isAuthenticated: boolean;
 }) {
   const isSupported = programType === "clinic_105" || programType === "private_lesson";
   const [fromDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -97,8 +155,7 @@ function AvailabilityPanel({
     return d.toISOString().slice(0, 10);
   });
 
-  const { data: slots, isLoading } = trpc.schedule.listAvailable.useQuery(
-    { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
+  const { data: slots, isLoading } = trpc.schedule.listAvailable.useQuery(    { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
     { enabled: isSupported }
   );
 
@@ -140,45 +197,49 @@ function AvailabilityPanel({
               const isSelected = selectedSlotId === slot.id;
               const isFull = slot.isFull;
               return (
-                <button
-                  key={slot.id}
-                  disabled={isFull}
-                  onClick={() => {
-                    const rawDate = slot.slotDate as unknown;
-                    const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
-                    onSelectSlot(slot.id, dateStr);
-                  }}
-                  className={`w-full text-left p-3 rounded-xl border transition-all ${
-                    isFull
-                      ? "opacity-50 cursor-not-allowed border-border bg-muted"
-                      : isSelected
-                      ? "border-primary bg-primary/10 ring-2 ring-primary/30"
-                      : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <div className="font-semibold text-sm text-foreground">
-                        {fmtDate(slot.slotDate)}
+                <div key={slot.id}>
+                  <button
+                    disabled={isFull}
+                    onClick={() => {
+                      const rawDate = slot.slotDate as unknown;
+                      const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
+                      onSelectSlot(slot.id, dateStr);
+                    }}
+                    className={`w-full text-left p-3 rounded-xl border transition-all ${
+                      isFull
+                        ? "cursor-not-allowed border-border bg-muted"
+                        : isSelected
+                        ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                        : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="font-semibold text-sm text-foreground">
+                          {fmtDate(slot.slotDate)}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {fmtTime(slot.startTime)} – {fmtTime(slot.endTime)}
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        {fmtTime(slot.startTime)} – {fmtTime(slot.endTime)}
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        {isFull ? (
+                          <Badge className="bg-red-100 text-red-700 text-xs">Full</Badge>
+                        ) : (
+                          <Badge className={`text-xs ${
+                            slot.spotsLeft <= 2 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
+                          }`}>
+                            {slot.spotsLeft} spot{slot.spotsLeft !== 1 ? "s" : ""} left
+                          </Badge>
+                        )}
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-primary" />}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      {isFull ? (
-                        <Badge className="bg-red-100 text-red-700 text-xs">Full</Badge>
-                      ) : (
-                        <Badge className={`text-xs ${
-                          slot.spotsLeft <= 2 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
-                        }`}>
-                          {slot.spotsLeft} spot{slot.spotsLeft !== 1 ? "s" : ""} left
-                        </Badge>
-                      )}
-                      {isSelected && <CheckCircle2 className="w-4 h-4 text-primary" />}
-                    </div>
-                  </div>
-                </button>
+                  </button>
+                  {isFull && (
+                    <WaitlistButton slotId={slot.id} programId={programId} isAuthenticated={isAuthenticated} />
+                  )}
+                </div>
               );
             })}
           </div>
@@ -428,6 +489,8 @@ export default function BookingPage() {
               <AvailabilityPanel
                 programType={programType}
                 selectedSlotId={selectedSlotId}
+                programId={0}
+                isAuthenticated={isAuthenticated}
                 onSelectSlot={(slotId, date) => {
                   setSelectedSlotId(slotId);
                   setSessionDate(date);
