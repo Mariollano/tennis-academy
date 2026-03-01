@@ -261,6 +261,75 @@ export const appRouter = router({
         }));
       }),
 
+    // Admin: full calendar view (slots + bookings + blocked times)
+    adminCalendar: adminProcedure
+      .input(z.object({ from: z.string(), to: z.string() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { slots: [], bookings: [], blocked: [] };
+        const fromDate = new Date(input.from);
+        const toDate = new Date(input.to);
+        const [slots, calBookings, blocked] = await Promise.all([
+          db.select({
+            slot: scheduleSlots,
+            programName: programs.name,
+            programType: programs.type,
+          })
+            .from(scheduleSlots)
+            .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
+            .where(and(
+              gte(scheduleSlots.slotDate, fromDate as any),
+              lte(scheduleSlots.slotDate, toDate as any),
+            ))
+            .orderBy(scheduleSlots.slotDate, scheduleSlots.startTime)
+            .limit(300),
+          db.select({
+            id: bookings.id,
+            status: bookings.status,
+            sessionDate: bookings.sessionDate,
+            createdAt: bookings.createdAt,
+            notes: bookings.notes,
+            totalAmountCents: bookings.totalAmountCents,
+            scheduleSlotId: bookings.scheduleSlotId,
+            studentName: users.name,
+            studentEmail: users.email,
+            programName: programs.name,
+            programType: programs.type,
+          })
+            .from(bookings)
+            .leftJoin(users, eq(bookings.userId, users.id))
+            .leftJoin(programs, eq(bookings.programId, programs.id))
+            .where(and(
+              sql`${bookings.status} IN ('pending','confirmed')`,
+              sql`(
+                (${bookings.sessionDate} IS NOT NULL AND ${bookings.sessionDate} >= ${fromDate.toISOString().slice(0,10)} AND ${bookings.sessionDate} <= ${toDate.toISOString().slice(0,10)})
+                OR
+                (${bookings.sessionDate} IS NULL AND ${bookings.createdAt} >= ${fromDate.toISOString()} AND ${bookings.createdAt} <= ${toDate.toISOString()})
+              )`,
+            ))
+            .orderBy(bookings.sessionDate, bookings.createdAt)
+            .limit(300),
+          db.select().from(blockedTimes)
+            .where(and(
+              gte(blockedTimes.blockedDate, fromDate as any),
+              lte(blockedTimes.blockedDate, toDate as any),
+            ))
+            .orderBy(blockedTimes.blockedDate)
+            .limit(100),
+        ]);
+        return {
+          slots: slots.map(s => ({
+            ...s.slot,
+            programName: s.programName,
+            programType: s.programType,
+            spotsLeft: Math.max(0, s.slot.maxParticipants - s.slot.currentParticipants),
+            isFull: s.slot.currentParticipants >= s.slot.maxParticipants,
+          })),
+          bookings: calBookings,
+          blocked,
+        };
+      }),
+
     // Admin: full schedule view (all slots + blocked times)
     adminView: adminProcedure
       .input(z.object({ from: z.string().optional(), to: z.string().optional() }))
@@ -581,6 +650,12 @@ export const appRouter = router({
       const db = await getDb();
       if (!db) return [];
       return db.select().from(users).where(eq(users.role, "user")).orderBy(desc(users.createdAt)).limit(100);
+    }),
+
+    listPrograms: adminProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return db.select().from(programs).where(eq(programs.isActive, true)).orderBy(programs.name);
     }),
   }),
 

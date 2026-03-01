@@ -112,3 +112,7 @@
 - [x] Admin: view who is enrolled in each session slot
 - [x] Student booking page: show available slots with live spot counts and Full indicators
 - [x] Enforce capacity limit on booking creation (reject if slot is full)
+- [x] Fix Admin Schedule calendar: show bookings as events (not just schedule slots)
+- [x] Add Day/Week/Month view switching to Admin Schedule (Google Calendar style)
+- [x] Day view: hourly time grid with events placed at correct times
+- [x] Month view: full month grid with event chips per day
