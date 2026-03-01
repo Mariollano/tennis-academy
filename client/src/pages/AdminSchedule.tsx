@@ -322,7 +322,7 @@ function Generate105Dialog({ onClose, onRefetch }: { onClose: () => void; onRefe
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Generate 105 Clinic Sessions</DialogTitle></DialogHeader>
-        <p className="text-sm text-muted-foreground">Creates sessions for Mon/Wed/Fri and Sundays in the selected date range.</p>
+        <p className="text-sm text-muted-foreground">Creates sessions for <strong>Mon, Wed, Fri</strong> (weekday cap) and <strong>Sundays</strong> (Sunday cap) in the selected date range.</p>
         <div className="space-y-3">
           <div>
             <Label>Program</Label>
@@ -339,7 +339,7 @@ function Generate105Dialog({ onClose, onRefetch }: { onClose: () => void; onRefe
           <div className="grid grid-cols-2 gap-3">
             <div><Label>From date</Label><Input type="date" value={form.fromDate} onChange={e => set("fromDate", e.target.value)} /></div>
             <div><Label>To date</Label><Input type="date" value={form.toDate} onChange={e => set("toDate", e.target.value)} /></div>
-            <div><Label>Mon/Wed/Fri cap</Label><Input type="number" min={1} max={100} value={form.weekdayCap} onChange={e => set("weekdayCap", e.target.value)} /></div>
+            <div><Label>Mon / Wed / Fri cap</Label><Input type="number" min={1} max={100} value={form.weekdayCap} onChange={e => set("weekdayCap", e.target.value)} /></div>
             <div><Label>Sunday cap</Label><Input type="number" min={1} max={100} value={form.sundayCap} onChange={e => set("sundayCap", e.target.value)} /></div>
             <div><Label>Start time</Label><Input type="time" value={form.startTime} onChange={e => set("startTime", e.target.value)} /></div>
             <div><Label>End time</Label><Input type="time" value={form.endTime} onChange={e => set("endTime", e.target.value)} /></div>

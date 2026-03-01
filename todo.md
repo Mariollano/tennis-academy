@@ -118,3 +118,4 @@
 - [x] Month view: full month grid with event chips per day
 - [x] Day/Week view: render events as tall blocks spanning their actual start-to-end hours (like Google Calendar)\n
 - [x] Calendar event popup: Charge & Confirm button for pending bookings — sends Stripe payment link and marks booking confirmed
+- [x] Fix 105 Clinic schedule: Mon/Wed/Fri = 12 spots, Sun = 24 spots (remove any other days from generator)
