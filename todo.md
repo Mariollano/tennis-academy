@@ -130,3 +130,4 @@
 - [x] Add publish reminder banner to Admin dashboard
 - [x] Remove "Book a Lesson" button from homepage hero section
 - [x] Wire Twilio SMS: install SDK, add credentials, send real texts on broadcast and booking notifications
+- [x] Show Booking Confirmed + social share screen after ALL booking types (Stripe, cash, mental coaching, waitlist, etc.)
