@@ -12,6 +12,7 @@ import MentalCoaching from "./pages/MentalCoaching";
 import Services from "./pages/Services";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminSchedule from "./pages/AdminSchedule";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ChatBot from "./components/ChatBot";
@@ -30,6 +31,7 @@ function Router() {
           <Route path="/services" component={Services} />
           <Route path="/profile" component={Profile} />
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/schedule" component={AdminSchedule} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />

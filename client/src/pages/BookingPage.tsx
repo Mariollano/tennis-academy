@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check } from "lucide-react";
+import { Calendar, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check, Users, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 const PROGRAM_CONFIG: Record<string, {
   title: string;
@@ -78,6 +79,115 @@ const PROGRAM_CONFIG: Record<string, {
   },
 };
 
+// ── Availability Panel (for clinic_105 and private_lesson) ──────────────────
+function AvailabilityPanel({
+  programType,
+  onSelectSlot,
+  selectedSlotId,
+}: {
+  programType: string;
+  onSelectSlot: (slotId: number, date: string) => void;
+  selectedSlotId: number | null;
+}) {
+  const isSupported = programType === "clinic_105" || programType === "private_lesson";
+  const [fromDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [toDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 60);
+    return d.toISOString().slice(0, 10);
+  });
+
+  const { data: slots, isLoading } = trpc.schedule.listAvailable.useQuery(
+    { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
+    { enabled: isSupported }
+  );
+
+  if (!isSupported) return null;
+
+  function fmtDate(d: any) {
+    return new Date(d).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+  }
+  function fmtTime(t: string | null | undefined) {
+    if (!t) return "";
+    const [h, m] = t.split(":");
+    const hour = parseInt(h);
+    return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
+  }
+
+  return (
+    <Card className="border-2 border-primary/20">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Calendar className="w-4 h-4 text-primary" />
+          Available Sessions
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">Select a session to pre-fill your booking date. Spots update in real time.</p>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-6 gap-2 text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading schedule…
+          </div>
+        ) : !slots || slots.length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground">
+            <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-40" />
+            <p className="text-sm">No sessions scheduled yet.</p>
+            <p className="text-xs mt-1">Contact Coach Mario to arrange a time.</p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+            {slots.map(slot => {
+              const isSelected = selectedSlotId === slot.id;
+              const isFull = slot.isFull;
+              return (
+                <button
+                  key={slot.id}
+                  disabled={isFull}
+                  onClick={() => {
+                    const rawDate = slot.slotDate as unknown;
+                    const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
+                    onSelectSlot(slot.id, dateStr);
+                  }}
+                  className={`w-full text-left p-3 rounded-xl border transition-all ${
+                    isFull
+                      ? "opacity-50 cursor-not-allowed border-border bg-muted"
+                      : isSelected
+                      ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                      : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <div className="font-semibold text-sm text-foreground">
+                        {fmtDate(slot.slotDate)}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {fmtTime(slot.startTime)} – {fmtTime(slot.endTime)}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      {isFull ? (
+                        <Badge className="bg-red-100 text-red-700 text-xs">Full</Badge>
+                      ) : (
+                        <Badge className={`text-xs ${
+                          slot.spotsLeft <= 2 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
+                        }`}>
+                          {slot.spotsLeft} spot{slot.spotsLeft !== 1 ? "s" : ""} left
+                        </Badge>
+                      )}
+                      {isSelected && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function BookingPage() {
   const params = useParams<{ programType: string }>();
   const programType = params.programType || "private_lesson";
@@ -86,6 +196,7 @@ export default function BookingPage() {
   const { user, isAuthenticated } = useAuth();
   const [selectedPricing, setSelectedPricing] = useState(config.pricing[0].value);
   const [sessionDate, setSessionDate] = useState("");
+  const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [afterCamp, setAfterCamp] = useState(false);
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -144,6 +255,7 @@ export default function BookingPage() {
     createBookingMutation.mutate({
       programType: config.type,
       sessionDate: sessionDate || undefined,
+      scheduleSlotId: selectedSlotId || undefined,
       pricingOption: selectedPricing,
       afterCampAddon: afterCamp,
       notes,
@@ -310,6 +422,20 @@ export default function BookingPage() {
 
       <div className="container py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Availability Panel for clinic + private lesson */}
+          {(programType === "clinic_105" || programType === "private_lesson") && (
+            <div className="lg:col-span-3 mb-2">
+              <AvailabilityPanel
+                programType={programType}
+                selectedSlotId={selectedSlotId}
+                onSelectSlot={(slotId, date) => {
+                  setSelectedSlotId(slotId);
+                  setSessionDate(date);
+                }}
+              />
+            </div>
+          )}
+
           {/* Booking Form */}
           <div className="lg:col-span-2">
             <Card>

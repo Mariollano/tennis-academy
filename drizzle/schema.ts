@@ -66,14 +66,19 @@ export type InsertProgram = typeof programs.$inferInsert;
 export const scheduleSlots = mysqlTable("schedule_slots", {
   id: int("id").autoincrement().primaryKey(),
   programId: int("programId").notNull(),
+  // Human-readable label, e.g. "105 Clinic – Monday Jan 6"
+  title: varchar("title", { length: 300 }),
   slotDate: date("slotDate").notNull(),
   startTime: time("startTime").notNull(),
   endTime: time("endTime").notNull(),
-  maxParticipants: int("maxParticipants").default(10).notNull(),
+  // Admin-set capacity for this specific slot (overrides program default)
+  maxParticipants: int("maxParticipants").default(12).notNull(),
+  // Derived from confirmed/pending bookings; updated on each booking change
   currentParticipants: int("currentParticipants").default(0).notNull(),
   isAvailable: boolean("isAvailable").default(true).notNull(),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type ScheduleSlot = typeof scheduleSlots.$inferSelect;
@@ -197,3 +202,21 @@ export const tournamentParticipants = mysqlTable("tournament_participants", {
 });
 
 export type TournamentParticipant = typeof tournamentParticipants.$inferSelect;
+
+// ─── Blocked Times ───────────────────────────────────────────────────────────
+// Mario can block out any date/time range to prevent student bookings
+export const blockedTimes = mysqlTable("blocked_times", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(), // e.g. "Vacation", "Personal", "Court maintenance"
+  blockedDate: date("blockedDate").notNull(),
+  startTime: time("startTime"),   // null = all day
+  endTime: time("endTime"),       // null = all day
+  isAllDay: boolean("isAllDay").default(false).notNull(),
+  // Which program types are blocked (null = all programs)
+  affectsPrivateLessons: boolean("affectsPrivateLessons").default(true).notNull(),
+  affects105Clinic: boolean("affects105Clinic").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BlockedTime = typeof blockedTimes.$inferSelect;
+export type InsertBlockedTime = typeof blockedTimes.$inferInsert;

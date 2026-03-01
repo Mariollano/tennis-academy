@@ -9,9 +9,10 @@ import { invokeLLM } from "./_core/llm";
 import { getDb } from "./db";
 import {
   users, bookings, programs, scheduleSlots, payments,
-  smsBroadcasts, mentalCoachingResources, merchandise, tournamentBookings, tournamentParticipants
+  smsBroadcasts, mentalCoachingResources, merchandise, tournamentBookings, tournamentParticipants,
+  blockedTimes
 } from "../drizzle/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
 
 // Admin guard middleware
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -117,6 +118,7 @@ export const appRouter = router({
       .input(z.object({
         programType: z.string(),
         sessionDate: z.string().optional(),
+        scheduleSlotId: z.number().optional(), // link booking to a specific schedule slot
         pricingOption: z.string(),
         afterCampAddon: z.boolean().optional(),
         notes: z.string().optional(),
@@ -130,6 +132,18 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        // If a schedule slot is selected, enforce capacity
+        if (input.scheduleSlotId) {
+          const slotRows = await db.select().from(scheduleSlots)
+            .where(eq(scheduleSlots.id, input.scheduleSlotId)).limit(1);
+          const slot = slotRows[0];
+          if (!slot) throw new TRPCError({ code: "NOT_FOUND", message: "Session slot not found." });
+          if (!slot.isAvailable) throw new TRPCError({ code: "BAD_REQUEST", message: "This session is no longer available." });
+          if (slot.currentParticipants >= slot.maxParticipants) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Sorry, this session is full. Please choose another time." });
+          }
+        }
 
         // Find or create a matching program
         const existingPrograms = await db.select().from(programs)
@@ -150,6 +164,7 @@ export const appRouter = router({
         await db.insert(bookings).values({
           userId: ctx.user.id,
           programId,
+          scheduleSlotId: input.scheduleSlotId || null,
           totalAmountCents: input.totalAmountCents,
           sessionDate: input.sessionDate ? new Date(input.sessionDate) as any : undefined,
           weekStartDate: input.weekStartDate ? new Date(input.weekStartDate) as any : undefined,
@@ -160,6 +175,13 @@ export const appRouter = router({
           notes: input.notes,
           status: "pending",
         });
+
+        // Increment participant count on the slot
+        if (input.scheduleSlotId) {
+          await db.update(scheduleSlots)
+            .set({ currentParticipants: sql`${scheduleSlots.currentParticipants} + 1`, updatedAt: new Date() })
+            .where(eq(scheduleSlots.id, input.scheduleSlotId));
+        }
 
         return { success: true };
       }),
@@ -193,37 +215,268 @@ export const appRouter = router({
       }),
   }),
 
-  // ─── Schedule ───────────────────────────────────────────────────────────────
+   // ─── Schedule ────────────────────────────────────────────────────────────
   schedule: router({
-    list: publicProcedure
-      .input(z.object({ programId: z.number().optional(), from: z.string().optional() }))
+    // Public: list available slots (for students booking)
+    listAvailable: publicProcedure
+      .input(z.object({
+        programType: z.enum(["clinic_105", "private_lesson"]),
+        from: z.string().optional(), // ISO date
+        to: z.string().optional(),
+      }))
       .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return [];
-        const conditions = [eq(scheduleSlots.isAvailable, true)];
-        if (input.programId) conditions.push(eq(scheduleSlots.programId, input.programId));
-        return db.select().from(scheduleSlots).where(and(...conditions)).orderBy(scheduleSlots.slotDate).limit(30);
+        // Find program IDs matching this type
+        const matchingPrograms = await db.select({ id: programs.id })
+          .from(programs)
+          .where(and(eq(programs.type, input.programType as any), eq(programs.isActive, true)));
+        if (!matchingPrograms.length) return [];
+        const programIds = matchingPrograms.map(p => p.id);
+        const fromDate = input.from ? new Date(input.from) : new Date();
+        const toDate = input.to ? new Date(input.to) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+        const slots = await db.select({
+          slot: scheduleSlots,
+          programName: programs.name,
+          programType: programs.type,
+          priceInCents: programs.priceInCents,
+        })
+          .from(scheduleSlots)
+          .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
+          .where(and(
+            eq(scheduleSlots.isAvailable, true),
+            gte(scheduleSlots.slotDate, fromDate as any),
+            lte(scheduleSlots.slotDate, toDate as any),
+            sql`${scheduleSlots.programId} IN (${sql.join(programIds.map(id => sql`${id}`), sql`, `)})`
+          ))
+          .orderBy(scheduleSlots.slotDate, scheduleSlots.startTime)
+          .limit(60);
+        return slots.map(s => ({
+          ...s.slot,
+          programName: s.programName,
+          programType: s.programType,
+          priceInCents: s.priceInCents,
+          spotsLeft: Math.max(0, s.slot.maxParticipants - s.slot.currentParticipants),
+          isFull: s.slot.currentParticipants >= s.slot.maxParticipants,
+        }));
       }),
 
+    // Admin: full schedule view (all slots + blocked times)
+    adminView: adminProcedure
+      .input(z.object({ from: z.string().optional(), to: z.string().optional() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { slots: [], blocked: [] };
+        const fromDate = input.from ? new Date(input.from) : new Date();
+        const toDate = input.to ? new Date(input.to) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+        const [slots, blocked] = await Promise.all([
+          db.select({
+            slot: scheduleSlots,
+            programName: programs.name,
+            programType: programs.type,
+          })
+            .from(scheduleSlots)
+            .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
+            .where(and(
+              gte(scheduleSlots.slotDate, fromDate as any),
+              lte(scheduleSlots.slotDate, toDate as any),
+            ))
+            .orderBy(scheduleSlots.slotDate, scheduleSlots.startTime)
+            .limit(200),
+          db.select().from(blockedTimes)
+            .where(and(
+              gte(blockedTimes.blockedDate, fromDate as any),
+              lte(blockedTimes.blockedDate, toDate as any),
+            ))
+            .orderBy(blockedTimes.blockedDate)
+            .limit(100),
+        ]);
+        return {
+          slots: slots.map(s => ({
+            ...s.slot,
+            programName: s.programName,
+            programType: s.programType,
+            spotsLeft: Math.max(0, s.slot.maxParticipants - s.slot.currentParticipants),
+            isFull: s.slot.currentParticipants >= s.slot.maxParticipants,
+          })),
+          blocked,
+        };
+      }),
+
+    // Admin: get enrollees for a specific slot
+    getEnrollees: adminProcedure
+      .input(z.object({ slotId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        return db.select({
+          bookingId: bookings.id,
+          status: bookings.status,
+          bookedAt: bookings.createdAt,
+          studentName: users.name,
+          studentEmail: users.email,
+          studentPhone: users.phone,
+        })
+          .from(bookings)
+          .leftJoin(users, eq(bookings.userId, users.id))
+          .where(and(
+            eq(bookings.scheduleSlotId, input.slotId),
+            sql`${bookings.status} IN ('pending','confirmed')`
+          ))
+          .orderBy(bookings.createdAt);
+      }),
+
+    // Admin: create a slot
     create: adminProcedure
       .input(z.object({
         programId: z.number(),
+        title: z.string().optional(),
         slotDate: z.string(),
         startTime: z.string(),
         endTime: z.string(),
-        maxParticipants: z.number().default(10),
+        maxParticipants: z.number().default(12),
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
         await db.insert(scheduleSlots).values({
-          ...input,
+          programId: input.programId,
+          title: input.title || null,
           slotDate: new Date(input.slotDate) as any,
+          startTime: input.startTime,
+          endTime: input.endTime,
+          maxParticipants: input.maxParticipants,
+          notes: input.notes || null,
           isAvailable: true,
           currentParticipants: 0,
         });
         return { success: true };
+      }),
+
+    // Admin: update slot capacity or availability
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        maxParticipants: z.number().optional(),
+        isAvailable: z.boolean().optional(),
+        notes: z.string().optional(),
+        title: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { id, ...updates } = input;
+        await db.update(scheduleSlots).set({ ...updates, updatedAt: new Date() }).where(eq(scheduleSlots.id, id));
+        return { success: true };
+      }),
+
+    // Admin: delete a slot
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.delete(scheduleSlots).where(eq(scheduleSlots.id, input.id));
+        return { success: true };
+      }),
+
+    // Admin: bulk-generate 105 clinic slots for a date range
+    generate105Slots: adminProcedure
+      .input(z.object({
+        programId: z.number(),
+        fromDate: z.string(),
+        toDate: z.string(),
+        weekdayCap: z.number().default(12),   // Mon/Wed/Fri
+        sundayCap: z.number().default(24),
+        startTime: z.string().default("09:00:00"),
+        endTime: z.string().default("10:30:00"),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const start = new Date(input.fromDate);
+        const end = new Date(input.toDate);
+        const toInsert: any[] = [];
+        const cur = new Date(start);
+        while (cur <= end) {
+          const dow = cur.getDay(); // 0=Sun, 1=Mon, 3=Wed, 5=Fri
+          if ([0, 1, 3, 5].includes(dow)) {
+            const isSunday = dow === 0;
+            const cap = isSunday ? input.sundayCap : input.weekdayCap;
+            const dayName = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dow];
+            const dateStr = cur.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+            toInsert.push({
+              programId: input.programId,
+              title: `105 Clinic – ${dayName} ${dateStr}`,
+              slotDate: new Date(cur) as any,
+              startTime: input.startTime,
+              endTime: input.endTime,
+              maxParticipants: cap,
+              isAvailable: true,
+              currentParticipants: 0,
+            });
+          }
+          cur.setDate(cur.getDate() + 1);
+        }
+        if (toInsert.length > 0) {
+          for (const slot of toInsert) {
+            await db.insert(scheduleSlots).values(slot);
+          }
+        }
+        return { success: true, created: toInsert.length };
+      }),
+
+    // Admin: block time
+    blockTime: adminProcedure
+      .input(z.object({
+        title: z.string(),
+        blockedDate: z.string(),
+        startTime: z.string().optional(),
+        endTime: z.string().optional(),
+        isAllDay: z.boolean().default(false),
+        affectsPrivateLessons: z.boolean().default(true),
+        affects105Clinic: z.boolean().default(true),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.insert(blockedTimes).values({
+          title: input.title,
+          blockedDate: new Date(input.blockedDate) as any,
+          startTime: input.startTime || null,
+          endTime: input.endTime || null,
+          isAllDay: input.isAllDay,
+          affectsPrivateLessons: input.affectsPrivateLessons,
+          affects105Clinic: input.affects105Clinic,
+        });
+        return { success: true };
+      }),
+
+    // Admin: delete a blocked time
+    deleteBlock: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.delete(blockedTimes).where(eq(blockedTimes.id, input.id));
+        return { success: true };
+      }),
+
+    // Public: get blocked dates (for student calendar)
+    getBlockedDates: publicProcedure
+      .input(z.object({ from: z.string().optional(), to: z.string().optional() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const fromDate = input.from ? new Date(input.from) : new Date();
+        const toDate = input.to ? new Date(input.to) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+        return db.select().from(blockedTimes)
+          .where(and(
+            gte(blockedTimes.blockedDate, fromDate as any),
+            lte(blockedTimes.blockedDate, toDate as any),
+          ))
+          .orderBy(blockedTimes.blockedDate);
       }),
   }),
 

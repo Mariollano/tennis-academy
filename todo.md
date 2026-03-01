@@ -99,3 +99,16 @@
 - [x] Add admin booking notifications - Mario gets instant alert when anyone signs up for anything (via Manus notification system, triggered on Stripe webhook checkout.session.completed)
 - [x] Make Admin dashboard stat cards clickable - link to relevant sections (students, bookings, pending, SMS)
 - [x] Add PWA support (manifest, service worker, icons) so app is installable on iOS and Android
+- [x] Add session_slots table with capacity, enrollment count, day-of-week rules for 105 clinic (Mon/Wed/Fri=12, Sun=24)
+- [x] Add admin-adjustable capacity per session slot
+- [x] Show live spot availability to students before booking (X spots left / Full)
+- [x] Admin session management UI: create sessions, set capacity, view who is enrolled
+- [x] Private lesson time slot availability view for students
+- [x] Add blocked_times table so Mario can block date/time ranges
+- [x] Admin Schedule page: calendar view of all sessions and bookings
+- [x] Admin: create 105 clinic sessions (Mon/Wed/Fri cap 12, Sun cap 24) with per-slot capacity override
+- [x] Admin: create private lesson time slots
+- [x] Admin: block time off (mark date/time as unavailable)
+- [x] Admin: view who is enrolled in each session slot
+- [x] Student booking page: show available slots with live spot counts and Full indicators
+- [x] Enforce capacity limit on booking creation (reject if slot is full)
