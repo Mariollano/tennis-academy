@@ -116,3 +116,4 @@
 - [x] Add Day/Week/Month view switching to Admin Schedule (Google Calendar style)
 - [x] Day view: hourly time grid with events placed at correct times
 - [x] Month view: full month grid with event chips per day
+- [x] Day/Week view: render events as tall blocks spanning their actual start-to-end hours (like Google Calendar)\n

@@ -356,6 +356,111 @@ function MonthView({ anchor, events, onEventClick }: { anchor: Date; events: Cal
   );
 }
 
+// ─── Shared time-grid helpers ─────────────────────────────────────────────────
+const HOUR_HEIGHT = 64; // px per hour
+const DAY_START = 7;    // 7 AM
+const DAY_END = 22;     // 10 PM
+const TOTAL_HOURS = DAY_END - DAY_START;
+
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + (m || 0);
+}
+
+function evTop(startTime: string | undefined): number {
+  if (!startTime) return 0;
+  const mins = timeToMinutes(startTime) - DAY_START * 60;
+  return Math.max(0, (mins / 60) * HOUR_HEIGHT);
+}
+
+function evHeight(startTime: string | undefined, endTime: string | undefined): number {
+  if (!startTime) return HOUR_HEIGHT;
+  const startMins = timeToMinutes(startTime);
+  const endMins = endTime ? timeToMinutes(endTime) : startMins + 60;
+  const durationMins = Math.max(30, endMins - startMins);
+  return (durationMins / 60) * HOUR_HEIGHT;
+}
+
+// ─── Time grid column (shared by Day and Week) ────────────────────────────────
+function TimeGridColumn({ dayEvs, onEventClick, compact = false }: {
+  dayEvs: CalEvent[];
+  onEventClick: (ev: CalEvent) => void;
+  compact?: boolean;
+}) {
+  const allDay = dayEvs.filter(ev => !ev.startTime);
+  const timed = dayEvs.filter(ev => !!ev.startTime);
+  const totalPx = TOTAL_HOURS * HOUR_HEIGHT;
+
+  return (
+    <div className="flex flex-col flex-1 min-w-0">
+      {/* All-day events */}
+      {allDay.length > 0 && (
+        <div className="border-b border-border p-1 space-y-0.5 bg-muted/20">
+          {allDay.map(ev => (
+            <button key={ev.id} onClick={() => onEventClick(ev)}
+              className={`w-full text-left rounded px-1.5 py-0.5 text-[11px] font-medium ${ev.color} hover:opacity-80`}>
+              {ev.title}
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Timed events grid */}
+      <div className="relative" style={{ height: totalPx }}>
+        {timed.map(ev => {
+          const top = evTop(ev.startTime);
+          const height = evHeight(ev.startTime, ev.endTime);
+          return (
+            <button
+              key={ev.id}
+              onClick={() => onEventClick(ev)}
+              style={{ top, height, left: 2, right: 2, position: "absolute" }}
+              className={`rounded-lg px-2 py-1 text-left overflow-hidden ${ev.color} hover:opacity-80 transition-opacity border border-white/30`}
+            >
+              <div className={`font-semibold leading-tight ${compact ? "text-[10px]" : "text-xs"} truncate`}>{ev.title}</div>
+              {height >= 36 && (
+                <div className={`opacity-80 ${compact ? "text-[9px]" : "text-[11px]"} leading-tight`}>
+                  {fmtTime(ev.startTime)}{ev.endTime ? ` – ${fmtTime(ev.endTime)}` : ""}
+                </div>
+              )}
+              {height >= 52 && ev.badge && (
+                <div className="text-[10px] opacity-70 mt-0.5">{ev.badge}</div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Hour labels column ───────────────────────────────────────────────────────
+function HourLabels() {
+  return (
+    <div className="w-14 shrink-0 relative" style={{ height: TOTAL_HOURS * HOUR_HEIGHT }}>
+      {Array.from({ length: TOTAL_HOURS }, (_, i) => ({ hour: DAY_START + i, i })).map(({ hour, i }) => (
+        <div
+          key={hour}
+          className="absolute right-2 text-[11px] text-muted-foreground"
+          style={{ top: i * HOUR_HEIGHT - 8 }}
+        >
+          {hour === 0 ? "12 AM" : hour < 12 ? `${hour} AM` : hour === 12 ? "12 PM" : `${hour - 12} PM`}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Hour grid lines ──────────────────────────────────────────────────────────
+function HourLines() {
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+        <div key={i} className="absolute w-full border-t border-border/50" style={{ top: i * HOUR_HEIGHT }} />
+      ))}
+    </div>
+  );
+}
+
 // ─── Week View ────────────────────────────────────────────────────────────────
 function WeekView({ anchor, events, onEventClick }: { anchor: Date; events: CalEvent[]; onEventClick: (ev: CalEvent) => void }) {
   const weekStart = startOfWeek(anchor);
@@ -366,40 +471,40 @@ function WeekView({ anchor, events, onEventClick }: { anchor: Date; events: CalE
     return m;
   }, [events]);
   const today = isoDate(new Date());
+
   return (
     <div className="flex-1 overflow-auto">
-      <div className="grid grid-cols-7 border-b border-border">
+      {/* Day headers */}
+      <div className="flex border-b border-border sticky top-0 bg-card z-10">
+        <div className="w-14 shrink-0" />
         {days.map((day, i) => {
           const key = isoDate(day);
           const isToday = key === today;
           return (
-            <div key={i} className="text-center py-2 border-r border-border last:border-r-0">
+            <div key={i} className="flex-1 text-center py-2 border-l border-border first:border-l-0">
               <div className="text-xs text-muted-foreground">{day.toLocaleDateString("en-US", { weekday: "short" })}</div>
-              <div className={`text-lg font-bold mx-auto w-9 h-9 flex items-center justify-center rounded-full ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>
-                {day.getDate()}
-              </div>
+              <div className={`text-base font-bold mx-auto w-8 h-8 flex items-center justify-center rounded-full ${
+                isToday ? "bg-primary text-primary-foreground" : "text-foreground"
+              }`}>{day.getDate()}</div>
             </div>
           );
         })}
       </div>
-      <div className="grid grid-cols-7 min-h-[400px]">
-        {days.map((day, i) => {
-          const key = isoDate(day);
-          const dayEvs = evByDate[key] || [];
-          return (
-            <div key={i} className="border-r border-border last:border-r-0 p-1.5 space-y-1 min-h-[400px]">
-              {dayEvs.length === 0 && <div className="text-[10px] text-muted-foreground/40 text-center mt-4">—</div>}
-              {dayEvs.map(ev => (
-                <button key={ev.id} onClick={() => onEventClick(ev)}
-                  className={`w-full text-left rounded-lg p-2 text-xs ${ev.color} hover:opacity-80 transition-opacity`}>
-                  <div className="font-semibold truncate">{ev.title}</div>
-                  {ev.startTime && <div className="opacity-80">{fmtTime(ev.startTime)}{ev.endTime ? ` – ${fmtTime(ev.endTime)}` : ""}</div>}
-                  {ev.badge && <Badge className="mt-1 text-[10px] px-1 py-0">{ev.badge}</Badge>}
-                </button>
-              ))}
-            </div>
-          );
-        })}
+      {/* Time grid */}
+      <div className="flex">
+        <HourLabels />
+        <div className="flex flex-1 relative">
+          <HourLines />
+          {days.map((day, i) => {
+            const key = isoDate(day);
+            const dayEvs = evByDate[key] || [];
+            return (
+              <div key={i} className="flex-1 border-l border-border first:border-l-0 relative">
+                <TimeGridColumn dayEvs={dayEvs} onEventClick={onEventClick} compact />
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -409,49 +514,22 @@ function WeekView({ anchor, events, onEventClick }: { anchor: Date; events: CalE
 function DayView({ anchor, events, onEventClick }: { anchor: Date; events: CalEvent[]; onEventClick: (ev: CalEvent) => void }) {
   const key = isoDate(anchor);
   const dayEvs = events.filter(ev => ev.dateKey === key);
-  const hours = Array.from({ length: 15 }, (_, i) => i + 7); // 7 AM – 9 PM
-  function evHour(ev: CalEvent) {
-    if (!ev.startTime) return null;
-    return parseInt(ev.startTime.split(":")[0]);
-  }
+
   return (
     <div className="flex-1 overflow-auto">
-      <div className="text-center py-3 border-b border-border">
+      {/* Header */}
+      <div className="text-center py-3 border-b border-border sticky top-0 bg-card z-10">
         <div className="text-lg font-bold text-foreground">{fmtDayFull(anchor)}</div>
         <div className="text-sm text-muted-foreground">{dayEvs.length} event{dayEvs.length !== 1 ? "s" : ""}</div>
       </div>
-      {dayEvs.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <CalendarDays className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p>No events scheduled for this day.</p>
+      {/* Time grid */}
+      <div className="flex">
+        <HourLabels />
+        <div className="flex-1 relative border-l border-border">
+          <HourLines />
+          <TimeGridColumn dayEvs={dayEvs} onEventClick={onEventClick} />
         </div>
-      ) : (
-        <div className="divide-y divide-border">
-          {hours.map(hour => {
-            const hourEvs = dayEvs.filter(ev => evHour(ev) === hour || (!ev.startTime));
-            const allDayEvs = hour === 7 ? dayEvs.filter(ev => !ev.startTime) : [];
-            const timedEvs = dayEvs.filter(ev => evHour(ev) === hour);
-            const showEvs = hour === 7 ? [...allDayEvs, ...timedEvs] : timedEvs;
-            return (
-              <div key={hour} className="flex gap-3 p-2 min-h-[56px]">
-                <div className="w-14 text-right text-xs text-muted-foreground pt-1 shrink-0">
-                  {hour % 12 || 12}{hour >= 12 ? " PM" : " AM"}
-                </div>
-                <div className="flex-1 space-y-1">
-                  {showEvs.map(ev => (
-                    <button key={ev.id} onClick={() => onEventClick(ev)}
-                      className={`w-full text-left rounded-lg p-2 text-xs ${ev.color} hover:opacity-80 transition-opacity`}>
-                      <div className="font-semibold">{ev.title}</div>
-                      {ev.startTime && <div className="opacity-80">{fmtTime(ev.startTime)}{ev.endTime ? ` – ${fmtTime(ev.endTime)}` : ""}</div>}
-                      {ev.badge && <span className="text-[10px] opacity-80 ml-1">{ev.badge}</span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
