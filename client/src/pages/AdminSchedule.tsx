@@ -310,14 +310,34 @@ function BlockTimeDialog({ onClose, onRefetch }: { onClose: () => void; onRefetc
 }
 
 // ─── Generate 105 Clinic dialog ───────────────────────────────────────────────
+const CLINIC_PREFS_KEY = "ri_tennis_clinic_prefs";
+function getClinicPrefs() {
+  try { return JSON.parse(localStorage.getItem(CLINIC_PREFS_KEY) || "{}"); } catch { return {}; }
+}
+function saveClinicPrefs(prefs: Record<string, string>) {
+  try { localStorage.setItem(CLINIC_PREFS_KEY, JSON.stringify({ ...getClinicPrefs(), ...prefs })); } catch {}
+}
+
 function Generate105Dialog({ onClose, onRefetch }: { onClose: () => void; onRefetch: () => void }) {
   const { data: programList } = trpc.admin.listPrograms.useQuery();
-  const [form, setForm] = useState({ programId: "", fromDate: isoDate(new Date()), toDate: isoDate(addDays(new Date(), 30)), weekdayCap: "12", sundayCap: "24", startTime: "09:00", endTime: "10:30" });
+  const prefs = getClinicPrefs();
+  const [form, setForm] = useState({
+    programId: prefs.programId || "",
+    fromDate: isoDate(new Date()),
+    toDate: isoDate(addDays(new Date(), 30)),
+    weekdayCap: prefs.weekdayCap || "12",
+    sundayCap: prefs.sundayCap || "24",
+    startTime: prefs.startTime || "09:00",
+    endTime: prefs.endTime || "10:30",
+  });
   const gen = trpc.schedule.generate105Slots.useMutation({
     onSuccess: (d) => { toast.success(`Created ${d.created} sessions!`); onRefetch(); onClose(); },
     onError: (e) => toast.error(e.message || "Failed to generate sessions."),
   });
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k: string, v: string) => {
+    setForm(f => ({ ...f, [k]: v }));
+    saveClinicPrefs({ [k]: v });
+  };
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">

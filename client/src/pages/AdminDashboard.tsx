@@ -29,6 +29,9 @@ export default function AdminDashboard() {
   const [bookingFilter, setBookingFilter] = useState("all");
   const [smsMessage, setSmsMessage] = useState("");
   const [activeTab, setActiveTab] = useState("bookings");
+  const [publishBannerDismissed, setPublishBannerDismissed] = useState(() => {
+    try { return localStorage.getItem("ri_tennis_publish_banner_dismissed") === "true"; } catch { return false; }
+  });
 
   const { data: stats } = trpc.admin.stats.useQuery(undefined, { enabled: user?.role === "admin" });
   const { data: bookings, refetch: refetchBookings } = trpc.booking.adminList.useQuery(
@@ -88,8 +91,28 @@ export default function AdminDashboard() {
     );
   }
 
+  const dismissPublishBanner = () => {
+    setPublishBannerDismissed(true);
+    try { localStorage.setItem("ri_tennis_publish_banner_dismissed", "true"); } catch {}
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Publish Reminder Banner */}
+      {!publishBannerDismissed && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-3">
+          <div className="container flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-amber-600 text-lg">🚀</span>
+              <div>
+                <p className="text-sm font-semibold text-amber-900">Your changes are live in preview — don't forget to Publish!</p>
+                <p className="text-xs text-amber-700">Click the <strong>Publish</strong> button in the top-right corner of the Management UI to push updates to your live site at <span className="font-mono">tennispro-kzzfscru.manus.space</span>.</p>
+              </div>
+            </div>
+            <button onClick={dismissPublishBanner} className="text-amber-500 hover:text-amber-700 text-xl font-bold flex-shrink-0" aria-label="Dismiss">×</button>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <section className="bg-primary text-primary-foreground py-10">
         <div className="container">

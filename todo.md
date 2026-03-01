@@ -125,3 +125,6 @@
 - [x] Auto-confirm booking on Stripe webhook payment success (already implemented in webhook handler)
 - [x] Current-time red line indicator in Day and Week calendar views
 - [x] Fix 105 Clinic days everywhere: delete wrong-day DB sessions, fix generator, fix all UI labels (Mon/Wed/Fri/Sun only)
+- [x] Seed DB with 105 Clinic sessions for March & April (Mon/Wed/Fri=12, Sun=24)
+- [x] Persist last-used start/end time in session generator (localStorage)
+- [x] Add publish reminder banner to Admin dashboard
