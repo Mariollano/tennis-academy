@@ -134,3 +134,4 @@
 - [ ] Debug and fix SMS not being delivered to users
 - [x] Update homepage stats: 40+ years, thousands of students, 3 coaching disciplines (Mental, Technique, Fitness)
 - [x] Add user-provided photos spread throughout the app (hero bg, program cards, about section, photo gallery page)
+- [x] Add second batch of 11 photos to gallery (total 21 photos now in gallery)

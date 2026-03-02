@@ -16,6 +16,15 @@ const photos = [
   { src: `${CDN}/IMG_2884_19472c09.jpg`, alt: "Junior in Tennis Academy shirt", caption: "Young champion in training" },
   { src: `${CDN}/IMG_2885_b0ce7285.jpg`, alt: "Young player forehand", caption: "Building the foundation — beginner program" },
   { src: `${CDN}/IMG_2892_41ec0d25.jpg`, alt: "Happy student on court", caption: "The joy of tennis — RI Tennis Academy" },
+  { src: `${CDN}/IMG_2888_85ceb301.jpg`, alt: "Tennis action shot", caption: "RI Tennis Academy — Court Action" },
+  { src: `${CDN}/IMG_2889_102fe4ea.jpg`, alt: "Tennis action shot", caption: "RI Tennis Academy — Training Session" },
+  { src: `${CDN}/IMG_2890_6a2c84be.jpg`, alt: "Tennis action shot", caption: "RI Tennis Academy — Summer Training" },
+  { src: `${CDN}/IMG_2893_4684ec8d.jpg`, alt: "Tennis action shot", caption: "Junior Development — RI Tennis Academy" },
+  { src: `${CDN}/IMG_2894_e7c3748b.jpg`, alt: "Tennis action shot", caption: "Skill Building — RI Tennis Academy" },
+  { src: `${CDN}/IMG_2895_2eb01310.jpg`, alt: "Tennis action shot", caption: "On Court — RI Tennis Academy" },
+  { src: `${CDN}/IMG_2896_7c2f9eee.jpg`, alt: "Tennis action shot", caption: "Practice Makes Perfect — RI Tennis Academy" },
+  { src: `${CDN}/IMG_2898_4f8aba97.jpg`, alt: "Tennis action shot", caption: "Game Day — RI Tennis Academy" },
+  { src: `${CDN}/IMG_2899_1f4427b5.jpg`, alt: "Tennis action shot", caption: "Champions in the Making — RI Tennis Academy" },
 ];
 
 export default function Gallery() {
