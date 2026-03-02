@@ -51,10 +51,10 @@ const programs = [
 ];
 
 const stats = [
-  { value: "15+", label: "Years Coaching" },
-  { value: "500+", label: "Students Trained" },
+  { value: "40+", label: "Years Coaching" },
+  { value: "1,000s", label: "Students Trained" },
   { value: "100%", label: "Passion for Tennis" },
-  { value: "2", label: "Coaching Disciplines" },
+  { value: "3", label: "Coaching Disciplines" },
 ];
 
 const features = [
@@ -183,14 +183,17 @@ export default function Home() {
             <div>
               <Badge className="mb-4 bg-accent/20 text-accent-foreground border-accent/30">Meet Your Coach</Badge>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                Mario Llano — <span className="text-primary">Technique & Mental Game Expert</span>
+                Mario Llano — <span className="text-primary">Mental, Technique & Fitness Expert</span>
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                Mario Llano is not just a tennis coach — he is a complete player development specialist.
-                With deep expertise in both technical stroke mechanics and the psychological side of
-                competition, Mario helps players at every level unlock their true potential.
+                Mario Llano is not just a tennis coach — he is a complete player development specialist
+                with over 40 years of coaching experience and thousands of students trained. His three
+                pillars of coaching — Mental, Technique, and Fitness — address every dimension of the game.
               </p>
               <p className="text-muted-foreground leading-relaxed mb-6">
+                Mental coaching comes first: Mario believes the mind wins or loses matches before the
+                first ball is struck. Technique is second — precise, repeatable strokes built on solid
+                fundamentals. Fitness is third — the physical foundation that makes everything else possible.
                 Through RI Tennis Academy, Mario offers private lessons, group clinics, junior development
                 programs, summer camps, and dedicated mental coaching sessions — all designed to build
                 confident, resilient, and skilled tennis players.

@@ -131,3 +131,6 @@
 - [x] Remove "Book a Lesson" button from homepage hero section
 - [x] Wire Twilio SMS: install SDK, add credentials, send real texts on broadcast and booking notifications
 - [x] Show Booking Confirmed + social share screen after ALL booking types (Stripe, cash, mental coaching, waitlist, etc.)
+- [ ] Debug and fix SMS not being delivered to users
+- [x] Update homepage stats: 40+ years, thousands of students, 3 coaching disciplines (Mental, Technique, Fitness)
+- [ ] Add user-provided photos spread throughout the app
