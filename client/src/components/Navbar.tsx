@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -116,6 +116,8 @@ onClick={() => (window.location.href = getLoginUrl())}
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="bg-primary text-primary-foreground w-64 p-0">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            <SheetDescription className="sr-only">Main navigation links for RI Tennis Academy</SheetDescription>
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <div className="flex items-center gap-2">
               <img src={LOGO_URL} alt="RI Tennis Academy" className="w-8 h-8 rounded-full object-cover border border-accent" />
