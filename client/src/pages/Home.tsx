@@ -4,8 +4,40 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Trophy, Brain, Users, Sun, Star, ChevronRight,
-  Calendar, MessageSquare, Play, Zap
+  Calendar, MessageSquare, Play, Zap, Images
 } from "lucide-react";
+
+const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
+
+const photos = {
+  hero:     `${CDN}/IMG_2867_fa17ab01.jpg`,   // action backhand, fall foliage
+  heroAlt:  `${CDN}/IMG_2886_220d66ff.jpg`,   // grass court player
+  group:    `${CDN}/IMG_2882_4dfd31c8.jpg`,   // Mario + 20 juniors group photo
+  highFive: `${CDN}/IMG_2891_c12742f2.jpg`,   // girl high-fiving coach
+  trophy:   `${CDN}/IMG_2866_846b0ea1.jpg`,   // championship trophy girls
+  hoodies:  `${CDN}/IMG_2865_0694faf1.jpg`,   // 3 juniors in tennis hoodies
+  action1:  `${CDN}/IMG_2881_baaab9b5.jpg`,   // boy backhand clay court
+  action2:  `${CDN}/IMG_2883_18ff44ca.jpg`,   // boy forehand jumping
+  action3:  `${CDN}/IMG_2885_b0ce7285.jpg`,   // young child forehand
+  action4:  `${CDN}/IMG_2887_9adc372b.jpg`,   // boy orange shirt forehand
+  junior:   `${CDN}/IMG_2884_19472c09.jpg`,   // boy in Tennis Academy shirt
+  smile:    `${CDN}/IMG_2892_41ec0d25.jpg`,   // smiling girl on court
+};
+
+const galleryImages = [
+  { src: photos.group,    alt: "Summer camp group with Coach Mario" },
+  { src: photos.action1,  alt: "Junior player backhand" },
+  { src: photos.trophy,   alt: "Championship trophy winners" },
+  { src: photos.action2,  alt: "Junior player forehand jump" },
+  { src: photos.highFive, alt: "High five after great shot" },
+  { src: photos.hoodies,  alt: "Junior players in custom tennis hoodies" },
+  { src: photos.action3,  alt: "Young player forehand" },
+  { src: photos.smile,    alt: "Happy student on court" },
+  { src: photos.action4,  alt: "Junior player forehand" },
+  { src: photos.junior,   alt: "Junior in Tennis Academy shirt" },
+  { src: photos.heroAlt,  alt: "Advanced player on grass court" },
+  { src: photos.hero,     alt: "Player backhand follow-through" },
+];
 
 const programs = [
   {
@@ -15,6 +47,7 @@ const programs = [
     badge: "All Levels",
     href: "/book/private_lesson",
     color: "bg-blue-50 text-blue-700",
+    img: photos.heroAlt,
   },
   {
     icon: <Users className="w-6 h-6" />,
@@ -23,6 +56,7 @@ const programs = [
     badge: "Adults",
     href: "/book/clinic_105",
     color: "bg-amber-50 text-amber-700",
+    img: photos.smile,
   },
   {
     icon: <Star className="w-6 h-6" />,
@@ -31,6 +65,7 @@ const programs = [
     badge: "Juniors",
     href: "/book/junior_daily",
     color: "bg-green-50 text-green-700",
+    img: photos.hoodies,
   },
   {
     icon: <Sun className="w-6 h-6" />,
@@ -39,6 +74,7 @@ const programs = [
     badge: "Summer",
     href: "/book/summer_camp_daily",
     color: "bg-orange-50 text-orange-700",
+    img: photos.group,
   },
   {
     icon: <Brain className="w-6 h-6" />,
@@ -47,6 +83,7 @@ const programs = [
     badge: "All Ages",
     href: "/mental-coaching",
     color: "bg-purple-50 text-purple-700",
+    img: photos.highFive,
   },
 ];
 
@@ -84,17 +121,14 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section
-        className="relative overflow-hidden text-white"
-        style={{
-          background: "linear-gradient(135deg, #0a0a0a 0%, #0d1b3e 50%, #1a2f5e 100%)",
-        }}
-      >
-        {/* Decorative tennis ball circles */}
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10"
-          style={{ background: "oklch(0.90 0.20 120)", transform: "translate(30%, -30%)" }} />
-        <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10"
-          style={{ background: "oklch(0.49 0.22 264)", transform: "translate(-30%, 30%)" }} />
+      <section className="relative overflow-hidden text-white min-h-[600px] flex items-center">
+        {/* Background photo */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${photos.hero})` }}
+        />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(10,10,10,0.85) 0%, rgba(13,27,62,0.80) 50%, rgba(26,47,94,0.65) 100%)" }} />
 
         <div className="container relative py-24 md:py-32">
           <div className="max-w-3xl">
@@ -116,7 +150,11 @@ export default function Home() {
                   View Programs <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
-
+              <Link href="/gallery">
+                <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 font-semibold px-8">
+                  <Images className="w-4 h-4 mr-2" /> Photo Gallery
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -148,6 +186,14 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {programs.map((p) => (
               <Card key={p.title} className="border border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden group">
+                {/* Program photo */}
+                <div className="h-44 overflow-hidden">
+                  <img
+                    src={p.img}
+                    alt={p.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
                 <CardContent className="p-6">
                   <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 ${p.color}`}>
                     {p.icon}
@@ -211,15 +257,70 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {features.map((f) => (
-                <div key={f.title} className="bg-card border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
-                  <div className="mb-2">{f.icon}</div>
-                  <h4 className="font-semibold text-foreground text-sm mb-1">{f.title}</h4>
-                  <p className="text-muted-foreground text-xs leading-relaxed">{f.desc}</p>
+            {/* Group photo replacing the features grid */}
+            <div className="space-y-4">
+              <div className="rounded-2xl overflow-hidden shadow-xl">
+                <img
+                  src={photos.group}
+                  alt="Coach Mario with summer camp students"
+                  className="w-full h-72 object-cover object-top"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-xl overflow-hidden shadow-md">
+                  <img src={photos.highFive} alt="High five on court" className="w-full h-36 object-cover" />
                 </div>
-              ))}
+                <div className="rounded-xl overflow-hidden shadow-md">
+                  <img src={photos.trophy} alt="Championship trophy" className="w-full h-36 object-cover" />
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Photo Strip */}
+      <section className="section-padding bg-background">
+        <div className="container">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Life at RI Tennis Academy</h2>
+              <p className="text-muted-foreground mt-1">Real moments from the court</p>
+            </div>
+            <Link href="/gallery">
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                <Images className="w-4 h-4 mr-2" /> View All Photos
+              </Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {galleryImages.slice(0, 8).map((img, i) => (
+              <div
+                key={i}
+                className={`rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${i === 0 ? "md:col-span-2 md:row-span-2" : ""}`}
+              >
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  className={`w-full object-cover hover:scale-105 transition-transform duration-500 ${i === 0 ? "h-64 md:h-full" : "h-40"}`}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features strip */}
+      <section className="py-12 bg-muted/30">
+        <div className="container">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {features.map((f) => (
+              <div key={f.title} className="bg-card border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
+                <div className="mb-2">{f.icon}</div>
+                <h4 className="font-semibold text-foreground text-sm mb-1">{f.title}</h4>
+                <p className="text-muted-foreground text-xs leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
