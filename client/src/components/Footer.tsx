@@ -5,7 +5,7 @@ const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFs
 
 const socialLinks = [
   {
-    href: "https://youtube.com/@RitennisMario",
+    href: "https://www.youtube.com/@MarioRITennis",
     label: "YouTube",
     icon: <Youtube className="w-5 h-5" />,
     color: "hover:bg-red-600 hover:border-red-600",

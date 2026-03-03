@@ -13,8 +13,8 @@ const TikTokIcon = () => (
 const socialChannels = [
   {
     platform: "YouTube",
-    handle: "Ri Tennis Mario",
-    url: "https://youtube.com/@RiTennisMario",
+    handle: "@MarioRITennis",
+    url: "https://www.youtube.com/@MarioRITennis",
     icon: <Youtube className="w-5 h-5" />,
     color: "bg-red-500",
     textColor: "text-red-600",
@@ -61,8 +61,8 @@ const socialChannels = [
   },
   {
     platform: "Facebook",
-    handle: "Mario Llano",
-    url: "https://facebook.com/MarioLlano",
+    handle: "RITennisAcademy",
+    url: "https://facebook.com/RITennisAcademy",
     icon: <Facebook className="w-5 h-5" />,
     color: "bg-blue-600",
     textColor: "text-blue-700",
@@ -88,18 +88,18 @@ const socialChannels = [
 const featuredVideos = [
   {
     title: "Delete Fear: The Mental Game of Tennis",
-    channel: "Ri Tennis Mario",
+    channel: "@MarioRITennis",
     platform: "YouTube",
     thumbnail: "https://picsum.photos/seed/tennis1/400/225",
-    url: "https://youtube.com/@RiTennisMario",
+    url: "https://www.youtube.com/@MarioRITennis",
     duration: "12:34",
   },
   {
     title: "Forehand Technique Breakdown",
-    channel: "Ri Tennis Mario",
+    channel: "@MarioRITennis",
     platform: "YouTube",
     thumbnail: "https://picsum.photos/seed/tennis2/400/225",
-    url: "https://youtube.com/@RiTennisMario",
+    url: "https://www.youtube.com/@MarioRITennis",
     duration: "8:15",
   },
   {

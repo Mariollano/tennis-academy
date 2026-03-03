@@ -292,7 +292,7 @@ export default function MentalCoaching() {
 
           <div className="text-center mt-8">
             <a
-              href="https://www.youtube.com/@RitennisMario"
+              href="https://www.youtube.com/@MarioRITennis"
               target="_blank"
               rel="noopener noreferrer"
             >

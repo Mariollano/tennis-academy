@@ -80,7 +80,7 @@ export default function Navbar() {
 
         {/* Social Icons — Desktop */}
         <div className="hidden lg:flex items-center gap-1 mr-1">
-          <a href="https://youtube.com/@RitennisMario" target="_blank" rel="noopener noreferrer"
+          <a href="https://www.youtube.com/@MarioRITennis" target="_blank" rel="noopener noreferrer"
             className="text-primary-foreground/60 hover:text-accent transition-colors p-1.5 rounded-md hover:bg-white/10" title="YouTube">
             <Youtube className="w-4 h-4" />
           </a>
@@ -168,7 +168,7 @@ onClick={() => (window.location.href = getLoginUrl())}
               <div className="mt-4 pt-4 border-t border-white/10 mb-2">
                 <p className="text-xs text-primary-foreground/40 px-3 mb-2 uppercase tracking-wider">Follow Mario</p>
                 <div className="flex gap-3 px-3">
-                  <a href="https://youtube.com/@RitennisMario" target="_blank" rel="noopener noreferrer"
+                  <a href="https://www.youtube.com/@MarioRITennis" target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-primary-foreground/70 hover:text-accent transition-colors text-sm">
                     <Youtube className="w-4 h-4" /> YouTube
                   </a>
