@@ -231,6 +231,72 @@ export default function MentalCoaching() {
         </section>
       )}
 
+      {/* YouTube Shorts */}
+      <section className="py-16 bg-background">
+        <div className="container">
+          <div className="text-center mb-10">
+            <Badge className="mb-3 bg-red-100 text-red-700 border-red-200">
+              <svg className="w-3.5 h-3.5 mr-1.5 inline" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              YouTube Shorts
+            </Badge>
+            <h2 className="text-3xl font-bold text-foreground mb-3">Mental Game Insights</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Coach Mario shares quick, powerful mental coaching tips on YouTube. Watch these shorts
+              to get a taste of the "Delete Fear" philosophy in action.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {[
+              { id: "shorts/1", label: "Delete Fear — The #1 Mental Block in Tennis" },
+              { id: "shorts/2", label: "How to Stay Focused on Big Points" },
+              { id: "shorts/3", label: "Building Unshakeable Confidence" },
+            ].map((short) => (
+              <a
+                key={short.id}
+                href="https://www.youtube.com/@RitennisMario"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block rounded-2xl overflow-hidden border border-border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-card"
+              >
+                <div className="relative aspect-[9/16] bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-7 h-7 text-white ml-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="absolute top-3 right-3">
+                    <Badge className="bg-red-600 text-white text-xs border-0">Short</Badge>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <p className="text-white text-sm font-medium leading-snug">{short.label}</p>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <a
+              href="https://www.youtube.com/@RitennisMario"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                View All Shorts on YouTube
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section className="py-16 bg-muted/30">
         <div className="container max-w-3xl">

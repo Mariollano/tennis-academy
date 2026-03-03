@@ -138,3 +138,5 @@
 - [x] Fix DialogContent missing DialogTitle accessibility error on homepage (Navbar mobile sheet)
 - [x] Add photos to Programs page cards (adult photo on 105 clinic)
 - [x] Generate and add mental/brain graphics to Mental Coaching page
+- [x] Move Tournament Attendance from Services page to Programs page
+- [x] Add YouTube Shorts section to Mental Coaching page (links to @RitennisMario channel)

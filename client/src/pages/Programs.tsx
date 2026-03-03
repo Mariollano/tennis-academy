@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Users, Star, Sun, Brain, Clock, DollarSign, CheckCircle } from "lucide-react";
+import { Trophy, Users, Star, Sun, Brain, Clock, DollarSign, CheckCircle, MapPin } from "lucide-react";
 
 const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
 
@@ -113,6 +113,31 @@ const programs = [
     ],
     bookHref: "/mental-coaching",
   },
+  {
+    id: "tournament_attendance",
+    icon: <MapPin className="w-6 h-6" />,
+    title: "Tournament Attendance",
+    category: "tournament",
+    badge: "Competitive",
+    badgeColor: "bg-red-100 text-red-800",
+    photo: `${CDN}/IMG_2885_c6e7a6d8.jpg`,
+    photoAlt: "Coach Mario at tournament — on-site coaching",
+    description: "Have Coach Mario attend your tournament to provide on-site coaching, warm-up support, between-match strategy, and mental performance coaching. Costs can be shared among multiple students attending the same tournament.",
+    pricing: [
+      { label: "Coaching rate", price: "$50 / hour" },
+      { label: "Travel time", price: "$25 / hour" },
+      { label: "Eating expenses", price: "Actual cost" },
+    ],
+    highlights: [
+      "Pre-match warm-up coaching",
+      "Between-match strategy sessions",
+      "Mental performance support",
+      "Real-time technique adjustments",
+      "Post-match debrief and feedback",
+      "Cost shareable among students",
+    ],
+    bookHref: "/services",
+  },
 ];
 
 export default function Programs() {
@@ -142,9 +167,10 @@ export default function Programs() {
               <TabsTrigger value="junior">Juniors</TabsTrigger>
               <TabsTrigger value="summer">Summer</TabsTrigger>
               <TabsTrigger value="mental">Mental</TabsTrigger>
+              <TabsTrigger value="tournament">Tournament</TabsTrigger>
             </TabsList>
 
-            {["all", "adult", "junior", "summer", "mental", "private"].map((tab) => (
+            {["all", "adult", "junior", "summer", "mental", "private", "tournament"].map((tab) => (
               <TabsContent key={tab} value={tab}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {programs
@@ -226,9 +252,8 @@ export default function Programs() {
             <h2 className="text-2xl font-bold text-foreground mb-2">Additional Services</h2>
             <p className="text-muted-foreground">Beyond programs, Mario offers these specialized services.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {[
-              { icon: <Trophy className="w-5 h-5" />, title: "Tournament Attendance", desc: "$50/hr coaching + $25/hr travel (shareable among students)", href: "/services" },
               { icon: <Clock className="w-5 h-5" />, title: "Racquet Stringing", desc: "$35 with Mario's string · $25 with your string", href: "/services" },
               { icon: <Star className="w-5 h-5" />, title: "Merchandise", desc: "Sweatshirts $50 · T-Shirts $25 — RI Tennis Academy gear", href: "/services" },
             ].map((s) => (
