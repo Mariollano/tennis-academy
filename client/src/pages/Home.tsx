@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
+const MARIO_PHOTO = `${CDN}/mario-us-open_68ad2763.jpg`;
 
 const photos = {
   hero:     `${CDN}/IMG_2867_fa17ab01.jpg`,   // action backhand, fall foliage
@@ -257,21 +258,26 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            {/* Group photo replacing the features grid */}
+            {/* Coach photo + academy photos */}
             <div className="space-y-4">
-              <div className="rounded-2xl overflow-hidden shadow-xl">
+              {/* Mario's US Open portrait — hero image */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                 <img
-                  src={photos.group}
-                  alt="Coach Mario with summer camp students"
-                  className="w-full h-72 object-cover object-top"
+                  src={MARIO_PHOTO}
+                  alt="Coach Mario Llano at the US Open"
+                  className="w-full h-80 object-cover object-top"
                 />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-5">
+                  <p className="text-white font-extrabold text-lg">Coach Mario Llano</p>
+                  <p className="text-accent text-sm font-semibold">US Open • 40+ Years Experience</p>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-xl overflow-hidden shadow-md">
                   <img src={photos.highFive} alt="High five on court" className="w-full h-36 object-cover" />
                 </div>
                 <div className="rounded-xl overflow-hidden shadow-md">
-                  <img src={photos.trophy} alt="Championship trophy" className="w-full h-36 object-cover" />
+                  <img src={photos.group} alt="Coach Mario with students" className="w-full h-36 object-cover object-top" />
                 </div>
               </div>
             </div>
