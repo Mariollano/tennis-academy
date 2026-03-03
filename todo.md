@@ -136,3 +136,4 @@
 - [x] Add user-provided photos spread throughout the app (hero bg, program cards, about section, photo gallery page)
 - [x] Add second batch of 11 photos to gallery (total 21 photos now in gallery)
 - [x] Fix DialogContent missing DialogTitle accessibility error on homepage (Navbar mobile sheet)
+- [x] Add photos to Programs page cards (adult photo on 105 clinic)

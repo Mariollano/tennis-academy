@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Users, Star, Sun, Brain, Clock, DollarSign, CheckCircle } from "lucide-react";
 
+const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
+
 const programs = [
   {
     id: "private_lesson",
@@ -13,6 +15,8 @@ const programs = [
     category: "private",
     badge: "All Levels",
     badgeColor: "bg-blue-100 text-blue-800",
+    photo: `${CDN}/IMG_2886_220d66ff.jpg`,
+    photoAlt: "Advanced player on court — private lesson",
     description: "One-on-one personalized coaching sessions with Coach Mario. Tailored to your specific needs — whether you're a beginner learning the fundamentals or an advanced player fine-tuning your game.",
     pricing: [{ label: "Per Hour", price: "$120/hour" }],
     highlights: [
@@ -30,6 +34,8 @@ const programs = [
     category: "adult",
     badge: "Adults",
     badgeColor: "bg-amber-100 text-amber-800",
+    photo: `${CDN}/IMG_2867_fa17ab01.jpg`,
+    photoAlt: "Adult player hitting backhand — 105 Game Clinic",
     description: "The signature RI Tennis Academy adult experience. The 105 Game is a structured group format where adults sign up and play competitive, coached sessions — every Monday, Wednesday, Friday, and Sunday.",
     pricing: [{ label: "Per 1.5-hour session", price: "$30" }],
     highlights: [
@@ -47,6 +53,8 @@ const programs = [
     category: "junior",
     badge: "Juniors",
     badgeColor: "bg-green-100 text-green-800",
+    photo: `${CDN}/IMG_2883_18ff44ca.jpg`,
+    photoAlt: "Junior player forehand — junior development program",
     description: "Fall and Spring junior development programs running 4:30–6:30 PM. Choose between daily sessions or commit to a full week package for the best value.",
     pricing: [
       { label: "Daily Session", price: "$80" },
@@ -67,6 +75,8 @@ const programs = [
     category: "summer",
     badge: "Summer",
     badgeColor: "bg-orange-100 text-orange-800",
+    photo: `${CDN}/IMG_2882_4dfd31c8.jpg`,
+    photoAlt: "Coach Mario with summer camp students",
     description: "The ultimate summer tennis experience. Morning camp runs 9 AM–2 PM covering technique, training, matchplay, mental coaching, and fitness. Add the After Camp program for extended afternoon supervision.",
     pricing: [
       { label: "Daily (main camp 9AM–2PM)", price: "$100/day" },
@@ -90,6 +100,8 @@ const programs = [
     category: "mental",
     badge: "All Ages",
     badgeColor: "bg-purple-100 text-purple-800",
+    photo: `${CDN}/IMG_2891_c12742f2.jpg`,
+    photoAlt: "High five on court — mental coaching",
     description: "Dedicated mental performance coaching with Mario. Address fear, build confidence, develop pre-match routines, and learn to perform under pressure. Available as standalone sessions or as a complement to technical training.",
     pricing: [{ label: "Per Session", price: "Contact for pricing" }],
     highlights: [
@@ -139,20 +151,27 @@ export default function Programs() {
                     .filter((p) => tab === "all" || p.category === tab)
                     .map((program) => (
                       <Card key={program.id} className="border border-border hover:shadow-xl transition-all duration-300 overflow-hidden">
-                        <CardHeader className="bg-primary/5 border-b border-border pb-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                {program.icon}
-                              </div>
-                              <div>
-                                <CardTitle className="text-xl">{program.title}</CardTitle>
-                                <Badge className={`text-xs mt-1 ${program.badgeColor}`}>{program.badge}</Badge>
-                              </div>
+                        {/* Photo Header */}
+                        <div className="relative h-48 overflow-hidden">
+                          <img
+                            src={program.photo}
+                            alt={program.photoAlt}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                          <div className="absolute bottom-3 left-4 flex items-center gap-2">
+                            <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
+                              {program.icon}
                             </div>
+                            <Badge className={`text-xs ${program.badgeColor}`}>{program.badge}</Badge>
                           </div>
+                        </div>
+
+                        <CardHeader className="pb-2 pt-4">
+                          <CardTitle className="text-xl">{program.title}</CardTitle>
                         </CardHeader>
-                        <CardContent className="p-6">
+
+                        <CardContent className="p-6 pt-0">
                           <p className="text-muted-foreground text-sm leading-relaxed mb-5">{program.description}</p>
 
                           {/* Pricing */}
