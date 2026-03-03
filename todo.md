@@ -144,3 +144,4 @@
 - [x] Fix broken Tournament Attendance card photo on Programs page
 - [x] Add social media icons/links to footer and navbar (all pages) - YouTube, Instagram, Facebook, TikTok
 - [x] Replace placeholder images in Social Media page with real YouTube thumbnails
+- [x] Add Mario's US Open photo as avatar on all social media channel cards and user profile

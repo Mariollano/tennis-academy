@@ -14,6 +14,8 @@ const InstagramIcon = () => (
   </svg>
 );
 
+const MARIO_AVATAR = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/mario-us-open_57b4eac2.jpg";
+
 const socialChannels = [
   {
     platform: "YouTube",
@@ -214,10 +216,13 @@ export default function SocialFeed() {
                   {/* Decorative glow orb */}
                   <div className={`absolute -top-10 -right-10 w-40 h-40 rounded-full bg-gradient-to-br ${channel.gradient} opacity-30 blur-2xl`} />
                   <div className="relative p-8">
-                    {/* Icon + Platform */}
+                    {/* Avatar + Platform */}
                     <div className="flex items-start justify-between mb-6">
-                      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${channel.gradient} flex items-center justify-center text-white shadow-lg`}>
-                        {channel.icon}
+                      <div className="relative">
+                        <img src={MARIO_AVATAR} alt="Coach Mario" className="w-16 h-16 rounded-2xl object-cover shadow-lg border-2 border-white/20" />
+                        <div className={`absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-lg bg-gradient-to-br ${channel.gradient} flex items-center justify-center text-white shadow-md`}>
+                          <span className="scale-75">{channel.icon}</span>
+                        </div>
                       </div>
                       <ExternalLink className="w-5 h-5 text-white/30 group-hover:text-white/70 transition-colors" />
                     </div>
@@ -255,8 +260,11 @@ export default function SocialFeed() {
                 <div className={`relative rounded-2xl overflow-hidden border ${channel.borderColor} hover:scale-[1.03] transition-transform duration-300`}>
                   <div className={`absolute inset-0 bg-gradient-to-br ${channel.bgGradient}`} />
                   <div className="relative p-5">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${channel.gradient} flex items-center justify-center text-white mb-4 shadow-md`}>
-                      {channel.icon}
+                    <div className="relative w-12 h-12 mb-4">
+                      <img src={MARIO_AVATAR} alt="Coach Mario" className="w-12 h-12 rounded-xl object-cover shadow-md border border-white/20" />
+                      <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-md bg-gradient-to-br ${channel.gradient} flex items-center justify-center text-white shadow-sm`}>
+                        <span className="scale-[0.6]">{channel.icon}</span>
+                      </div>
                     </div>
                     <div className={`text-xs font-bold uppercase tracking-widest ${channel.accentColor} mb-0.5`}>{channel.platform}</div>
                     <div className="text-white font-bold text-sm mb-1">{channel.handle}</div>
