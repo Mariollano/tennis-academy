@@ -88,7 +88,7 @@ export default function Navbar() {
             className="text-primary-foreground/60 hover:text-accent transition-colors p-1.5 rounded-md hover:bg-white/10" title="Instagram">
             <Instagram className="w-4 h-4" />
           </a>
-          <a href="https://facebook.com/MarioLlano" target="_blank" rel="noopener noreferrer"
+          <a href="https://facebook.com/RITennisAcademy" target="_blank" rel="noopener noreferrer"
             className="text-primary-foreground/60 hover:text-accent transition-colors p-1.5 rounded-md hover:bg-white/10" title="Facebook">
             <Facebook className="w-4 h-4" />
           </a>

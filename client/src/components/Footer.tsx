@@ -21,7 +21,7 @@ const socialLinks = [
     color: "hover:bg-pink-600 hover:border-pink-600",
   },
   {
-    href: "https://facebook.com/MarioLlano",
+    href: "https://facebook.com/RITennisAcademy",
     label: "Facebook",
     icon: <Facebook className="w-5 h-5" />,
     color: "hover:bg-blue-600 hover:border-blue-600",
