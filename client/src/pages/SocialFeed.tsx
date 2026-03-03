@@ -87,28 +87,28 @@ const socialChannels = [
 
 const featuredVideos = [
   {
-    title: "Delete Fear: The Mental Game of Tennis",
+    title: "Comfort is the ENEMY. Your brain wants you to be a loser. Why?",
     channel: "@MarioRITennis",
     platform: "YouTube",
-    thumbnail: "https://picsum.photos/seed/tennis1/400/225",
-    url: "https://www.youtube.com/@MarioRITennis",
-    duration: "12:34",
+    thumbnail: "https://i.ytimg.com/vi/-Q65jiJH1Bg/hq2.jpg",
+    url: "https://youtube.com/shorts/-Q65jiJH1Bg",
+    duration: "Short",
   },
   {
-    title: "Forehand Technique Breakdown",
+    title: "You are DOING IT all WRONG!",
     channel: "@MarioRITennis",
     platform: "YouTube",
-    thumbnail: "https://picsum.photos/seed/tennis2/400/225",
-    url: "https://www.youtube.com/@MarioRITennis",
-    duration: "8:15",
+    thumbnail: "https://i.ytimg.com/vi/1FGAqbl0-Fo/hq2.jpg",
+    url: "https://youtube.com/shorts/1FGAqbl0-Fo",
+    duration: "Short",
   },
   {
-    title: "Junior Camp Highlights",
-    channel: "RITennisandFAYE",
-    platform: "Instagram",
-    thumbnail: "https://picsum.photos/seed/tennis3/400/225",
-    url: "https://instagram.com/RITennisandFAYE",
-    duration: "2:45",
+    title: "CHOKING IS a LIE! And here's WHY!",
+    channel: "@MarioRITennis",
+    platform: "YouTube",
+    thumbnail: "https://i.ytimg.com/vi/BD7MTizqBHM/hq2.jpg",
+    url: "https://youtube.com/shorts/BD7MTizqBHM",
+    duration: "Short",
   },
 ];
 

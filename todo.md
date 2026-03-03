@@ -143,3 +143,4 @@
 - [x] Embed 7 real YouTube Shorts with actual thumbnails and titles on Mental Coaching page
 - [x] Fix broken Tournament Attendance card photo on Programs page
 - [x] Add social media icons/links to footer and navbar (all pages) - YouTube, Instagram, Facebook, TikTok
+- [x] Replace placeholder images in Social Media page with real YouTube thumbnails
