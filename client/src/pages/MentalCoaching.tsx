@@ -5,6 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Brain, Target, Shield, Zap, Heart, Star, ChevronRight, MessageSquare } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
+const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
+
+const HERO_IMG = `${CDN}/mental-coaching-hero-NJwttZzthSUWB95CtU2ivV.webp`;
+const FEAR_ICON = `${CDN}/mental-fear-icon-hndjHscMfm9th9BiDfzt5h.webp`;
+const FOCUS_ICON = `${CDN}/mental-focus-icon-NsuWDtWYa4tYtgfb7ZzeTK.webp`;
+const CONFIDENCE_ICON = `${CDN}/mental-confidence-icon-CAwHdnGzHrSbUcMfnpx2nF.webp`;
+
 const pillars = [
   {
     icon: <Shield className="w-6 h-6" />,
@@ -68,20 +75,21 @@ export default function MentalCoaching() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <section className="relative overflow-hidden py-20 text-white"
-        style={{ background: "linear-gradient(135deg, oklch(0.25 0.08 280) 0%, oklch(0.20 0.06 260) 100%)" }}>
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-10 w-64 h-64 rounded-full border-4 border-white" />
-          <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full border-2 border-white" />
-        </div>
-        <div className="container relative">
+      {/* Hero — full brain graphic background */}
+      <section className="relative overflow-hidden min-h-[520px] flex items-center text-white">
+        <img
+          src={HERO_IMG}
+          alt="Mental coaching — brain with tennis court"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
+        <div className="container relative z-10 py-20">
           <Badge className="mb-4 bg-white/20 text-white border-white/30">Mental Performance Coaching</Badge>
           <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
             Delete Fear.<br />
-            <span style={{ color: "oklch(0.72 0.12 80)" }}>Play Free.</span>
+            <span style={{ color: "oklch(0.85 0.22 130)" }}>Play Free.</span>
           </h1>
-          <p className="text-white/80 max-w-2xl text-lg leading-relaxed mb-8">
+          <p className="text-white/80 max-w-xl text-lg leading-relaxed mb-8">
             Coach Mario Llano is not just a tennis technician — he is a mental performance specialist.
             His "Delete Fear" philosophy has transformed players at every level, helping them unlock
             the confident, fearless game that lives inside every player.
@@ -107,7 +115,49 @@ export default function MentalCoaching() {
         </div>
       </section>
 
-      {/* Philosophy */}
+      {/* Three Core Pillars with AI graphics */}
+      <section className="py-16 bg-primary text-primary-foreground">
+        <div className="container">
+          <div className="text-center mb-12">
+            <Badge className="mb-3 bg-white/20 text-white border-white/30">The Core Framework</Badge>
+            <h2 className="text-3xl font-bold">Three Pillars of Mental Freedom</h2>
+            <p className="text-primary-foreground/70 mt-2 max-w-xl mx-auto">
+              Every mental coaching session is built around these three transformative principles.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {[
+              {
+                img: FEAR_ICON,
+                title: "Delete Fear",
+                desc: "Identify, confront, and permanently eliminate the fear responses that hold your game back. Fear is learned — and it can be unlearned.",
+              },
+              {
+                img: FOCUS_ICON,
+                title: "Laser Focus",
+                desc: "Train your mind to lock in on what matters during big points, tiebreakers, and high-pressure moments. Stay present, stay sharp.",
+              },
+              {
+                img: CONFIDENCE_ICON,
+                title: "Unshakeable Confidence",
+                desc: "Build the kind of deep, earned confidence that doesn't waver under pressure. Compete freely — not to survive, but to thrive.",
+              },
+            ].map((item) => (
+              <div key={item.title} className="flex flex-col items-center text-center">
+                <img
+                  src={item.img}
+                  alt={item.title}
+                  className="w-36 h-36 object-contain mb-5 drop-shadow-2xl"
+                />
+                <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
+                <p className="text-primary-foreground/70 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Six Pillars */}
       <section className="py-16 bg-background">
         <div className="container max-w-4xl">
           <div className="text-center mb-12">
