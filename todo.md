@@ -140,3 +140,4 @@
 - [x] Generate and add mental/brain graphics to Mental Coaching page
 - [x] Move Tournament Attendance from Services page to Programs page
 - [x] Add YouTube Shorts section to Mental Coaching page (links to @RitennisMario channel)
+- [x] Embed 7 real YouTube Shorts with actual thumbnails and titles on Mental Coaching page

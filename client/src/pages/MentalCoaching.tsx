@@ -248,23 +248,33 @@ export default function MentalCoaching() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-5xl mx-auto">
             {[
-              { id: "shorts/1", label: "Delete Fear — The #1 Mental Block in Tennis" },
-              { id: "shorts/2", label: "How to Stay Focused on Big Points" },
-              { id: "shorts/3", label: "Building Unshakeable Confidence" },
+              { id: "-Q65jiJH1Bg", title: "Comfort is the ENEMY. Your brain wants you to be a loser. Why?", thumb: "https://i.ytimg.com/vi/-Q65jiJH1Bg/hq2.jpg" },
+              { id: "1FGAqbl0-Fo", title: "You are DOING IT all WRONG!", thumb: "https://i.ytimg.com/vi/1FGAqbl0-Fo/hq2.jpg" },
+              { id: "T-zSAHSveo0", title: "\"THE ZONE\" is Bull Sh….t! 🔥", thumb: "https://i.ytimg.com/vi/T-zSAHSveo0/hq2.jpg" },
+              { id: "BD7MTizqBHM", title: "CHOKING IS a LIE! And here's WHY! 🔥", thumb: "https://i.ytimg.com/vi/BD7MTizqBHM/hq2.jpg" },
+              { id: "RilXhfnEQjA", title: "KEEP CHOKING! WHY WIN?", thumb: "https://i.ytimg.com/vi/RilXhfnEQjA/hq2.jpg" },
+              { id: "Ldr5d-rOT3k", title: "Como DESHACERTE de tu PROFE!", thumb: "https://i.ytimg.com/vi/Ldr5d-rOT3k/hq2.jpg" },
+              { id: "9xrs2LVybJA", title: "Your Words Build Your Future — Choose Solutions.", thumb: "https://i.ytimg.com/vi/9xrs2LVybJA/hq2.jpg" },
             ].map((short) => (
               <a
                 key={short.id}
-                href="https://www.youtube.com/@RitennisMario"
+                href={`https://youtube.com/shorts/${short.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group block rounded-2xl overflow-hidden border border-border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-card"
               >
-                <div className="relative aspect-[9/16] bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
+                <div className="relative aspect-[9/16] bg-black overflow-hidden">
+                  <img
+                    src={short.thumb}
+                    alt={short.title}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
-                      <svg className="w-7 h-7 text-white ml-1" viewBox="0 0 24 24" fill="currentColor">
+                    <div className="w-14 h-14 rounded-full bg-red-600/90 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:bg-red-600 transition-all duration-300">
+                      <svg className="w-6 h-6 text-white ml-1" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M8 5v14l11-7z"/>
                       </svg>
                     </div>
@@ -272,8 +282,8 @@ export default function MentalCoaching() {
                   <div className="absolute top-3 right-3">
                     <Badge className="bg-red-600 text-white text-xs border-0">Short</Badge>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <p className="text-white text-sm font-medium leading-snug">{short.label}</p>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pt-10">
+                    <p className="text-white text-xs font-semibold leading-snug line-clamp-3">{short.title}</p>
                   </div>
                 </div>
               </a>
