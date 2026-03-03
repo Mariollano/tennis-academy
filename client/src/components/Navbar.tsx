@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, Youtube, Instagram, Facebook } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -78,6 +78,22 @@ export default function Navbar() {
           )}
         </nav>
 
+        {/* Social Icons — Desktop */}
+        <div className="hidden lg:flex items-center gap-1 mr-1">
+          <a href="https://youtube.com/@RitennisMario" target="_blank" rel="noopener noreferrer"
+            className="text-primary-foreground/60 hover:text-accent transition-colors p-1.5 rounded-md hover:bg-white/10" title="YouTube">
+            <Youtube className="w-4 h-4" />
+          </a>
+          <a href="https://instagram.com/deletefearwithmario" target="_blank" rel="noopener noreferrer"
+            className="text-primary-foreground/60 hover:text-accent transition-colors p-1.5 rounded-md hover:bg-white/10" title="Instagram">
+            <Instagram className="w-4 h-4" />
+          </a>
+          <a href="https://facebook.com/MarioLlano" target="_blank" rel="noopener noreferrer"
+            className="text-primary-foreground/60 hover:text-accent transition-colors p-1.5 rounded-md hover:bg-white/10" title="Facebook">
+            <Facebook className="w-4 h-4" />
+          </a>
+        </div>
+
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center gap-2">
           {isAuthenticated ? (
@@ -148,7 +164,21 @@ onClick={() => (window.location.href = getLoginUrl())}
                   </span>
                 </Link>
               )}
-              <div className="mt-4 pt-4 border-t border-white/10">
+              {/* Social icons in mobile menu */}
+              <div className="mt-4 pt-4 border-t border-white/10 mb-2">
+                <p className="text-xs text-primary-foreground/40 px-3 mb-2 uppercase tracking-wider">Follow Mario</p>
+                <div className="flex gap-3 px-3">
+                  <a href="https://youtube.com/@RitennisMario" target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-primary-foreground/70 hover:text-accent transition-colors text-sm">
+                    <Youtube className="w-4 h-4" /> YouTube
+                  </a>
+                  <a href="https://instagram.com/deletefearwithmario" target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-primary-foreground/70 hover:text-accent transition-colors text-sm">
+                    <Instagram className="w-4 h-4" /> Instagram
+                  </a>
+                </div>
+              </div>
+              <div className="pt-2 border-t border-white/10">
                 {isAuthenticated ? (
                   <>
                     <Link href="/profile" onClick={() => setOpen(false)}>

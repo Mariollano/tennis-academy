@@ -120,7 +120,7 @@ const programs = [
     category: "tournament",
     badge: "Competitive",
     badgeColor: "bg-red-100 text-red-800",
-    photo: `${CDN}/IMG_2885_c6e7a6d8.jpg`,
+    photo: `${CDN}/IMG_2885_b0ce7285.jpg`,
     photoAlt: "Coach Mario at tournament — on-site coaching",
     description: "Have Coach Mario attend your tournament to provide on-site coaching, warm-up support, between-match strategy, and mental performance coaching. Costs can be shared among multiple students attending the same tournament.",
     pricing: [
