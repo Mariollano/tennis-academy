@@ -151,3 +151,10 @@
 - [ ] Update WordPress site ritennisacademy.com branding to match app (colors, logo, hero, programs, About Mario, social links)
 - [ ] Fix Junior Programs time to 3:30–6:30 PM on WordPress site
 - [x] Fix Junior Programs time to 3:30–6:30 PM in the RI Tennis Academy app (currently shows 4:30–6:30 PM)
+- [ ] Update WordPress homepage hero with new branding (black/royal blue/yellow colors, bold typography)
+- [ ] Add About Mario section with US Open photo to WordPress homepage
+- [ ] Add prominent Book Now button on WordPress site linking to tennispro app
+- [ ] Add social media links (YouTube, Instagram, TikTok, Facebook) to WordPress site
+- [x] Add "Get the App" button on WordPress homepage linking to tennispro-kzzfscru.manus.space
+- [x] Add visual "Install the App" section to WordPress homepage with iPhone/Android steps
+- [x] Add in-app install prompt banner that guides users to add app to home screen

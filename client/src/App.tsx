@@ -17,6 +17,7 @@ import AdminSchedule from "./pages/AdminSchedule";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ChatBot from "./components/ChatBot";
+import { InstallPrompt } from "./components/InstallPrompt";
 
 function Router() {
   return (
@@ -41,6 +42,7 @@ function Router() {
       </main>
       <Footer />
       <ChatBot />
+      <InstallPrompt />
     </div>
   );
 }
