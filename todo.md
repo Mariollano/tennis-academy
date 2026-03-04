@@ -148,3 +148,6 @@
 - [x] Make Mario's US Open photo large and prominent on Social Media page hero section
 - [x] Add Mario's US Open photo to About Mario section on homepage
 - [x] Fix "Sign Up & Opt In to SMS" button on Social Media page - button is not functional
+- [ ] Update WordPress site ritennisacademy.com branding to match app (colors, logo, hero, programs, About Mario, social links)
+- [ ] Fix Junior Programs time to 3:30–6:30 PM on WordPress site
+- [x] Fix Junior Programs time to 3:30–6:30 PM in the RI Tennis Academy app (currently shows 4:30–6:30 PM)

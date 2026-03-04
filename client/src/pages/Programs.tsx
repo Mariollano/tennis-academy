@@ -55,14 +55,14 @@ const programs = [
     badgeColor: "bg-green-100 text-green-800",
     photo: `${CDN}/IMG_2883_18ff44ca.jpg`,
     photoAlt: "Junior player forehand — junior development program",
-    description: "Fall and Spring junior development programs running 4:30–6:30 PM. Choose between daily sessions or commit to a full week package for the best value.",
+    description: "Fall and Spring junior development programs running 3:30–6:30 PM. Choose between daily sessions or commit to a full week package for the best value.",
     pricing: [
       { label: "Daily Session", price: "$80" },
       { label: "Weekly Package (5 days)", price: "$350" },
     ],
     highlights: [
       "Fall & Spring seasons",
-      "4:30 PM – 6:30 PM daily",
+      "3:30 PM – 6:30 PM daily",
       "Technique & match development",
       "Age-appropriate training",
     ],

@@ -40,15 +40,15 @@ const PROGRAM_CONFIG: Record<string, {
     title: "Junior Program — Daily",
     type: "junior_daily",
     description: "Single daily junior session (Fall/Spring).",
-    pricing: [{ label: "$80 per session (4:30–6:30 PM)", value: "daily", cents: 8000 }],
-    timeInfo: "4:30 PM – 6:30 PM",
+    pricing: [{ label: "$80 per session (3:30–6:30 PM)", value: "daily", cents: 8000 }],
+    timeInfo: "3:30 PM – 6:30 PM",
   },
   junior_weekly: {
     title: "Junior Program — Weekly Package",
     type: "junior_weekly",
     description: "Full week junior program (5 sessions, Fall/Spring).",
     pricing: [{ label: "$350 per week (5 sessions)", value: "weekly", cents: 35000 }],
-    timeInfo: "4:30 PM – 6:30 PM, Monday–Friday",
+    timeInfo: "3:30 PM – 6:30 PM, Monday–Friday",
   },
   summer_camp_daily: {
     title: "Summer Camp — Daily",
