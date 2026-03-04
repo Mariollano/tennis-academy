@@ -1,6 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Youtube, Instagram, Facebook, Twitter, ExternalLink, Play, Users } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
+import { useLocation } from "wouter";
 
 const TikTokIcon = () => (
   <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
@@ -145,6 +148,16 @@ const featuredVideos = [
 export default function SocialFeed() {
   const featured = socialChannels.filter((c) => c.featured);
   const rest = socialChannels.filter((c) => !c.featured);
+  const { isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const handleSmsSignUp = () => {
+    if (isAuthenticated) {
+      setLocation("/profile");
+    } else {
+      window.location.href = getLoginUrl();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -376,7 +389,10 @@ export default function SocialFeed() {
           <p className="text-primary-foreground/70 mb-6">
             Sign up for RI Tennis Academy and opt in to receive Mario's daily updates, schedule changes, and motivational messages directly to your phone.
           </p>
-          <Button className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold px-8 py-3 text-base rounded-full">
+          <Button
+            onClick={handleSmsSignUp}
+            className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold px-8 py-3 text-base rounded-full"
+          >
             Sign Up & Opt In to SMS
           </Button>
         </div>

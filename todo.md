@@ -147,3 +147,4 @@
 - [x] Add Mario's US Open photo as avatar on all social media channel cards and user profile
 - [x] Make Mario's US Open photo large and prominent on Social Media page hero section
 - [x] Add Mario's US Open photo to About Mario section on homepage
+- [x] Fix "Sign Up & Opt In to SMS" button on Social Media page - button is not functional
