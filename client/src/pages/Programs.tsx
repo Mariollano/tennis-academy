@@ -37,7 +37,7 @@ const programs = [
     photo: `${CDN}/IMG_2867_fa17ab01.jpg`,
     photoAlt: "Adult player hitting backhand — 105 Game Clinic",
     description: "The signature RI Tennis Academy adult experience. The 105 Game is a structured group format where adults sign up and play competitive, coached sessions — every Monday, Wednesday, Friday, and Sunday.",
-    pricing: [{ label: "Per 1.5-hour session", price: "$30" }],
+    pricing: [{ label: "Per 1.5-hour session", price: "$35" }],
     highlights: [
       "Runs Mon, Wed, Fri & Sunday",
       "Competitive group play format",
@@ -79,8 +79,8 @@ const programs = [
     photoAlt: "Coach Mario with summer camp students",
     description: "The ultimate summer tennis experience. Morning camp runs 9 AM–2 PM covering technique, training, matchplay, mental coaching, and fitness. Add the After Camp program for extended afternoon supervision.",
     pricing: [
-      { label: "Daily (main camp 9AM–2PM)", price: "$100/day" },
-      { label: "Weekly Package (same week, 5 days)", price: "$450/week" },
+      { label: "Daily (main camp 9AM–2PM)", price: "$90/day" },
+      { label: "Weekly Package (same week, 5 days)", price: "$420/week" },
       { label: "After Camp Add-on (2:30–5PM)", price: "+$20/day" },
     ],
     highlights: [
@@ -88,6 +88,7 @@ const programs = [
       "Technique, matchplay & fitness",
       "Mental coaching included",
       "After Camp: 2:30–5 PM (+$20)",
+      "Afternoon-only (no morning): $50/day",
       "Weekly package: must use all 5 days in same week",
     ],
     bookHref: "/book/summer_camp_daily",

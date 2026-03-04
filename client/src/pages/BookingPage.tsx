@@ -33,7 +33,7 @@ const PROGRAM_CONFIG: Record<string, {
     title: "105 Game Adult Clinic",
     type: "clinic_105",
     description: "Signature adult group play session — 1.5 hours.",
-    pricing: [{ label: "$30 per 1.5-hour session", value: "session", cents: 3000 }],
+    pricing: [{ label: "$35 per 1.5-hour session", value: "session", cents: 3500 }],
     timeInfo: "Runs Monday, Wednesday, Friday & Sunday — select an available session below.",
   },
   junior_daily: {
@@ -55,7 +55,7 @@ const PROGRAM_CONFIG: Record<string, {
     type: "summer_camp_daily",
     description: "Single day summer camp session.",
     pricing: [
-      { label: "$100 per day (9 AM–2 PM)", value: "daily", cents: 10000 },
+      { label: "$90 per day (9 AM–2 PM)", value: "daily", cents: 9000 },
       { label: "+ $20 After Camp add-on (2:30–5 PM)", value: "after_camp", cents: 2000 },
     ],
     timeInfo: "9:00 AM – 2:00 PM (After Camp: 2:30–5 PM)",
@@ -65,7 +65,7 @@ const PROGRAM_CONFIG: Record<string, {
     type: "summer_camp_weekly",
     description: "Full week summer camp (all 5 days must be in the same week).",
     pricing: [
-      { label: "$450 per week (Mon–Fri, same week)", value: "weekly", cents: 45000 },
+      { label: "$420 per week (Mon–Fri, same week)", value: "weekly", cents: 42000 },
       { label: "+ $20/day After Camp add-on (2:30–5 PM)", value: "after_camp_daily", cents: 2000 },
     ],
     timeInfo: "9:00 AM – 2:00 PM, Monday–Friday",

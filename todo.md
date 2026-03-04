@@ -158,3 +158,9 @@
 - [x] Add "Get the App" button on WordPress homepage linking to tennispro-kzzfscru.manus.space
 - [x] Add visual "Install the App" section to WordPress homepage with iPhone/Android steps
 - [x] Add in-app install prompt banner that guides users to add app to home screen
+- [ ] Fix contrast on WordPress install steps section - text is barely visible (light gray on white)
+- [x] Move "Get the App" section to top of WordPress homepage (currently at bottom)
+- [x] Fix mobile visibility of Get the App button on WordPress site
+- [x] Fix 105 Game price in app: $30 → $35 per session
+- [x] Fix Summer Camp day pass price in app: $100 → $90/day
+- [x] Fix Summer Camp weekly price in app: $450 → $420/week

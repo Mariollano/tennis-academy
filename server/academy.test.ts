@@ -262,8 +262,8 @@ describe("user.getMyBookings", () => {
 
 // ─── Pricing Validation Tests ─────────────────────────────────────────────────
 describe("Pricing constants", () => {
-  it("105 Game clinic is priced at $30 (3000 cents)", () => {
-    expect(3000).toBe(3000); // $30 per 1.5-hour session
+  it("105 Game clinic is priced at $35 (3500 cents)", () => {
+    expect(3500).toBe(3500); // $35 per 1.5-hour session
   });
 
   it("Junior daily session is priced at $80 (8000 cents)", () => {
@@ -274,12 +274,12 @@ describe("Pricing constants", () => {
     expect(35000).toBe(35000); // $350 per week
   });
 
-  it("Summer camp daily is priced at $100 (10000 cents)", () => {
-    expect(10000).toBe(10000); // $100 per day
+  it("Summer camp daily is priced at $90 (9000 cents)", () => {
+    expect(9000).toBe(9000); // $90 per day
   });
 
-  it("Summer camp weekly is priced at $450 (45000 cents)", () => {
-    expect(45000).toBe(45000); // $450 per week
+  it("Summer camp weekly is priced at $420 (42000 cents)", () => {
+    expect(42000).toBe(42000); // $420 per week
   });
 
   it("After camp add-on is $20 (2000 cents)", () => {

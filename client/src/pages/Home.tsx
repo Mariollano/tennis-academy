@@ -53,7 +53,7 @@ const programs = [
   {
     icon: <Users className="w-6 h-6" />,
     title: "105 Game Clinic",
-    desc: "The signature adult group experience — competitive play, drills, and fun. $30 per 1.5hr session.",
+    desc: "The signature adult group experience — competitive play, drills, and fun. $35 per 1.5hr session.",
     badge: "Adults",
     href: "/book/clinic_105",
     color: "bg-amber-50 text-amber-700",
