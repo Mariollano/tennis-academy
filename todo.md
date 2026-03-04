@@ -164,3 +164,4 @@
 - [x] Fix 105 Game price in app: $30 → $35 per session
 - [x] Fix Summer Camp day pass price in app: $100 → $90/day
 - [x] Fix Summer Camp weekly price in app: $450 → $420/week
+- [x] Audit and fix all booking flow prices to match confirmed prices: 105 Game $35, Junior $80/day, Summer $90/day $420/week, Private $120/hr
