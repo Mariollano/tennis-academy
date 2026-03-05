@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check, Users, AlertCircle, CheckCircle2, Tag, X } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check, Users, AlertCircle, CheckCircle2, Tag, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -151,19 +152,18 @@ function AvailabilityPanel({
   const [fromDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [toDate] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() + 60);
+    d.setDate(d.getDate() + 90);
     return d.toISOString().slice(0, 10);
   });
+  const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined);
 
-  const { data: slots, isLoading } = trpc.schedule.listAvailable.useQuery(    { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
+  const { data: slots, isLoading } = trpc.schedule.listAvailable.useQuery(
+    { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
     { enabled: isSupported }
   );
 
   if (!isSupported) return null;
 
-  function fmtDate(d: any) {
-    return new Date(d).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
-  }
   function fmtTime(t: string | null | undefined) {
     if (!t) return "";
     const [h, m] = t.split(":");
@@ -171,16 +171,37 @@ function AvailabilityPanel({
     return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
   }
 
+  // Build a set of date strings that have available slots (for calendar dot indicators)
+  const availableDates = new Set<string>();
+  const fullDates = new Set<string>();
+  (slots || []).forEach(slot => {
+    const rawDate = slot.slotDate as unknown;
+    const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
+    if (slot.isFull) fullDates.add(dateStr);
+    else availableDates.add(dateStr);
+  });
+
+  // Slots for the selected day
+  const selectedDayStr = selectedDay ? selectedDay.toISOString().slice(0, 10) : null;
+  const daySlots = (slots || []).filter(slot => {
+    const rawDate = slot.slotDate as unknown;
+    const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
+    return dateStr === selectedDayStr;
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   return (
     <Card className="border-2 border-primary/20">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Calendar className="w-4 h-4 text-primary" />
-          Available Sessions
+          <CalendarIcon className="w-4 h-4 text-primary" />
+          Pick a Date
         </CardTitle>
-        <p className="text-xs text-muted-foreground">Select a session to pre-fill your booking date. Spots update in real time.</p>
+        <p className="text-xs text-muted-foreground">Dates with available spots are highlighted. Select one to see times.</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3 pt-0">
         {isLoading ? (
           <div className="flex items-center justify-center py-6 gap-2 text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading schedule…
@@ -192,57 +213,101 @@ function AvailabilityPanel({
             <p className="text-xs mt-1">Contact Coach Mario to arrange a time.</p>
           </div>
         ) : (
-          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-            {slots.map(slot => {
-              const isSelected = selectedSlotId === slot.id;
-              const isFull = slot.isFull;
-              return (
-                <div key={slot.id}>
-                  <button
-                    disabled={isFull}
-                    onClick={() => {
-                      const rawDate = slot.slotDate as unknown;
-                      const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
-                      onSelectSlot(slot.id, dateStr);
-                    }}
-                    className={`w-full text-left p-3 rounded-xl border transition-all ${
-                      isFull
-                        ? "cursor-not-allowed border-border bg-muted"
-                        : isSelected
-                        ? "border-primary bg-primary/10 ring-2 ring-primary/30"
-                        : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="font-semibold text-sm text-foreground">
-                          {fmtDate(slot.slotDate)}
+          <>
+            {/* Calendar */}
+            <div className="flex justify-center">
+              <Calendar
+                mode="single"
+                selected={selectedDay}
+                onSelect={setSelectedDay}
+                disabled={(date) => {
+                  const ds = date.toISOString().slice(0, 10);
+                  return date < today || (!availableDates.has(ds) && !fullDates.has(ds));
+                }}
+                modifiers={{
+                  available: (date) => availableDates.has(date.toISOString().slice(0, 10)),
+                  full: (date) => fullDates.has(date.toISOString().slice(0, 10)),
+                }}
+                modifiersClassNames={{
+                  available: "!font-bold after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-green-500",
+                  full: "!font-bold after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-red-400 opacity-60",
+                }}
+                className="w-full"
+              />
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-4 justify-center mt-1 mb-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> Available</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Full</span>
+            </div>
+
+            {/* Time slots for selected day */}
+            {selectedDay && (
+              <div className="mt-1">
+                <p className="text-sm font-semibold mb-2 text-foreground">
+                  {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                </p>
+                {daySlots.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-3">No sessions on this day.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {daySlots.map(slot => {
+                      const isSelected = selectedSlotId === slot.id;
+                      const isFull = slot.isFull;
+                      return (
+                        <div key={slot.id}>
+                          <button
+                            disabled={isFull}
+                            onClick={() => {
+                              const rawDate = slot.slotDate as unknown;
+                              const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
+                              onSelectSlot(slot.id, dateStr);
+                            }}
+                            className={`w-full text-left p-3 rounded-xl border transition-all ${
+                              isFull
+                                ? "cursor-not-allowed border-border bg-muted"
+                                : isSelected
+                                ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                                : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                                <span className="font-semibold text-sm">
+                                  {fmtTime(slot.startTime)} – {fmtTime(slot.endTime)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {isFull ? (
+                                  <Badge className="bg-red-100 text-red-700 text-xs">Full</Badge>
+                                ) : (
+                                  <Badge className={`text-xs ${
+                                    slot.spotsLeft <= 2 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
+                                  }`}>
+                                    {slot.spotsLeft} spot{slot.spotsLeft !== 1 ? "s" : ""} left
+                                  </Badge>
+                                )}
+                                {isSelected && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                              </div>
+                            </div>
+                          </button>
+                          {isFull && (
+                            <WaitlistButton slotId={slot.id} programId={programId} isAuthenticated={isAuthenticated} />
+                          )}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          {fmtTime(slot.startTime)} – {fmtTime(slot.endTime)}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        {isFull ? (
-                          <Badge className="bg-red-100 text-red-700 text-xs">Full</Badge>
-                        ) : (
-                          <Badge className={`text-xs ${
-                            slot.spotsLeft <= 2 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
-                          }`}>
-                            {slot.spotsLeft} spot{slot.spotsLeft !== 1 ? "s" : ""} left
-                          </Badge>
-                        )}
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-primary" />}
-                      </div>
-                    </div>
-                  </button>
-                  {isFull && (
-                    <WaitlistButton slotId={slot.id} programId={programId} isAuthenticated={isAuthenticated} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!selectedDay && (
+              <p className="text-center text-xs text-muted-foreground py-2">Tap a highlighted date to see available times.</p>
+            )}
+          </>
         )}
       </CardContent>
     </Card>

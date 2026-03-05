@@ -186,3 +186,4 @@
 - [x] Fix social media circles overlapping Download the App button on mobile (circles too wide)
 - [x] Create TESTFREE promo code in DB (100% off, unlimited uses, all program types)
 - [x] Polish Download the App button: smaller yellow area, shadow/gradient depth, pressed-state feel
+- [x] Redesign booking slot picker: calendar month view to pick date, then show time slots for selected day only
