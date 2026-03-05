@@ -166,3 +166,4 @@
 - [x] Fix Summer Camp weekly price in app: $450 → $420/week
 - [ ] Audit and fix all booking flow prices to match confirmed prices: 105 Game $35, Junior $80/day, Summer $90/day $420/week, Private $120/hr
 - [x] Add $1 Donate One Dollar Test button to test live Stripe payment
+- [x] Fix image cropping on program cards - Private Lessons and Mental Coaching faces cut off

@@ -17,6 +17,7 @@ const programs = [
     badgeColor: "bg-blue-100 text-blue-800",
     photo: `${CDN}/IMG_2886_220d66ff.jpg`,
     photoAlt: "Advanced player on court — private lesson",
+    objectPosition: "center top",
     description: "One-on-one personalized coaching sessions with Coach Mario. Tailored to your specific needs — whether you're a beginner learning the fundamentals or an advanced player fine-tuning your game.",
     pricing: [{ label: "Per Hour", price: "$120/hour" }],
     highlights: [
@@ -103,6 +104,7 @@ const programs = [
     badgeColor: "bg-purple-100 text-purple-800",
     photo: `${CDN}/IMG_2891_c12742f2.jpg`,
     photoAlt: "High five on court — mental coaching",
+    objectPosition: "center top",
     description: "Dedicated mental performance coaching with Mario. Address fear, build confidence, develop pre-match routines, and learn to perform under pressure. Available as standalone sessions or as a complement to technical training.",
     pricing: [{ label: "Per Session", price: "Contact for pricing" }],
     highlights: [
@@ -184,6 +186,7 @@ export default function Programs() {
                             src={program.photo}
                             alt={program.photoAlt}
                             className="w-full h-full object-cover"
+                            style={{ objectPosition: program.objectPosition || "center center" }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                           <div className="absolute bottom-3 left-4 flex items-center gap-2">
