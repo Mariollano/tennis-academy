@@ -180,3 +180,4 @@
 - [x] Add server procedures: createPromoCode (admin), listPromoCodes (admin), deletePromoCode (admin), validatePromoCode (public)
 - [x] Add promo code input to booking checkout flow (validate + apply discount, bypass Stripe if 100% off)
 - [x] Build Admin Promo Codes management page (create/view/delete codes)
+- [x] Add round Download App button to top-right corner of homepage hero section

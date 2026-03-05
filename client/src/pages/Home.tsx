@@ -121,46 +121,42 @@ const features = [
 
 function InstallAppInlineButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [show, setShow] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   useState(() => {
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as any).standalone === true;
-    if (isStandalone) return;
-    const dismissed = localStorage.getItem("pwa-install-dismissed");
-    if (dismissed) return;
+    if (isStandalone) { setDismissed(true); return; }
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShow(true);
     };
     window.addEventListener("beforeinstallprompt", handler);
-    // Show on mobile even without deferred prompt
-    const ua = navigator.userAgent;
-    if (/iphone|ipad|ipod|android/i.test(ua)) setShow(true);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   });
 
-  if (!show) return null;
+  if (dismissed) return null;
 
   const handleInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       await deferredPrompt.userChoice;
       setDeferredPrompt(null);
+    } else {
+      // Fallback: show instructions
+      alert('To install: tap the Share button in your browser, then "Add to Home Screen"');
     }
-    setShow(false);
-    localStorage.setItem("pwa-install-dismissed", "1");
   };
 
   return (
     <button
       onClick={handleInstall}
-      className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 border border-white/30 text-white rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+      title="Download the App"
+      className="w-12 h-12 flex flex-col items-center justify-center bg-accent hover:bg-accent/90 text-black rounded-full shadow-lg border-2 border-white/30 transition-all hover:scale-105 active:scale-95"
     >
-      <Download className="w-3 h-3" />
-      Install App — Free
+      <Download className="w-5 h-5" />
+      <span className="text-[9px] font-bold leading-none mt-0.5">APP</span>
     </button>
   );
 }
@@ -178,6 +174,11 @@ export default function Home() {
         />
         {/* Dark overlay for readability */}
         <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(10,10,10,0.85) 0%, rgba(13,27,62,0.80) 50%, rgba(26,47,94,0.65) 100%)" }} />
+
+        {/* Download App button - top right corner */}
+        <div className="absolute top-4 right-4 z-10">
+          <InstallAppInlineButton />
+        </div>
 
         <div className="container relative py-24 md:py-32">
           <div className="max-w-3xl">
