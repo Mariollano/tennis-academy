@@ -231,12 +231,9 @@ export default function Home() {
 
         <div className="container relative py-24 md:py-32">
           <div className="max-w-3xl">
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <Badge className="bg-accent/20 text-accent border-accent/30 text-sm px-3 py-1">
-                Rhode Island's Premier Tennis Academy
-              </Badge>
-              <InstallAppInlineButton />
-            </div>
+            <Badge className="mb-4 bg-accent/20 text-accent border-accent/30 text-sm px-3 py-1">
+              Rhode Island's Premier Tennis Academy
+            </Badge>
             <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
               Elevate Your Game.<br />
               <span style={{ color: "oklch(0.90 0.20 120)" }}>Master Your Mind.</span>

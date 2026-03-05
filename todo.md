@@ -171,3 +171,4 @@
 - [x] Move Install App banner to top of homepage next to "Rhode Island's Premier Tennis Academy" tagline
 - [x] Build Schedule page: private lesson slots and 105 Game availability with day/week/month/year views
 - [x] Add Schedule link to main navigation
+- [x] Fix Install App button: make it small, round, move to navbar right side (not in hero)

@@ -1,12 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Menu, X, User, LogOut, Youtube, Instagram, Facebook } from "lucide-react";
+import { Menu, X, User, LogOut, Youtube, Instagram, Facebook, Download } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+function InstallAppButton() {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone === true;
+    if (isStandalone) return;
+    const dismissed = localStorage.getItem("pwa-install-dismissed");
+    if (dismissed) return;
+    const ua = navigator.userAgent;
+    if (/iphone|ipad|ipod|android/i.test(ua)) { setShow(true); return; }
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShow(true);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  if (!show) return null;
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      setDeferredPrompt(null);
+    }
+    setShow(false);
+    localStorage.setItem("pwa-install-dismissed", "1");
+  };
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={handleInstall}
+          className="w-8 h-8 rounded-full bg-accent/20 hover:bg-accent/40 border border-accent/40 flex items-center justify-center text-accent transition-colors"
+          aria-label="Install App"
+        >
+          <Download className="w-3.5 h-3.5" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">Install App — Free</TooltipContent>
+    </Tooltip>
+  );
+}
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/ri-tennis-logo_3de51834.jpg";
 
@@ -81,6 +132,7 @@ export default function Navbar() {
 
         {/* Social Icons — Desktop */}
         <div className="hidden lg:flex items-center gap-1 mr-1">
+          <InstallAppButton />
           <a href="https://www.youtube.com/@MarioRITennis" target="_blank" rel="noopener noreferrer"
             className="text-primary-foreground/60 hover:text-accent transition-colors p-1.5 rounded-md hover:bg-white/10" title="YouTube">
             <Youtube className="w-4 h-4" />
