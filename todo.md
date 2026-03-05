@@ -185,3 +185,4 @@
 - [x] Replace social pill buttons with circle profile photo style (Mario US Open photo + platform badge) for YouTube, Instagram, Facebook, X, TikTok
 - [x] Fix social media circles overlapping Download the App button on mobile (circles too wide)
 - [x] Create TESTFREE promo code in DB (100% off, unlimited uses, all program types)
+- [x] Polish Download the App button: smaller yellow area, shadow/gradient depth, pressed-state feel
