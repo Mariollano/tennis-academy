@@ -182,3 +182,4 @@
 - [x] Build Admin Promo Codes management page (create/view/delete codes)
 - [x] Add round Download App button to top-right corner of homepage hero section
 - [x] Add social media icons/handles to top-left corner of homepage hero section
+- [x] Replace social pill buttons with circle profile photo style (Mario US Open photo + platform badge) for YouTube, Instagram, Facebook, X, TikTok
