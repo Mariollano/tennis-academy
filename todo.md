@@ -173,3 +173,4 @@
 - [x] Add Schedule link to main navigation
 - [x] Fix Install App button: make it small, round, move to navbar right side (not in hero)
 - [x] Fix Private Lessons card image crop to show player face (object-position adjustment)
+- [x] Rebuild Schedule page: day view with 7AM-8PM hourly slots (occupied/Free labels), month view with session dots on busy days

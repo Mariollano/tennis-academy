@@ -2,12 +2,15 @@ import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, Users, ChevronLeft, ChevronRight, Trophy, User } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Clock, Users, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 type ViewMode = "day" | "week" | "month";
+
+// Hours Mario works: 7 AM to 8 PM
+const DAY_START_HOUR = 7;
+const DAY_END_HOUR = 20; // 8 PM (exclusive, so last slot is 7 PM)
 
 function formatDate(d: Date) {
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
@@ -25,7 +28,7 @@ function addDays(d: Date, n: number) {
 }
 function startOfWeek(d: Date) {
   const r = new Date(d);
-  r.setDate(r.getDate() - r.getDay()); // Sunday
+  r.setDate(r.getDate() - r.getDay());
   return r;
 }
 function startOfMonth(d: Date) {
@@ -34,135 +37,168 @@ function startOfMonth(d: Date) {
 function endOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth() + 1, 0);
 }
+function formatHour(h: number) {
+  if (h === 0) return "12 AM";
+  if (h < 12) return `${h} AM`;
+  if (h === 12) return "12 PM";
+  return `${h - 12} PM`;
+}
+// Parse "HH:MM:SS" or "HH:MM" to hour number
+function parseHour(timeStr: string): number {
+  return parseInt(timeStr.split(":")[0], 10);
+}
 
-const PROGRAM_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  private_lesson: { bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
-  clinic_105: { bg: "bg-amber-50", text: "text-amber-800", border: "border-amber-200" },
-};
+const PROGRAM_COLORS = {
+  private_lesson: {
+    bg: "bg-blue-500",
+    light: "bg-blue-50 border-blue-300",
+    text: "text-blue-800",
+    dot: "bg-blue-500",
+    label: "Private Lesson",
+  },
+  clinic_105: {
+    bg: "bg-amber-500",
+    light: "bg-amber-50 border-amber-300",
+    text: "text-amber-800",
+    dot: "bg-amber-500",
+    label: "105 Game Clinic",
+  },
+} as const;
 
-function SlotCard({ slot }: { slot: any }) {
+function SlotBlock({ slot }: { slot: any }) {
+  const colors = PROGRAM_COLORS[slot.programType as keyof typeof PROGRAM_COLORS] || {
+    light: "bg-gray-50 border-gray-300", text: "text-gray-800", label: "Session",
+  };
   const isPrivate = slot.programType === "private_lesson";
-  const colors = PROGRAM_COLORS[slot.programType] || { bg: "bg-gray-50", text: "text-gray-800", border: "border-gray-200" };
   const spotsLeft = slot.maxParticipants - slot.currentParticipants;
   const isFull = spotsLeft <= 0;
 
   return (
-    <div className={`rounded-lg border p-3 ${colors.bg} ${colors.border}`}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
-            {isPrivate ? (
-              <User className={`w-3.5 h-3.5 ${colors.text}`} />
-            ) : (
-              <Users className={`w-3.5 h-3.5 ${colors.text}`} />
-            )}
-            <span className={`font-semibold text-sm ${colors.text}`}>
-              {slot.programName || (isPrivate ? "Private Lesson" : "105 Game Clinic")}
-            </span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
-            <Clock className="w-3 h-3" />
-            {slot.startTime?.slice(0, 5)} – {slot.endTime?.slice(0, 5)}
-          </div>
-          {slot.notes && (
-            <p className="text-xs text-gray-500 mb-2">{slot.notes}</p>
-          )}
-        </div>
-        <div className="text-right shrink-0">
-          {isPrivate ? (
-            <Badge className="bg-blue-100 text-blue-700 text-xs">1-on-1</Badge>
-          ) : (
-            <div>
-              <div className={`text-xs font-bold ${isFull ? "text-red-600" : "text-green-700"}`}>
-                {isFull ? "Full" : `${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`}
-              </div>
-              <div className="text-xs text-gray-400">{slot.currentParticipants}/{slot.maxParticipants}</div>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="flex gap-2">
-        {!isFull ? (
-          <Link href={`/book/${slot.programType === "private_lesson" ? "private_lesson" : "clinic_105"}`}>
-            <Button size="sm" className="h-7 text-xs bg-primary text-primary-foreground hover:bg-primary/90 px-3">
-              Book Now
-            </Button>
-          </Link>
+    <div className={`rounded-lg border-2 px-3 py-2 ${colors.light} flex items-center justify-between gap-2`}>
+      <div className="flex items-center gap-2 min-w-0">
+        {isPrivate ? (
+          <User className={`w-4 h-4 shrink-0 ${colors.text}`} />
         ) : (
-          <Badge variant="outline" className="text-xs text-red-600 border-red-200">Session Full</Badge>
+          <Users className={`w-4 h-4 shrink-0 ${colors.text}`} />
         )}
+        <div className="min-w-0">
+          <div className={`font-semibold text-sm truncate ${colors.text}`}>
+            {isPrivate ? "Private Lesson" : "105 Game Clinic"}
+          </div>
+          <div className="text-xs text-gray-500">
+            {slot.startTime?.slice(0, 5)} – {slot.endTime?.slice(0, 5)}
+            {!isPrivate && (
+              <span className={`ml-2 font-medium ${isFull ? "text-red-600" : "text-green-700"}`}>
+                {isFull ? "Full" : `${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function DayView({ date, slots }: { date: Date; slots: any[] }) {
-  const daySlots = slots.filter((s) => s.slotDate === isoDate(date));
-  const privateSlots = daySlots.filter((s) => s.programType === "private_lesson");
-  const clinicSlots = daySlots.filter((s) => s.programType === "clinic_105");
-
-  return (
-    <div>
-      <h3 className="text-lg font-bold text-foreground mb-4">{formatDateFull(date)}</h3>
-      {daySlots.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <Calendar className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p>No sessions scheduled for this day.</p>
-        </div>
+      {!isFull ? (
+        <Link href={`/book/${isPrivate ? "private_lesson" : "clinic_105"}`}>
+          <Button size="sm" className="h-7 text-xs px-3 shrink-0">Book</Button>
+        </Link>
       ) : (
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-              <User className="w-4 h-4" /> Private Lessons ({privateSlots.length})
-            </h4>
-            {privateSlots.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">No private lessons today</p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {privateSlots.map((s) => <SlotCard key={s.id} slot={s} />)}
-              </div>
-            )}
-          </div>
-          <div>
-            <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-              <Users className="w-4 h-4" /> 105 Game Clinic ({clinicSlots.length})
-            </h4>
-            {clinicSlots.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">No 105 Game sessions today</p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {clinicSlots.map((s) => <SlotCard key={s.id} slot={s} />)}
-              </div>
-            )}
-          </div>
-        </div>
+        <Badge variant="outline" className="text-xs text-red-600 border-red-300 shrink-0">Full</Badge>
       )}
     </div>
   );
 }
 
-function WeekView({ weekStart, slots }: { weekStart: Date; slots: any[] }) {
-  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+function HourlyDayView({ date, slots }: { date: Date; slots: any[] }) {
+  const dateKey = isoDate(date);
+  const daySlots = slots.filter((s) => s.slotDate === dateKey);
+  const hours = Array.from({ length: DAY_END_HOUR - DAY_START_HOUR }, (_, i) => DAY_START_HOUR + i);
+
+  // Map each slot to its start hour
+  const slotsByHour: Record<number, any[]> = {};
+  daySlots.forEach((s) => {
+    const h = parseHour(s.startTime || "0:00");
+    if (!slotsByHour[h]) slotsByHour[h] = [];
+    slotsByHour[h].push(s);
+  });
+
   return (
-    <div className="space-y-4">
+    <div>
+      <h3 className="text-lg font-bold text-foreground mb-4">{formatDateFull(date)}</h3>
+      <div className="border border-border rounded-xl overflow-hidden">
+        {hours.map((hour, idx) => {
+          const hourSlots = slotsByHour[hour] || [];
+          const isEmpty = hourSlots.length === 0;
+          const isLast = idx === hours.length - 1;
+          return (
+            <div
+              key={hour}
+              className={`flex gap-0 ${!isLast ? "border-b border-border" : ""} ${isEmpty ? "bg-card" : "bg-white"}`}
+            >
+              {/* Hour label */}
+              <div className="w-20 shrink-0 flex items-start justify-end pr-3 pt-3 pb-3">
+                <span className="text-xs font-semibold text-muted-foreground tabular-nums">
+                  {formatHour(hour)}
+                </span>
+              </div>
+              {/* Divider line */}
+              <div className="w-px bg-border shrink-0" />
+              {/* Slot content */}
+              <div className="flex-1 min-w-0 px-3 py-2.5 min-h-[52px] flex items-center">
+                {isEmpty ? (
+                  <span className="text-xs font-medium text-muted-foreground/40 select-none uppercase tracking-widest">
+                    Free
+                  </span>
+                ) : (
+                  <div className="flex flex-col gap-1.5 w-full">
+                    {hourSlots.map((s) => (
+                      <SlotBlock key={s.id} slot={s} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function WeekView({ weekStart, slots, onDayClick }: { weekStart: Date; slots: any[]; onDayClick: (d: Date) => void }) {
+  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const today = isoDate(new Date());
+
+  return (
+    <div className="space-y-3">
       {days.map((day) => {
-        const daySlots = slots.filter((s) => s.slotDate === isoDate(day));
-        const isToday = isoDate(day) === isoDate(new Date());
+        const dayKey = isoDate(day);
+        const daySlots = slots.filter((s) => s.slotDate === dayKey);
+        const isToday = dayKey === today;
+        const privateSlots = daySlots.filter((s) => s.programType === "private_lesson");
+        const clinicSlots = daySlots.filter((s) => s.programType === "clinic_105");
+
         return (
-          <div key={isoDate(day)} className={`rounded-xl border p-4 ${isToday ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className={`font-bold ${isToday ? "text-primary" : "text-foreground"}`}>
+          <div
+            key={dayKey}
+            className={`rounded-xl border p-4 ${isToday ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <button
+                onClick={() => onDayClick(day)}
+                className={`font-bold text-sm hover:underline ${isToday ? "text-primary" : "text-foreground"}`}
+              >
                 {formatDate(day)} {isToday && <span className="text-xs font-normal text-primary ml-1">(Today)</span>}
-              </h4>
+              </button>
               {daySlots.length > 0 && (
-                <Badge variant="outline" className="text-xs">{daySlots.length} session{daySlots.length !== 1 ? "s" : ""}</Badge>
+                <Badge variant="outline" className="text-xs">
+                  {daySlots.length} session{daySlots.length !== 1 ? "s" : ""}
+                </Badge>
               )}
             </div>
             {daySlots.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">No sessions</p>
+              <p className="text-xs text-muted-foreground/50 uppercase tracking-widest font-medium">No sessions</p>
             ) : (
               <div className="grid sm:grid-cols-2 gap-2">
-                {daySlots.map((s) => <SlotCard key={s.id} slot={s} />)}
+                {privateSlots.map((s) => <SlotBlock key={s.id} slot={s} />)}
+                {clinicSlots.map((s) => <SlotBlock key={s.id} slot={s} />)}
               </div>
             )}
           </div>
@@ -175,9 +211,10 @@ function WeekView({ weekStart, slots }: { weekStart: Date; slots: any[] }) {
 function MonthView({ monthStart, slots, onDayClick }: { monthStart: Date; slots: any[]; onDayClick: (d: Date) => void }) {
   const firstDay = startOfMonth(monthStart);
   const lastDay = endOfMonth(monthStart);
-  const startPad = firstDay.getDay(); // 0=Sun
+  const startPad = firstDay.getDay();
   const totalCells = startPad + lastDay.getDate();
   const rows = Math.ceil(totalCells / 7);
+  const today = isoDate(new Date());
 
   const slotsByDate = useMemo(() => {
     const map: Record<string, any[]> = {};
@@ -188,20 +225,20 @@ function MonthView({ monthStart, slots, onDayClick }: { monthStart: Date; slots:
     return map;
   }, [slots]);
 
-  const today = isoDate(new Date());
-
   return (
     <div>
+      {/* Day headers */}
       <div className="grid grid-cols-7 mb-1">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
           <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-2">{d}</div>
         ))}
       </div>
+      {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1">
         {Array.from({ length: rows * 7 }, (_, i) => {
           const dayNum = i - startPad + 1;
           if (dayNum < 1 || dayNum > lastDay.getDate()) {
-            return <div key={i} className="h-16 rounded-lg bg-muted/20" />;
+            return <div key={i} className="h-20 rounded-lg bg-muted/20" />;
           }
           const d = new Date(monthStart.getFullYear(), monthStart.getMonth(), dayNum);
           const key = isoDate(d);
@@ -209,23 +246,47 @@ function MonthView({ monthStart, slots, onDayClick }: { monthStart: Date; slots:
           const privateCount = daySessions.filter((s) => s.programType === "private_lesson").length;
           const clinicCount = daySessions.filter((s) => s.programType === "clinic_105").length;
           const isToday = key === today;
+          const hasAny = daySessions.length > 0;
+
           return (
             <button
               key={i}
               onClick={() => onDayClick(d)}
-              className={`h-16 rounded-lg border p-1.5 text-left transition-all hover:shadow-md hover:border-primary/50 ${
-                isToday ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-muted/30"
+              className={`h-20 rounded-lg border p-1.5 text-left transition-all hover:shadow-md hover:border-primary/50 flex flex-col ${
+                isToday
+                  ? "border-primary bg-primary/10"
+                  : hasAny
+                  ? "border-border bg-card"
+                  : "border-border/50 bg-card/50"
               }`}
             >
-              <div className={`text-xs font-bold mb-1 ${isToday ? "text-primary" : "text-foreground"}`}>{dayNum}</div>
-              {privateCount > 0 && (
-                <div className="text-[10px] bg-blue-100 text-blue-700 rounded px-1 mb-0.5 truncate">
-                  {privateCount} private
+              {/* Day number */}
+              <div className={`text-xs font-bold mb-1 ${isToday ? "text-primary" : "text-foreground"}`}>
+                {dayNum}
+              </div>
+              {/* Session indicators */}
+              {hasAny ? (
+                <div className="flex flex-col gap-0.5 flex-1">
+                  {privateCount > 0 && (
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                      <span className="text-[10px] text-blue-700 font-medium truncate">
+                        {privateCount} private
+                      </span>
+                    </div>
+                  )}
+                  {clinicCount > 0 && (
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                      <span className="text-[10px] text-amber-700 font-medium truncate">
+                        {clinicCount} clinic
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
-              {clinicCount > 0 && (
-                <div className="text-[10px] bg-amber-100 text-amber-700 rounded px-1 truncate">
-                  {clinicCount} clinic
+              ) : (
+                <div className="flex-1 flex items-end">
+                  <span className="text-[9px] text-muted-foreground/30 uppercase tracking-widest font-medium">free</span>
                 </div>
               )}
             </button>
@@ -237,11 +298,9 @@ function MonthView({ monthStart, slots, onDayClick }: { monthStart: Date; slots:
 }
 
 export default function Schedule() {
-  const [view, setView] = useState<ViewMode>("week");
+  const [view, setView] = useState<ViewMode>("day");
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
-  // Compute date range based on view
   const { fromDate, toDate } = useMemo(() => {
     if (view === "day") {
       return { fromDate: isoDate(currentDate), toDate: isoDate(currentDate) };
@@ -263,14 +322,15 @@ export default function Schedule() {
 
   const navigate = (dir: 1 | -1) => {
     setCurrentDate((prev) => {
-      if (view === "day") return addDays(prev, dir);
-      if (view === "week") return addDays(prev, dir * 7);
-      // month
       const d = new Date(prev);
+      if (view === "day") return addDays(d, dir);
+      if (view === "week") return addDays(d, dir * 7);
       d.setMonth(d.getMonth() + dir);
       return d;
     });
   };
+
+  const goToToday = () => setCurrentDate(new Date());
 
   const periodLabel = useMemo(() => {
     if (view === "day") return formatDateFull(currentDate);
@@ -282,10 +342,9 @@ export default function Schedule() {
     return currentDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   }, [view, currentDate]);
 
-  const handleMonthDayClick = (d: Date) => {
-    setSelectedDay(d);
-    setView("day");
+  const handleDayClick = (d: Date) => {
     setCurrentDate(d);
+    setView("day");
   };
 
   const totalPrivate = slots.filter((s) => s.programType === "private_lesson").length;
@@ -302,9 +361,8 @@ export default function Schedule() {
           <Badge className="mb-3 bg-accent/20 text-accent border-accent/30">Live Schedule</Badge>
           <h1 className="text-3xl md:text-4xl font-extrabold mb-2">Session Schedule</h1>
           <p className="text-primary-foreground/80 max-w-xl">
-            Browse available private lessons and 105 Game Clinic sessions. Book directly from the calendar.
+            Browse available private lessons and 105 Game Clinic sessions. Click any session to book directly.
           </p>
-          {/* Quick stats */}
           <div className="flex flex-wrap gap-4 mt-5">
             <div className="bg-white/10 rounded-lg px-4 py-2 text-sm">
               <span className="font-bold text-accent">{totalPrivate}</span>
@@ -327,12 +385,16 @@ export default function Schedule() {
         <div className="container flex flex-wrap items-center gap-4 text-xs">
           <span className="text-muted-foreground font-medium">Legend:</span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-blue-200 inline-block" />
+            <span className="w-3 h-3 rounded-full bg-blue-500 inline-block" />
             <span className="text-blue-700 font-medium">Private Lesson</span> — 1-on-1 with Coach Mario
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-amber-200 inline-block" />
+            <span className="w-3 h-3 rounded-full bg-amber-500 inline-block" />
             <span className="text-amber-700 font-medium">105 Game Clinic</span> — Group competitive play
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-muted-foreground/40 font-medium uppercase tracking-widest text-[10px]">Free</span>
+            <span className="text-muted-foreground">= open hour slot</span>
           </span>
         </div>
       </div>
@@ -340,7 +402,6 @@ export default function Schedule() {
       {/* Calendar Controls */}
       <div className="container py-6">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          {/* View toggle */}
           <Tabs value={view} onValueChange={(v) => setView(v as ViewMode)}>
             <TabsList>
               <TabsTrigger value="day">Day</TabsTrigger>
@@ -349,83 +410,42 @@ export default function Schedule() {
             </TabsList>
           </Tabs>
 
-          {/* Navigation */}
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={goToToday} className="text-xs">Today</Button>
             <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-sm font-semibold text-foreground min-w-[200px] text-center">{periodLabel}</span>
+            <span className="text-sm font-semibold text-foreground min-w-[220px] text-center">{periodLabel}</span>
             <Button variant="outline" size="icon" onClick={() => navigate(1)}>
               <ChevronRight className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentDate(new Date())}
-              className="ml-2 text-xs"
-            >
-              Today
             </Button>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="text-center py-16 text-muted-foreground">
-            <Calendar className="w-10 h-10 mx-auto mb-3 animate-pulse opacity-40" />
-            <p>Loading schedule...</p>
+          <div className="flex items-center justify-center py-20 text-muted-foreground">
+            <Clock className="w-6 h-6 animate-spin mr-2" />
+            Loading schedule...
           </div>
         ) : (
           <>
-            {view === "day" && <DayView date={currentDate} slots={slots} />}
-            {view === "week" && <WeekView weekStart={startOfWeek(currentDate)} slots={slots} />}
-            {view === "month" && (
-              <MonthView
-                monthStart={startOfMonth(currentDate)}
-                slots={slots}
-                onDayClick={handleMonthDayClick}
-              />
-            )}
+            {view === "day" && <HourlyDayView date={currentDate} slots={slots} />}
+            {view === "week" && <WeekView weekStart={startOfWeek(currentDate)} slots={slots} onDayClick={handleDayClick} />}
+            {view === "month" && <MonthView monthStart={startOfMonth(currentDate)} slots={slots} onDayClick={handleDayClick} />}
           </>
         )}
 
-        {/* No slots message */}
-        {!isLoading && slots.length === 0 && (
-          <Card className="mt-6 border-dashed">
-            <CardContent className="py-12 text-center">
-              <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground/40" />
-              <CardTitle className="text-lg mb-2 text-muted-foreground">No sessions scheduled yet</CardTitle>
-              <p className="text-sm text-muted-foreground mb-4">
-                Coach Mario hasn't added sessions for this period yet. Check back soon or contact him directly.
-              </p>
-              <div className="flex flex-wrap justify-center gap-3">
-                <a href="tel:+14019655873">
-                  <Button variant="outline" size="sm">📞 (401) 965-5873</Button>
-                </a>
-                <a href="mailto:ritennismario@gmail.com">
-                  <Button variant="outline" size="sm">✉️ ritennismario@gmail.com</Button>
-                </a>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* CTA */}
-        <div className="mt-10 bg-primary/5 border border-primary/20 rounded-xl p-6 text-center">
-          <Trophy className="w-8 h-8 mx-auto mb-3 text-primary" />
-          <h3 className="font-bold text-lg text-foreground mb-1">Don't see a time that works?</h3>
-          <p className="text-muted-foreground text-sm mb-4">
-            Contact Coach Mario directly to arrange a custom session time.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <a href="tel:+14019655873">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                📞 Call (401) 965-5873
-              </Button>
-            </a>
-            <a href="mailto:ritennismario@gmail.com">
-              <Button variant="outline">✉️ Email Mario</Button>
-            </a>
-          </div>
+        {/* Bottom CTA */}
+        <div className="mt-10 text-center border-t border-border pt-8">
+          <p className="text-muted-foreground mb-3">Don't see a time that works for you?</p>
+          <a href="mailto:ritennismario@gmail.com">
+            <Button variant="outline" className="mr-2">
+              Email Coach Mario
+            </Button>
+          </a>
+          <a href="tel:+14019655873">
+            <Button>Call 401-965-5873</Button>
+          </a>
         </div>
       </div>
     </div>
