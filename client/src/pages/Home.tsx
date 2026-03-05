@@ -181,7 +181,7 @@ export default function Home() {
         <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(10,10,10,0.85) 0%, rgba(13,27,62,0.80) 50%, rgba(26,47,94,0.65) 100%)" }} />
 
         {/* Top bar: social circles (left) + Download button (right) — single flex row, never overlap */}
-        <div className="absolute top-3 left-4 right-4 z-10 flex items-center justify-between gap-3">
+        <div className="absolute top-3 left-4 right-6 z-10 flex items-center justify-between gap-3">
           {/* Social circles */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {[
