@@ -17,7 +17,7 @@ const programs = [
     badgeColor: "bg-blue-100 text-blue-800",
     photo: `${CDN}/IMG_2886_220d66ff.jpg`,
     photoAlt: "Advanced player on court — private lesson",
-    objectPosition: "center top",
+    objectPosition: "center 15%",
     description: "One-on-one personalized coaching sessions with Coach Mario. Tailored to your specific needs — whether you're a beginner learning the fundamentals or an advanced player fine-tuning your game.",
     pricing: [{ label: "Per Hour", price: "$120/hour" }],
     highlights: [
