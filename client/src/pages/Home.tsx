@@ -153,10 +153,10 @@ function InstallAppInlineButton() {
     <button
       onClick={handleInstall}
       title="Download the App"
-      className="w-12 h-12 flex flex-col items-center justify-center bg-accent hover:bg-accent/90 text-black rounded-full shadow-lg border-2 border-white/30 transition-all hover:scale-105 active:scale-95"
+      className="flex items-center gap-2 bg-accent hover:bg-accent/90 text-black rounded-full shadow-lg border-2 border-white/30 transition-all hover:scale-105 active:scale-95 px-4 py-2.5 font-bold text-sm"
     >
-      <Download className="w-5 h-5" />
-      <span className="text-[9px] font-bold leading-none mt-0.5">APP</span>
+      <Download className="w-4 h-4 shrink-0" />
+      <span className="whitespace-nowrap">Download the App</span>
     </button>
   );
 }
