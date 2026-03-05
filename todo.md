@@ -167,3 +167,7 @@
 - [ ] Audit and fix all booking flow prices to match confirmed prices: 105 Game $35, Junior $80/day, Summer $90/day $420/week, Private $120/hr
 - [x] Add $1 Donate One Dollar Test button to test live Stripe payment
 - [x] Fix image cropping on program cards - Private Lessons and Mental Coaching faces cut off
+- [x] Add floating contact button (email ritennismario@gmail.com + phone 401-965-5873) visible on all pages
+- [x] Move Install App banner to top of homepage next to "Rhode Island's Premier Tennis Academy" tagline
+- [x] Build Schedule page: private lesson slots and 105 Game availability with day/week/month/year views
+- [x] Add Schedule link to main navigation

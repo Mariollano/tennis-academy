@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Trophy, Brain, Users, Sun, Star, ChevronRight,
-  Calendar, MessageSquare, Play, Zap, Images, Heart
+  Calendar, MessageSquare, Play, Zap, Images, Heart, Download
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -122,6 +122,52 @@ const features = [
   },
 ];
 
+function InstallAppInlineButton() {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [show, setShow] = useState(false);
+
+  useState(() => {
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone === true;
+    if (isStandalone) return;
+    const dismissed = localStorage.getItem("pwa-install-dismissed");
+    if (dismissed) return;
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShow(true);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    // Show on mobile even without deferred prompt
+    const ua = navigator.userAgent;
+    if (/iphone|ipad|ipod|android/i.test(ua)) setShow(true);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  });
+
+  if (!show) return null;
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      setDeferredPrompt(null);
+    }
+    setShow(false);
+    localStorage.setItem("pwa-install-dismissed", "1");
+  };
+
+  return (
+    <button
+      onClick={handleInstall}
+      className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 border border-white/30 text-white rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+    >
+      <Download className="w-3 h-3" />
+      Install App — Free
+    </button>
+  );
+}
+
 function DonateTestButton() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -185,9 +231,12 @@ export default function Home() {
 
         <div className="container relative py-24 md:py-32">
           <div className="max-w-3xl">
-            <Badge className="mb-4 bg-accent/20 text-accent border-accent/30 text-sm px-3 py-1">
-              Rhode Island's Premier Tennis Academy
-            </Badge>
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <Badge className="bg-accent/20 text-accent border-accent/30 text-sm px-3 py-1">
+                Rhode Island's Premier Tennis Academy
+              </Badge>
+              <InstallAppInlineButton />
+            </div>
             <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
               Elevate Your Game.<br />
               <span style={{ color: "oklch(0.90 0.20 120)" }}>Master Your Mind.</span>
@@ -201,6 +250,11 @@ export default function Home() {
               <Link href="/programs">
                 <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-base px-8">
                   View Programs <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+              <Link href="/schedule">
+                <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 font-semibold px-8">
+                  <Calendar className="w-4 h-4 mr-2" /> View Schedule
                 </Button>
               </Link>
               <Link href="/gallery">

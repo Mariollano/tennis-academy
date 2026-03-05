@@ -13,6 +13,7 @@ const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFs
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/programs", label: "Programs" },
+  { href: "/schedule", label: "Schedule" },
   { href: "/social", label: "Media" },
   { href: "/mental-coaching", label: "Mental Coaching" },
   { href: "/services", label: "Services" },

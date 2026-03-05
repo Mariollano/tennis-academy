@@ -18,6 +18,8 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ChatBot from "./components/ChatBot";
 import { InstallPrompt } from "./components/InstallPrompt";
+import FloatingContact from "./components/FloatingContact";
+import Schedule from "./pages/Schedule";
 
 function Router() {
   return (
@@ -35,6 +37,7 @@ function Router() {
           <Route path="/gallery" component={Gallery} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/schedule" component={AdminSchedule} />
+          <Route path="/schedule" component={Schedule} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
@@ -42,6 +45,7 @@ function Router() {
       </main>
       <Footer />
       <ChatBot />
+      <FloatingContact />
       <InstallPrompt />
     </div>
   );

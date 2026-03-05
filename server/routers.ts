@@ -338,6 +338,53 @@ export const appRouter = router({
         }));
       }),
 
+    // Public: list available slots for multiple program types (used by Schedule page)
+    listAvailableMulti: publicProcedure
+      .input(z.object({
+        programTypes: z.array(z.enum(["clinic_105", "private_lesson"])).optional(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const types = input.programTypes ?? ["clinic_105", "private_lesson"];
+        const matchingPrograms = await db.select({ id: programs.id, type: programs.type })
+          .from(programs)
+          .where(and(
+            sql`${programs.type} IN (${sql.join(types.map(t => sql`${t}`), sql`, `)})`,
+            eq(programs.isActive, true)
+          ));
+        if (!matchingPrograms.length) return [];
+        const programIds = matchingPrograms.map(p => p.id);
+        const fromDate = input.from ? new Date(input.from) : new Date();
+        const toDate = input.to ? new Date(input.to) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+        const slots = await db.select({
+          slot: scheduleSlots,
+          programName: programs.name,
+          programType: programs.type,
+          priceInCents: programs.priceInCents,
+        })
+          .from(scheduleSlots)
+          .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
+          .where(and(
+            eq(scheduleSlots.isAvailable, true),
+            gte(scheduleSlots.slotDate, fromDate as any),
+            lte(scheduleSlots.slotDate, toDate as any),
+            sql`${scheduleSlots.programId} IN (${sql.join(programIds.map(id => sql`${id}`), sql`, `)})`
+          ))
+          .orderBy(scheduleSlots.slotDate, scheduleSlots.startTime)
+          .limit(200);
+        return slots.map(s => ({
+          ...s.slot,
+          programName: s.programName,
+          programType: s.programType,
+          priceInCents: s.priceInCents,
+          spotsLeft: Math.max(0, s.slot.maxParticipants - s.slot.currentParticipants),
+          isFull: s.slot.currentParticipants >= s.slot.maxParticipants,
+        }));
+      }),
+
     // Admin: full calendar view (slots + bookings + blocked times)
     adminCalendar: adminProcedure
       .input(z.object({ from: z.string(), to: z.string() }))
