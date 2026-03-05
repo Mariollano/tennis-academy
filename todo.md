@@ -187,3 +187,4 @@
 - [x] Create TESTFREE promo code in DB (100% off, unlimited uses, all program types)
 - [x] Polish Download the App button: smaller yellow area, shadow/gradient depth, pressed-state feel
 - [x] Redesign booking slot picker: calendar month view to pick date, then show time slots for selected day only
+- [x] Fix calendar bleeding over booking form fields (z-index / layout containment issue)

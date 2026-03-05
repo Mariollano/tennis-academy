@@ -612,7 +612,7 @@ export default function BookingPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-primary" />
+                  <CalendarIcon className="w-5 h-5 text-primary" />
                   Booking Details
                 </CardTitle>
               </CardHeader>
