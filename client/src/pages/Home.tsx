@@ -158,10 +158,13 @@ function InstallAppInlineButton() {
         boxShadow: '0 4px 0 #7a9400, 0 6px 16px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.35)',
         border: '1px solid rgba(255,255,255,0.2)',
       }}
-      className="flex items-center gap-1.5 text-black rounded-full transition-all hover:brightness-105 active:translate-y-[3px] active:shadow-none px-3.5 py-1.5 font-bold text-xs tracking-wide"
+      className="flex flex-col items-center justify-center text-black rounded-full transition-all hover:brightness-105 active:translate-y-[3px] active:shadow-none px-3.5 py-2 font-bold leading-tight"
     >
-      <Download className="w-3.5 h-3.5 shrink-0" />
-      <span className="whitespace-nowrap">Download the App</span>
+      <span className="flex items-center gap-1 text-xs tracking-wide">
+        <Download className="w-3 h-3 shrink-0" />
+        Download
+      </span>
+      <span className="text-[10px] tracking-widest uppercase opacity-80">the App</span>
     </button>
   );
 }
