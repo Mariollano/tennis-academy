@@ -188,3 +188,4 @@
 - [x] Polish Download the App button: smaller yellow area, shadow/gradient depth, pressed-state feel
 - [x] Redesign booking slot picker: calendar month view to pick date, then show time slots for selected day only
 - [x] Fix calendar bleeding over booking form fields (z-index / layout containment issue)
+- [x] Fix calendar not showing available dates even though slots exist in DB

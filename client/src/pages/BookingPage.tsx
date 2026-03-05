@@ -164,6 +164,47 @@ function AvailabilityPanel({
 
   if (!isSupported) return null;
 
+  // Private lessons are flexible — no fixed slots, just let the user pick any future date
+  if (programType === "private_lesson") {
+    return (
+      <Card className="border-2 border-primary/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CalendarIcon className="w-4 h-4 text-primary" />
+            Pick a Preferred Date
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">Private lessons are scheduled directly with Coach Mario. Choose your preferred date below and he'll confirm availability.</p>
+        </CardHeader>
+        <CardContent className="p-3 pt-0">
+          <div className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={selectedDay}
+              onSelect={(day) => {
+                setSelectedDay(day);
+                if (day) {
+                  const dateStr = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`;
+                  onSelectSlot(-1, dateStr);
+                }
+              }}
+              disabled={(date) => {
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                return date < today;
+              }}
+              className="w-full"
+            />
+          </div>
+          {selectedDay && (
+            <p className="text-center text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg py-2 px-3 mt-2">
+              ✓ Preferred date set to {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}. Mario will confirm your time.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
   function fmtTime(t: string | null | undefined) {
     if (!t) return "";
     const [h, m] = t.split(":");

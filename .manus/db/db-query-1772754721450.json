@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, name, type FROM programs ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, name, type FROM programs ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Clinic 105",
+      "type": "clinic_105"
+    },
+    {
+      "id": "2",
+      "name": "Private Lesson",
+      "type": "private_lesson"
+    },
+    {
+      "id": "30001",
+      "name": "Mental Coaching",
+      "type": "mental_coaching"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\ttype\n1\tClinic 105\tclinic_105\n2\tPrivate Lesson\tprivate_lesson\n30001\tMental Coaching\tmental_coaching\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}
