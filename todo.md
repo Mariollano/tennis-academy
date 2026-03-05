@@ -183,3 +183,5 @@
 - [x] Add round Download App button to top-right corner of homepage hero section
 - [x] Add social media icons/handles to top-left corner of homepage hero section
 - [x] Replace social pill buttons with circle profile photo style (Mario US Open photo + platform badge) for YouTube, Instagram, Facebook, X, TikTok
+- [x] Fix social media circles overlapping Download the App button on mobile (circles too wide)
+- [x] Create TESTFREE promo code in DB (100% off, unlimited uses, all program types)

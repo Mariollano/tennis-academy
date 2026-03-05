@@ -1,0 +1,9 @@
+{
+  "query": "\nINSERT INTO promo_codes (code, description, discountType, discountValue, maxUses, usedCount, isActive, appliesTo)\nVALUES (\n  'TESTFREE',\n  '100% off for testing — no charge',\n  'free',\n  100,\n  NULL,\n  0,\n  1,\n  NULL\n)\nON DUPLICATE KEY UPDATE\n  discountType = 'free',\n  discountValue = 100,\n  maxUses = NULL,\n  isActive = 1,\n  description = '100% off for testing — no charge';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \nINSERT INTO promo_codes (code, description, discountType, discountValue, maxUses, usedCount, isActive, appliesTo)\nVALUES (\n  'TESTFREE',\n  '100% off for testing — no charge',\n  'free',\n  100,\n  NULL,\n  0,\n  1,\n  NULL\n)\nON DUPLICATE KEY UPDATE\n  discountType = 'free',\n  discountValue = 100,\n  maxUses = NULL,\n  isActive = 1,\n  description = '100% off for testing — no charge';\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 76
+}

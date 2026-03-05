@@ -1,0 +1,19 @@
+{
+  "query": "SELECT id, code, description, discountType, discountValue, maxUses, isActive FROM promo_codes WHERE code = 'TESTFREE';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, code, description, discountType, discountValue, maxUses, isActive FROM promo_codes WHERE code = 'TESTFREE';",
+  "rows": [
+    {
+      "id": "1",
+      "code": "TESTFREE",
+      "description": "100% off for testing — no charge",
+      "discountType": "free",
+      "discountValue": "100",
+      "maxUses": "NULL",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcode\tdescription\tdiscountType\tdiscountValue\tmaxUses\tisActive\n1\tTESTFREE\t100% off for testing — no charge\tfree\t100\tNULL\t1\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}
