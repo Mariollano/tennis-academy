@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { stripeRouter } from "./stripeRouter";
+import { promoCodeRouter } from "./promoCodeRouter";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -23,6 +24,7 @@ const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 export const appRouter = router({
   system: systemRouter,
+  promoCodes: promoCodeRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

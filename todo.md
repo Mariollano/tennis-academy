@@ -174,3 +174,9 @@
 - [x] Fix Install App button: make it small, round, move to navbar right side (not in hero)
 - [x] Fix Private Lessons card image crop to show player face (object-position adjustment)
 - [x] Rebuild Schedule page: day view with 7AM-8PM hourly slots (occupied/Free labels), month view with session dots on busy days
+- [x] Remove $1 donation test button from homepage
+- [x] Add $0 free test session booking option for testing the full booking flow (via promo codes)
+- [x] Add promoCodes table to DB schema (code, discountType, discountValue, maxUses, usedCount, expiresAt, programTypes)
+- [x] Add server procedures: createPromoCode (admin), listPromoCodes (admin), deletePromoCode (admin), validatePromoCode (public)
+- [x] Add promo code input to booking checkout flow (validate + apply discount, bypass Stripe if 100% off)
+- [x] Build Admin Promo Codes management page (create/view/delete codes)

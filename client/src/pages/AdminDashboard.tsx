@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Users, Calendar, DollarSign, MessageSquare, CheckCircle,
-  Clock, XCircle, Send, Trophy, BarChart3, Shield
+  Clock, XCircle, Send, Trophy, BarChart3, Shield, Tag, Trash2, Plus, Percent
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -41,6 +41,18 @@ export default function AdminDashboard() {
   const { data: students } = trpc.admin.listStudents.useQuery(undefined, { enabled: user?.role === "admin" });
   const { data: broadcasts } = trpc.sms.getBroadcasts.useQuery(undefined, { enabled: user?.role === "admin" });
   const { data: smsCount } = trpc.sms.getOptInCount.useQuery(undefined, { enabled: user?.role === "admin" });
+
+  // Promo codes
+  const { data: promoCodes, refetch: refetchPromos } = trpc.promoCodes.list.useQuery(undefined, { enabled: user?.role === "admin" });
+  const [promoForm, setPromoForm] = useState({ code: "", discountType: "percent", discountValue: "", maxUses: "", expiresAt: "", applicablePrograms: "" });
+  const createPromoMutation = trpc.promoCodes.create.useMutation({
+    onSuccess: () => { toast.success("Promo code created!"); refetchPromos(); setPromoForm({ code: "", discountType: "percent", discountValue: "", maxUses: "", expiresAt: "", applicablePrograms: "" }); },
+    onError: (e) => toast.error(e.message || "Failed to create promo code."),
+  });
+  const deletePromoMutation = trpc.promoCodes.delete.useMutation({
+    onSuccess: () => { toast.success("Promo code deleted."); refetchPromos(); },
+    onError: () => toast.error("Failed to delete promo code."),
+  });
 
   const updateStatusMutation = trpc.booking.updateStatus.useMutation({
     onSuccess: () => { toast.success("Booking status updated!"); refetchBookings(); },
@@ -169,6 +181,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="bookings" onClick={() => setActiveTab("bookings")}><Calendar className="w-4 h-4 mr-1.5" />Bookings</TabsTrigger>
             <TabsTrigger value="students" onClick={() => setActiveTab("students")}><Users className="w-4 h-4 mr-1.5" />Students</TabsTrigger>
             <TabsTrigger value="sms" onClick={() => setActiveTab("sms")}><MessageSquare className="w-4 h-4 mr-1.5" />SMS Broadcast</TabsTrigger>
+            <TabsTrigger value="promos" onClick={() => setActiveTab("promos")}><Tag className="w-4 h-4 mr-1.5" />Promo Codes</TabsTrigger>
           </TabsList>
 
           {/* Bookings Tab */}
@@ -377,6 +390,142 @@ export default function AdminDashboard() {
                           </div>
                           <p className="text-sm text-foreground line-clamp-2">{b.message}</p>
                           <p className="text-xs text-muted-foreground mt-1">{b.recipientCount} recipients</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          {/* Promo Codes Tab */}
+          <TabsContent value="promos">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Create Form */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Plus className="w-5 h-5 text-primary" /> Create Promo Code</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Code (e.g. FREELESSON, SUMMER50)</Label>
+                    <Input
+                      placeholder="FREELESSON"
+                      value={promoForm.code}
+                      onChange={(e) => setPromoForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
+                      className="uppercase font-mono"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Discount Type</Label>
+                      <Select value={promoForm.discountType} onValueChange={(v) => setPromoForm(f => ({ ...f, discountType: v }))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="percent">Percentage Off (%)</SelectItem>
+                          <SelectItem value="fixed">Fixed Amount Off ($)</SelectItem>
+                          <SelectItem value="free">100% Free</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {promoForm.discountType !== "free" && (
+                      <div>
+                        <Label>{promoForm.discountType === "percent" ? "Percent Off" : "Dollars Off"}</Label>
+                        <Input
+                          type="number"
+                          placeholder={promoForm.discountType === "percent" ? "50" : "20"}
+                          value={promoForm.discountValue}
+                          onChange={(e) => setPromoForm(f => ({ ...f, discountValue: e.target.value }))}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Max Uses (blank = unlimited)</Label>
+                      <Input
+                        type="number"
+                        placeholder="10"
+                        value={promoForm.maxUses}
+                        onChange={(e) => setPromoForm(f => ({ ...f, maxUses: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Expires At (optional)</Label>
+                      <Input
+                        type="date"
+                        value={promoForm.expiresAt}
+                        onChange={(e) => setPromoForm(f => ({ ...f, expiresAt: e.target.value }))}
+                        min={new Date().toISOString().split("T")[0]}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Applies To (blank = all programs)</Label>
+                    <Input
+                      placeholder="private_lesson, clinic_105 (comma-separated)"
+                      value={promoForm.applicablePrograms}
+                      onChange={(e) => setPromoForm(f => ({ ...f, applicablePrograms: e.target.value }))}
+                    />
+                  </div>
+                  <Button
+                    className="w-full bg-primary text-primary-foreground"
+                    onClick={() => createPromoMutation.mutate({
+                      code: promoForm.code,
+                      discountType: promoForm.discountType as "percent" | "fixed" | "free",
+                      discountValue: promoForm.discountType === "free" ? 100 : Number(promoForm.discountValue),
+                      maxUses: promoForm.maxUses ? Number(promoForm.maxUses) : undefined,
+                      expiresAt: promoForm.expiresAt ? new Date(promoForm.expiresAt).getTime().toString() : undefined,
+                      appliesTo: promoForm.applicablePrograms ? promoForm.applicablePrograms.split(",").map(s => s.trim()) : undefined,
+                    })}
+                    disabled={!promoForm.code || (promoForm.discountType !== "free" && !promoForm.discountValue) || createPromoMutation.isPending}
+                  >
+                    {createPromoMutation.isPending ? "Creating..." : "Create Promo Code"}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Existing Codes */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Tag className="w-5 h-5 text-primary" /> Active Promo Codes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!promoCodes || promoCodes.length === 0 ? (
+                    <div className="text-center py-10 text-muted-foreground">
+                      <Tag className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                      <p>No promo codes yet.</p>
+                      <p className="text-xs mt-1">Create your first code — try <strong>TESTFREE</strong> (100% free) to test bookings without charges.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {promoCodes.map((p) => (
+                        <div key={p.id} className="flex items-start justify-between p-3 border border-border rounded-lg gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-mono font-bold text-sm text-foreground">{p.code}</span>
+                              <Badge className={p.discountType === "free" ? "bg-green-100 text-green-800 text-xs" : "bg-blue-100 text-blue-800 text-xs"}>
+                                {p.discountType === "free" ? "FREE" : p.discountType === "percent" ? `${p.discountValue}% off` : `$${p.discountValue} off`}
+                              </Badge>
+                              {p.isActive ? (
+                                <Badge className="bg-green-50 text-green-700 text-xs">Active</Badge>
+                              ) : (
+                                <Badge className="bg-red-50 text-red-700 text-xs">Expired</Badge>
+                              )}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                              <div>Used: {p.usedCount}{p.maxUses ? ` / ${p.maxUses}` : " (unlimited)"}</div>
+                              {p.expiresAt && <div>Expires: {new Date(p.expiresAt).toLocaleDateString()}</div>}
+                              {p.appliesTo && <div>Programs: {p.appliesTo}</div>}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => deletePromoMutation.mutate({ id: p.id })}
+                            className="text-muted-foreground hover:text-red-500 transition-colors mt-0.5"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       ))}
                     </div>

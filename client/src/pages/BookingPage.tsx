@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check, Users, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Calendar, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check, Users, AlertCircle, CheckCircle2, Tag, X } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -261,6 +261,16 @@ export default function BookingPage() {
   const [afterCamp, setAfterCamp] = useState(false);
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoInput, setPromoInput] = useState("");
+  const [promoResult, setPromoResult] = useState<{
+    valid: boolean;
+    message?: string;
+    discountDescription?: string;
+    discountedAmountCents?: number;
+    isFree?: boolean;
+  } | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
 
   const searchString = useSearch();
   const searchParams = new URLSearchParams(searchString);
@@ -274,6 +284,8 @@ export default function BookingPage() {
       toast.info("Payment was cancelled. Your booking was not confirmed.");
     }
   }, [paymentStatus]);
+
+  const markPromoUsed = trpc.promoCodes.markUsed.useMutation();
 
   const createCheckoutMutation = trpc.stripe.createCheckout.useMutation({
     onSuccess: (data) => {
@@ -307,12 +319,38 @@ export default function BookingPage() {
   const selectedPrice = config.pricing.find((p) => p.value === selectedPricing);
   const totalCents = (selectedPrice?.cents || 0) + (afterCamp ? 2000 : 0);
 
+  // Promo code validation query - placed after totalCents is declared
+  const validatePromoQuery = trpc.promoCodes.validate.useQuery(
+    { code: promoCode, programType: config.type, originalAmountCents: totalCents },
+    { enabled: promoCode.length > 0 && totalCents > 0 }
+  );
+
+  // Sync promo result when query data changes
+  const promoData = validatePromoQuery.data;
+
+  const finalAmountCents = promoData?.valid && promoData.discountedAmountCents !== undefined
+    ? promoData.discountedAmountCents
+    : totalCents;
+
+  const applyPromoCode = () => {
+    if (!promoInput.trim()) return;
+    setPromoCode(promoInput.trim().toUpperCase());
+  };
+
+  const clearPromoCode = () => {
+    setPromoCode("");
+    setPromoInput("");
+    setPromoResult(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
       window.location.href = getLoginUrl();
       return;
     }
+    const chargeAmount = finalAmountCents;
+
     createBookingMutation.mutate({
       programType: config.type,
       sessionDate: sessionDate || undefined,
@@ -320,8 +358,13 @@ export default function BookingPage() {
       pricingOption: selectedPricing,
       afterCampAddon: afterCamp,
       notes,
-      totalAmountCents: totalCents,
+      totalAmountCents: chargeAmount,
     });
+
+    // If free via promo, mark it used
+    if (promoData?.isFree && promoCode) {
+      markPromoUsed.mutate({ code: promoCode });
+    }
   };
 
   // Social sharing helpers
@@ -593,21 +636,64 @@ export default function BookingPage() {
                       />
                     </div>
 
+                    {/* Promo Code */}
+                    {totalCents > 0 && (
+                      <div>
+                        <Label className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" /> Promo Code</Label>
+                        {promoData?.valid ? (
+                          <div className="flex items-center gap-2 mt-1.5 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                            <div className="flex-1">
+                              <span className="font-semibold text-green-700 text-sm">{promoCode}</span>
+                              <span className="text-green-600 text-sm ml-2">— {promoData.discountDescription}</span>
+                              {promoData.isFree && <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">FREE</span>}
+                            </div>
+                            <button onClick={clearPromoCode} className="text-muted-foreground hover:text-foreground">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2 mt-1.5">
+                            <Input
+                              placeholder="Enter promo code"
+                              value={promoInput}
+                              onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyPromoCode())}
+                              className="uppercase"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={applyPromoCode}
+                              disabled={validatePromoQuery.isFetching}
+                            >
+                              {validatePromoQuery.isFetching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                            </Button>
+                          </div>
+                        )}
+                        {promoCode && promoData && !promoData.valid && (
+                          <p className="text-xs text-red-500 mt-1">{promoData.message}</p>
+                        )}
+                      </div>
+                    )}
+
                     {config.note && (
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
                         <strong>Important:</strong> {config.note}
                       </div>
                     )}
 
-                    <Button
+                      <Button
                       type="submit"
                       className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-bold py-3 text-base"
                       disabled={createBookingMutation.isPending || createCheckoutMutation.isPending}
                     >
                       {createBookingMutation.isPending || createCheckoutMutation.isPending ? (
                         <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-                      ) : totalCents > 0 ? (
-                        <><CreditCard className="w-4 h-4 mr-2" /> Book & Pay ${(totalCents / 100).toFixed(0)}</>
+                      ) : finalAmountCents === 0 && totalCents > 0 ? (
+                        <><CheckCircle2 className="w-4 h-4 mr-2" /> Book for FREE (Promo Applied)</>
+                      ) : finalAmountCents > 0 ? (
+                        <><CreditCard className="w-4 h-4 mr-2" /> Book & Pay ${(finalAmountCents / 100).toFixed(0)}</>
                       ) : (
                         "Submit Booking Request"
                       )}
@@ -647,10 +733,23 @@ export default function BookingPage() {
                       <span className="font-medium">+$20</span>
                     </div>
                   )}
+                  {promoData?.valid && (
+                    <div className="flex justify-between text-sm py-1 text-green-600">
+                      <span>Promo ({promoCode})</span>
+                      <span>-{promoData.discountDescription}</span>
+                    </div>
+                  )}
                   {totalCents > 0 && (
                     <div className="flex justify-between font-bold text-foreground pt-2 border-t border-border mt-2">
                       <span>Total</span>
-                      <span className="text-primary">${(totalCents / 100).toFixed(0)}</span>
+                      {promoData?.valid ? (
+                        <span>
+                          <span className="line-through text-muted-foreground text-sm mr-2">${(totalCents / 100).toFixed(0)}</span>
+                          <span className="text-green-600">{finalAmountCents === 0 ? "FREE" : `$${(finalAmountCents / 100).toFixed(0)}`}</span>
+                        </span>
+                      ) : (
+                        <span className="text-primary">${(totalCents / 100).toFixed(0)}</span>
+                      )}
                     </div>
                   )}
                 </div>

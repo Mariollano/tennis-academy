@@ -162,6 +162,7 @@ const plugins = [
     injectRegister: "auto",
     manifest: false, // We use our own manifest.webmanifest in public/
     workbox: {
+      maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, // 4MB limit
       globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
       runtimeCaching: [
         {

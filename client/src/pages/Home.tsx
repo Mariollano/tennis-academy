@@ -1,15 +1,12 @@
-import { Link } from "wouter";
 import { useState } from "react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Trophy, Brain, Users, Sun, Star, ChevronRight,
-  Calendar, MessageSquare, Play, Zap, Images, Heart, Download
+  Calendar, MessageSquare, Play, Zap, Images, Download
 } from "lucide-react";
-import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 
 const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
 const MARIO_PHOTO = `${CDN}/mario-us-open_68ad2763.jpg`;
@@ -168,53 +165,6 @@ function InstallAppInlineButton() {
   );
 }
 
-function DonateTestButton() {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const createCheckout = trpc.stripe.createCheckout.useMutation();
-
-  const handleDonate = async () => {
-    if (!user) {
-      window.location.href = getLoginUrl();
-      return;
-    }
-    setLoading(true);
-    try {
-      const result = await createCheckout.mutateAsync({
-        bookingId: 0,
-        programName: "Donate One Dollar Test",
-        amountCents: 100,
-        origin: window.location.origin,
-      });
-      if (result.url) window.location.href = result.url;
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <section className="py-10 bg-muted/20 border-t border-border">
-      <div className="container max-w-md text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Heart className="w-5 h-5 text-red-500" />
-          <h3 className="text-lg font-bold text-foreground">Support the Academy</h3>
-        </div>
-        <p className="text-muted-foreground text-sm mb-4">
-          Test our live payment system with a $1 donation.
-        </p>
-        <Button
-          onClick={handleDonate}
-          disabled={loading}
-          className="bg-red-500 hover:bg-red-600 text-white font-bold px-8 py-3"
-        >
-          {loading ? "Processing..." : "💛 Donate One Dollar Test"}
-        </Button>
-      </div>
-    </section>
-  );
-}
 
 export default function Home() {
   return (
@@ -435,9 +385,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Donation Test Button */}
-      <DonateTestButton />
 
       {/* CTA */}
       <section className="py-20 bg-primary text-primary-foreground text-center">

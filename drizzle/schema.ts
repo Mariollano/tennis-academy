@@ -235,3 +235,21 @@ export const sessionWaitlist = mysqlTable("session_waitlist", {
 });
 export type SessionWaitlist = typeof sessionWaitlist.$inferSelect;
 export type InsertSessionWaitlist = typeof sessionWaitlist.$inferInsert;
+
+// ─── Promo Codes ──────────────────────────────────────────────────────────────
+export const promoCodes = mysqlTable("promo_codes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  description: text("description"),
+  discountType: mysqlEnum("discountType", ["percent", "fixed", "free"]).notNull(),
+  discountValue: int("discountValue").notNull().default(0), // percent (0-100) or cents for fixed
+  maxUses: int("maxUses"), // null = unlimited
+  usedCount: int("usedCount").notNull().default(0),
+  expiresAt: timestamp("expiresAt"),
+  isActive: boolean("isActive").notNull().default(true),
+  appliesTo: text("appliesTo"), // JSON array of program types, null = all
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  createdBy: int("createdBy"), // admin user id
+});
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InsertPromoCode = typeof promoCodes.$inferInsert;

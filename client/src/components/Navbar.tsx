@@ -11,36 +11,25 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 function InstallAppButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true;
-    if (isStandalone) return;
-    const dismissed = localStorage.getItem("pwa-install-dismissed");
-    if (dismissed) return;
-    const ua = navigator.userAgent;
-    if (/iphone|ipad|ipod|android/i.test(ua)) { setShow(true); return; }
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShow(true);
     };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
-
-  if (!show) return null;
 
   const handleInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       await deferredPrompt.userChoice;
       setDeferredPrompt(null);
+    } else {
+      // Fallback: show instructions toast
+      toast.info("To install: tap Share → Add to Home Screen (iOS) or use browser menu → Install App (Android/Chrome)");
     }
-    setShow(false);
-    localStorage.setItem("pwa-install-dismissed", "1");
   };
 
   return (
