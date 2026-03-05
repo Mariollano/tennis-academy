@@ -231,9 +231,16 @@ export default function Home() {
 
         <div className="container relative py-24 md:py-32">
           <div className="max-w-3xl">
-            <Badge className="mb-4 bg-accent/20 text-accent border-accent/30 text-sm px-3 py-1">
-              Rhode Island's Premier Tennis Academy
-            </Badge>
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <Badge className="bg-accent/20 text-accent border-accent/30 text-sm px-3 py-1">
+                Rhode Island's Premier Tennis Academy
+              </Badge>
+              <Link href="/schedule">
+                <button className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 border border-white/30 text-white rounded-full px-3 py-1 text-xs font-semibold transition-colors">
+                  <Calendar className="w-3 h-3" /> View Schedule
+                </button>
+              </Link>
+            </div>
             <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
               Elevate Your Game.<br />
               <span style={{ color: "oklch(0.90 0.20 120)" }}>Master Your Mind.</span>
@@ -247,11 +254,6 @@ export default function Home() {
               <Link href="/programs">
                 <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-base px-8">
                   View Programs <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-              <Link href="/schedule">
-                <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 font-semibold px-8">
-                  <Calendar className="w-4 h-4 mr-2" /> View Schedule
                 </Button>
               </Link>
               <Link href="/gallery">
