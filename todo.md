@@ -191,3 +191,4 @@
 - [x] Fix calendar not showing available dates even though slots exist in DB
 - [x] Fix time slots not showing after picking a date on 105 Clinic calendar
 - [x] Fix booking submission error
+- [x] Fix time slots not appearing after clicking a date on 105 Clinic calendar
