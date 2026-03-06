@@ -8,6 +8,17 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "./_core/llm";
 import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
+import { sendBookingConfirmation, isEmailConfigured } from "./email";
+
+// Convert "HH:MM:SS" or "HH:MM" to "9:00 AM" style
+function formatTime12h(t: string): string {
+  const [hStr, mStr] = t.split(":");
+  const h = parseInt(hStr, 10);
+  const m = parseInt(mStr || "0", 10);
+  const ampm = h < 12 ? "AM" : "PM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+}
 import { getDb } from "./db";
 import {
   users, bookings, programs, scheduleSlots, payments,
@@ -212,13 +223,40 @@ export const appRouter = router({
             .where(eq(scheduleSlots.id, input.scheduleSlotId));
         }
 
+        // Fetch the new booking ID for the confirmation
+        const newBookingRows = await db.select({ id: bookings.id })
+          .from(bookings)
+          .where(eq(bookings.userId, ctx.user.id))
+          .orderBy(desc(bookings.createdAt))
+          .limit(1);
+        const newBookingId = newBookingRows[0]?.id ?? 0;
+
+        const programLabel = input.programType.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+        const dateStr = input.sessionDate
+          ? new Date(input.sessionDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
+          : undefined;
+        const timeStr = input.sessionStartTime && input.sessionEndTime
+          ? `${formatTime12h(input.sessionStartTime)} – ${formatTime12h(input.sessionEndTime)}`
+          : undefined;
+
+        // Send email confirmation to the student
+        if (isEmailConfigured() && ctx.user.email) {
+          sendBookingConfirmation({
+            toEmail: ctx.user.email,
+            toName: ctx.user.name || "there",
+            programLabel,
+            sessionDate: dateStr,
+            sessionTime: timeStr,
+            bookingId: newBookingId,
+          }).catch(() => {}); // non-blocking
+        }
+
         // Send SMS confirmation to the student
         if (isTwilioConfigured() && ctx.user.phone) {
-          const programLabel = input.programType.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
-          const dateStr = input.sessionDate
-            ? new Date(input.sessionDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+          const smsDateStr = input.sessionDate
+            ? new Date(input.sessionDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
             : "";
-          const msg = `Hi ${ctx.user.name || "there"}! Your booking for ${programLabel}${dateStr ? " on " + dateStr : ""} has been received. Mario will confirm your spot shortly. - RI Tennis Academy`;
+          const msg = `Hi ${ctx.user.name || "there"}! Your booking for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""} has been received. Mario will confirm your spot shortly. - RI Tennis Academy`;
           await sendSms(ctx.user.phone, msg).catch(() => {}); // non-blocking
         }
 

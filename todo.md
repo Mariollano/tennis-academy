@@ -202,3 +202,4 @@
 - [x] Add student-facing "Cancel Booking" button on Profile page (pending/confirmed bookings only)
 - [x] Fix Schedule page showing empty even when user has booked lessons
 - [x] Private lesson bookings should appear on the Schedule page
+- [x] Send booking confirmation email to student after successful booking
