@@ -201,3 +201,4 @@
 - [x] Blocked times show as "Unavailable" (grayed out) on student hour grid
 - [x] Add student-facing "Cancel Booking" button on Profile page (pending/confirmed bookings only)
 - [x] Fix Schedule page showing empty even when user has booked lessons
+- [x] Private lesson bookings should appear on the Schedule page

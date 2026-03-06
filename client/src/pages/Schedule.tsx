@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Clock, Users, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 type ViewMode = "day" | "week" | "month";
 
@@ -76,20 +77,27 @@ function SlotBlock({ slot }: { slot: any }) {
     light: "bg-gray-50 border-gray-300", text: "text-gray-800", label: "Session",
   };
   const isPrivate = slot.programType === "private_lesson";
-  const spotsLeft = slot.maxParticipants - slot.currentParticipants;
+  const spotsLeft = (slot.maxParticipants ?? 0) - (slot.currentParticipants ?? 0);
   const isFull = spotsLeft <= 0;
+  const isMyBooking = !!slot.isMyBooking;
+
+  // For user's own private lesson bookings, use a green tint
+  const containerClass = isMyBooking
+    ? "rounded-lg border-2 px-3 py-2 bg-green-50 border-green-300 flex items-center justify-between gap-2"
+    : `rounded-lg border-2 px-3 py-2 ${colors.light} flex items-center justify-between gap-2`;
 
   return (
-    <div className={`rounded-lg border-2 px-3 py-2 ${colors.light} flex items-center justify-between gap-2`}>
+    <div className={containerClass}>
       <div className="flex items-center gap-2 min-w-0">
         {isPrivate ? (
-          <User className={`w-4 h-4 shrink-0 ${colors.text}`} />
+          <User className={`w-4 h-4 shrink-0 ${isMyBooking ? "text-green-700" : colors.text}`} />
         ) : (
           <Users className={`w-4 h-4 shrink-0 ${colors.text}`} />
         )}
         <div className="min-w-0">
-          <div className={`font-semibold text-sm truncate ${colors.text}`}>
+          <div className={`font-semibold text-sm truncate ${isMyBooking ? "text-green-800" : colors.text}`}>
             {isPrivate ? "Private Lesson" : "105 Game Clinic"}
+            {isMyBooking && <span className="ml-1 text-xs font-normal text-green-600">(you)</span>}
           </div>
           <div className="text-xs text-gray-500">
             {slot.startTime?.slice(0, 5)} – {slot.endTime?.slice(0, 5)}
@@ -101,7 +109,9 @@ function SlotBlock({ slot }: { slot: any }) {
           </div>
         </div>
       </div>
-      {!isFull ? (
+      {isMyBooking ? (
+        <Badge variant="outline" className="text-xs text-green-700 border-green-400 bg-green-100 shrink-0">Booked</Badge>
+      ) : !isFull ? (
         <Link href={`/book/${isPrivate ? "private_lesson" : "clinic_105"}`}>
           <Button size="sm" className="h-7 text-xs px-3 shrink-0">Book</Button>
         </Link>
@@ -321,11 +331,26 @@ export default function Schedule() {
     }
   }, [view, currentDate]);
 
+  const { isAuthenticated } = useAuth();
+
   const { data: slots = [], isLoading } = trpc.schedule.listAvailableMulti.useQuery({
     from: fromDate,
     to: toDate,
     programTypes: ["private_lesson", "clinic_105"],
   });
+
+  // Fetch the logged-in user's own private lesson bookings and merge them into the calendar
+  const { data: myPrivateLessons = [] } = trpc.schedule.listMyPrivateLessons.useQuery(
+    { from: fromDate, to: toDate },
+    { enabled: isAuthenticated }
+  );
+
+  // Merge: use the public slots for 105 Clinic, plus user's own private lesson bookings
+  const allSlots = useMemo(() => {
+    // Remove any public private_lesson slots (there are none currently), then add user's bookings
+    const clinicSlots = slots.filter((s) => s.programType === "clinic_105");
+    return [...clinicSlots, ...myPrivateLessons];
+  }, [slots, myPrivateLessons]);
 
   const navigate = (dir: 1 | -1) => {
     setCurrentDate((prev) => {
@@ -354,11 +379,11 @@ export default function Schedule() {
     setView("day");
   };
 
-  const totalPrivate = slots.filter((s) => s.programType === "private_lesson").length;
-  const totalClinic = slots.filter((s) => s.programType === "clinic_105").length;
-  const totalSpotsLeft = slots
+  const totalPrivate = allSlots.filter((s) => s.programType === "private_lesson").length;
+  const totalClinic = allSlots.filter((s) => s.programType === "clinic_105").length;
+  const totalSpotsLeft = allSlots
     .filter((s) => s.programType === "clinic_105")
-    .reduce((sum, s) => sum + Math.max(0, s.maxParticipants - s.currentParticipants), 0);
+    .reduce((sum, s) => sum + Math.max(0, (s.maxParticipants ?? 0) - (s.currentParticipants ?? 0)), 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -436,9 +461,9 @@ export default function Schedule() {
           </div>
         ) : (
           <>
-            {view === "day" && <HourlyDayView date={currentDate} slots={slots} />}
-            {view === "week" && <WeekView weekStart={startOfWeek(currentDate)} slots={slots} onDayClick={handleDayClick} />}
-            {view === "month" && <MonthView monthStart={startOfMonth(currentDate)} slots={slots} onDayClick={handleDayClick} />}
+            {view === "day" && <HourlyDayView date={currentDate} slots={allSlots} />}
+            {view === "week" && <WeekView weekStart={startOfWeek(currentDate)} slots={allSlots} onDayClick={handleDayClick} />}
+            {view === "month" && <MonthView monthStart={startOfMonth(currentDate)} slots={allSlots} onDayClick={handleDayClick} />}
           </>
         )}
 

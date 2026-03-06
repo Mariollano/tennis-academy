@@ -414,6 +414,59 @@ export const appRouter = router({
         }));
       }),
 
+    // Authenticated: list the current user's active private lesson bookings as calendar events
+    listMyPrivateLessons: protectedProcedure
+      .input(z.object({
+        from: z.string().optional(),
+        to: z.string().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const fromStr = input.from ?? new Date().toISOString().slice(0, 10);
+        const toStr = input.to ?? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const rows = await db.select({
+          id: bookings.id,
+          status: bookings.status,
+          sessionDate: bookings.sessionDate,
+          sessionStartTime: bookings.sessionStartTime,
+          sessionEndTime: bookings.sessionEndTime,
+          totalAmountCents: bookings.totalAmountCents,
+          programName: programs.name,
+          programType: programs.type,
+        })
+          .from(bookings)
+          .leftJoin(programs, eq(bookings.programId, programs.id))
+          .where(and(
+            eq(bookings.userId, ctx.user.id),
+            sql`${programs.type} = 'private_lesson'`,
+            sql`${bookings.status} IN ('pending', 'confirmed')`,
+            sql`${bookings.sessionDate} IS NOT NULL`,
+            sql`DATE(${bookings.sessionDate}) >= ${fromStr}`,
+            sql`DATE(${bookings.sessionDate}) <= ${toStr}`,
+          ))
+          .orderBy(bookings.sessionDate, bookings.sessionStartTime)
+          .limit(100);
+        // Return in the same shape as a schedule slot so the frontend can merge them
+        return rows.map(r => ({
+          id: -r.id, // negative ID to distinguish from real slot IDs
+          bookingId: r.id,
+          programType: r.programType,
+          programName: r.programName,
+          slotDate: r.sessionDate,
+          startTime: r.sessionStartTime,
+          endTime: r.sessionEndTime,
+          status: r.status,
+          maxParticipants: 1,
+          currentParticipants: 1,
+          isAvailable: false, // already booked
+          spotsLeft: 0,
+          isFull: true,
+          isMyBooking: true,
+          priceInCents: r.totalAmountCents,
+        }));
+      }),
+
     // Admin: full calendar view (slots + bookings + blocked times)
     adminCalendar: adminProcedure
       .input(z.object({ from: z.string(), to: z.string() }))

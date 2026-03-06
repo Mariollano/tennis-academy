@@ -1,0 +1,65 @@
+{
+  "query": "SELECT b.id, b.userId, b.programId, b.scheduleSlotId, b.status, b.sessionDate, b.sessionStartTime, b.sessionEndTime, p.type FROM bookings b JOIN programs p ON b.programId = p.id WHERE p.type = 'private_lesson' ORDER BY b.id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT b.id, b.userId, b.programId, b.scheduleSlotId, b.status, b.sessionDate, b.sessionStartTime, b.sessionEndTime, p.type FROM bookings b JOIN programs p ON b.programId = p.id WHERE p.type = 'private_lesson' ORDER BY b.id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "300001",
+      "userId": "1",
+      "programId": "2",
+      "scheduleSlotId": "NULL",
+      "status": "pending",
+      "sessionDate": "2026-03-07",
+      "sessionStartTime": "10:00:00",
+      "sessionEndTime": "11:00:00",
+      "type": "private_lesson"
+    },
+    {
+      "id": "270001",
+      "userId": "1",
+      "programId": "2",
+      "scheduleSlotId": "NULL",
+      "status": "pending",
+      "sessionDate": "2026-03-06",
+      "sessionStartTime": "08:00:00",
+      "sessionEndTime": "09:00:00",
+      "type": "private_lesson"
+    },
+    {
+      "id": "240005",
+      "userId": "1",
+      "programId": "2",
+      "scheduleSlotId": "NULL",
+      "status": "pending",
+      "sessionDate": "2026-03-06",
+      "sessionStartTime": "NULL",
+      "sessionEndTime": "NULL",
+      "type": "private_lesson"
+    },
+    {
+      "id": "240004",
+      "userId": "1",
+      "programId": "2",
+      "scheduleSlotId": "NULL",
+      "status": "pending",
+      "sessionDate": "2026-03-06",
+      "sessionStartTime": "NULL",
+      "sessionEndTime": "NULL",
+      "type": "private_lesson"
+    },
+    {
+      "id": "240003",
+      "userId": "1",
+      "programId": "2",
+      "scheduleSlotId": "NULL",
+      "status": "pending",
+      "sessionDate": "2026-03-06",
+      "sessionStartTime": "NULL",
+      "sessionEndTime": "NULL",
+      "type": "private_lesson"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tprogramId\tscheduleSlotId\tstatus\tsessionDate\tsessionStartTime\tsessionEndTime\ttype\n300001\t1\t2\tNULL\tpending\t2026-03-07\t10:00:00\t11:00:00\tprivate_lesson\n270001\t1\t2\tNULL\tpending\t2026-03-06\t08:00:00\t09:00:00\tprivate_lesson\n240005\t1\t2\tNULL\tpending\t2026-03-06\tNULL\tNULL\tprivate_lesson\n240004\t1\t2\tNULL\tpending\t2026-03-06\tNULL\tNULL\tprivate_lesson\n240003\t1\t2\tNULL\tpending\t2026-03-06\tNULL\tNULL\tprivate_lesson\n",
+  "stderr": "",
+  "execution_time_ms": 111
+}
