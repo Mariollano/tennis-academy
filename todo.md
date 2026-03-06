@@ -226,3 +226,4 @@
 - [x] Fix booking email: changed heading to "Booking Request Received" and body copy to clarify pending state
 - [x] Add confirmation email + SMS to student when admin confirms a booking (confirmNow procedure updated)
 - [x] Phone number field already in profile page — confirmed present and saving correctly
+- [x] Fix: Admin Dashboard Confirm button now uses confirmNow (sends confirmed email + SMS) instead of updateStatus

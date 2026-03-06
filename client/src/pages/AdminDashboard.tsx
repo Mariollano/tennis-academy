@@ -54,6 +54,11 @@ export default function AdminDashboard() {
     onError: () => toast.error("Failed to delete promo code."),
   });
 
+  const confirmNowMutation = trpc.booking.confirmNow.useMutation({
+    onSuccess: () => { toast.success("Booking confirmed! Student notified via email & SMS."); refetchBookings(); },
+    onError: () => toast.error("Failed to confirm booking."),
+  });
+
   const updateStatusMutation = trpc.booking.updateStatus.useMutation({
     onSuccess: () => { toast.success("Booking status updated!"); refetchBookings(); },
     onError: () => toast.error("Failed to update status."),
@@ -244,7 +249,8 @@ export default function AdminDashboard() {
                             {item.booking.status === "pending" && (
                               <>
                                 <Button size="sm" className="bg-green-600 text-white hover:bg-green-700 h-7 text-xs px-2"
-                                  onClick={() => updateStatusMutation.mutate({ id: item.booking.id, status: "confirmed" })}>
+                                  onClick={() => confirmNowMutation.mutate({ id: item.booking.id })}
+                                  disabled={confirmNowMutation.isPending}>
                                   <CheckCircle className="w-3 h-3 mr-1" /> Confirm
                                 </Button>
                                 <Button size="sm" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 h-7 text-xs px-2"
