@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Users, Calendar, DollarSign, MessageSquare, CheckCircle,
-  Clock, XCircle, Send, Trophy, BarChart3, Shield, Tag, Trash2, Plus, Percent
+  Clock, XCircle, Send, Trophy, BarChart3, Shield, Tag, Trash2, Plus, Percent, Mail
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -134,11 +134,17 @@ export default function AdminDashboard() {
           </div>
           <h1 className="text-3xl font-extrabold">RI Tennis Academy — Control Center</h1>
           <p className="text-primary-foreground/70 mt-1">Welcome back, {user?.name?.split(" ")[0] || "Coach Mario"}</p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap gap-3">
             <Link href="/admin/schedule">
               <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 gap-2">
                 <Calendar className="w-4 h-4 text-accent" />
                 Manage My Schedule
+              </Button>
+            </Link>
+            <Link href="/admin/newsletter">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 gap-2">
+                <Mail className="w-4 h-4 text-accent" />
+                Newsletter Manager
               </Button>
             </Link>
           </div>

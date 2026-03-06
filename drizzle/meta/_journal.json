@@ -43,6 +43,13 @@
       "when": 1772745644644,
       "tag": "0005_organic_lilith",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1772806364261,
+      "tag": "0006_conscious_wild_child",
+      "breakpoints": true
     }
   ]
 }

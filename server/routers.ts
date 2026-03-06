@@ -23,9 +23,33 @@ import { getDb } from "./db";
 import {
   users, bookings, programs, scheduleSlots, payments,
   smsBroadcasts, mentalCoachingResources, merchandise, tournamentBookings, tournamentParticipants,
-  blockedTimes, sessionWaitlist
+  blockedTimes, sessionWaitlist, newsletters, newsletterSubscribers
 } from "../drizzle/schema";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
+
+// ─── Program Schedule HTML helper (used in newsletter) ─────────────────────
+function buildProgramScheduleHtml(): string {
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="background:#1a3a8f;color:#fff;">
+          <th style="padding:8px 12px;text-align:left;">Program</th>
+          <th style="padding:8px 12px;text-align:left;">Schedule</th>
+          <th style="padding:8px 12px;text-align:right;">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Private Lesson (1-on-1)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">By appointment</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$75 / hr</td></tr>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">105 Game Adult Clinic</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">See schedule</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$35 / 1.5 hr</td></tr>
+        <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Junior Program – Daily</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$80 / day</td></tr>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">Junior Program – Weekly</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$350 / week</td></tr>
+        <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Summer Camp – Daily</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 9 AM–2 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$90 / day</td></tr>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">Summer Camp – Weekly</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 9 AM–2 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$420 / week</td></tr>
+        <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">After Camp</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">2–5 PM (add-on)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">+$20/day or $50 afternoon</td></tr>
+        <tr><td style="padding:8px 12px;">Mental Coaching</td><td style="padding:8px 12px;">By appointment</td><td style="padding:8px 12px;text-align:right;">$75 / hr</td></tr>
+      </tbody>
+    </table>`;
+}
 
 // Admin guard middleware
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -250,6 +274,15 @@ export const appRouter = router({
             sessionTime: timeStr,
             bookingId: newBookingId,
           }).catch(() => {}); // non-blocking
+        }
+
+        // Auto-subscribe student to newsletter if they have an email
+        if (ctx.user.email) {
+          db.insert(newsletterSubscribers).values({
+            email: ctx.user.email,
+            name: ctx.user.name || null,
+            source: "booking",
+          }).onDuplicateKeyUpdate({ set: { name: ctx.user.name || undefined } }).catch(() => {}); // non-blocking, ignore duplicates
         }
 
         // Send SMS confirmation to the student
@@ -1139,6 +1172,225 @@ export const appRouter = router({
       if (!db) return [];
       return db.select().from(programs).where(eq(programs.isActive, true)).orderBy(programs.name);
     }),
+  }),
+
+  // ─── Newsletter ─────────────────────────────────────────────────────────────
+  newsletter: router({
+    // Public: subscribe to newsletter
+    subscribe: publicProcedure
+      .input(z.object({ email: z.string().email(), name: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        // Upsert: if already subscribed, reactivate
+        const existing = await db.select().from(newsletterSubscribers)
+          .where(eq(newsletterSubscribers.email, input.email)).limit(1);
+        if (existing.length > 0) {
+          await db.update(newsletterSubscribers)
+            .set({ isActive: true, name: input.name || existing[0].name, unsubscribedAt: null as any })
+            .where(eq(newsletterSubscribers.email, input.email));
+        } else {
+          await db.insert(newsletterSubscribers).values({
+            email: input.email,
+            name: input.name,
+            isActive: true,
+            source: "website",
+          });
+        }
+        return { success: true };
+      }),
+
+    // Public: unsubscribe
+    unsubscribe: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.update(newsletterSubscribers)
+          .set({ isActive: false, unsubscribedAt: new Date() })
+          .where(eq(newsletterSubscribers.email, input.email));
+        return { success: true };
+      }),
+
+    // Admin: list newsletters
+    list: adminProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return db.select().from(newsletters).orderBy(desc(newsletters.createdAt)).limit(50);
+    }),
+
+    // Admin: get subscriber count
+    subscriberCount: adminProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return { count: 0 };
+      const result = await db.select({ count: sql<number>`count(*)` })
+        .from(newsletterSubscribers).where(eq(newsletterSubscribers.isActive, true));
+      return { count: result[0]?.count || 0 };
+    }),
+
+    // Admin: list subscribers
+    listSubscribers: adminProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return db.select().from(newsletterSubscribers)
+        .where(eq(newsletterSubscribers.isActive, true))
+        .orderBy(desc(newsletterSubscribers.subscribedAt));
+    }),
+
+    // Admin: save draft newsletter
+    saveDraft: adminProcedure
+      .input(z.object({
+        id: z.number().optional(),
+        subject: z.string(),
+        headline: z.string().optional(),
+        bodyHtml: z.string(),
+        tennisTip: z.string().optional(),
+        mentalTip: z.string().optional(),
+        winnerSpotlight: z.string().optional(),
+        programScheduleHtml: z.string().optional(),
+        isAutoGenerated: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        if (input.id) {
+          await db.update(newsletters).set({
+            subject: input.subject,
+            headline: input.headline,
+            bodyHtml: input.bodyHtml,
+            tennisTip: input.tennisTip,
+            mentalTip: input.mentalTip,
+            winnerSpotlight: input.winnerSpotlight,
+            programScheduleHtml: input.programScheduleHtml,
+            isAutoGenerated: input.isAutoGenerated ?? false,
+          }).where(eq(newsletters.id, input.id));
+          return { id: input.id };
+        } else {
+          const result = await db.insert(newsletters).values({
+            subject: input.subject,
+            headline: input.headline,
+            bodyHtml: input.bodyHtml,
+            tennisTip: input.tennisTip,
+            mentalTip: input.mentalTip,
+            winnerSpotlight: input.winnerSpotlight,
+            programScheduleHtml: input.programScheduleHtml,
+            status: "draft",
+            createdBy: ctx.user.id,
+            isAutoGenerated: input.isAutoGenerated ?? false,
+          });
+          return { id: Number((result as any).insertId) };
+        }
+      }),
+
+    // Admin: send newsletter to all active subscribers
+    send: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        if (!isEmailConfigured()) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Email not configured" });
+
+        const [nl] = await db.select().from(newsletters).where(eq(newsletters.id, input.id)).limit(1);
+        if (!nl) throw new TRPCError({ code: "NOT_FOUND" });
+
+        const subscribers = await db.select()
+          .from(newsletterSubscribers)
+          .where(eq(newsletterSubscribers.isActive, true));
+
+        if (subscribers.length === 0) return { success: true, sent: 0, failed: 0 };
+
+        const { sendNewsletterEmail } = await import("./newsletterEmail");
+        let sent = 0; let failed = 0;
+        for (const sub of subscribers) {
+          try {
+            await sendNewsletterEmail({
+              toEmail: sub.email,
+              toName: sub.name || undefined,
+              subject: nl.subject,
+              bodyHtml: nl.bodyHtml,
+              tennisTip: nl.tennisTip || undefined,
+              mentalTip: nl.mentalTip || undefined,
+              winnerSpotlight: nl.winnerSpotlight || undefined,
+              programScheduleHtml: nl.programScheduleHtml || undefined,
+              headline: nl.headline || undefined,
+            });
+            sent++;
+          } catch { failed++; }
+        }
+
+        await db.update(newsletters).set({
+          status: "sent",
+          sentAt: new Date(),
+          recipientCount: sent,
+        }).where(eq(newsletters.id, input.id));
+
+        return { success: true, sent, failed };
+      }),
+
+    // Admin: auto-generate newsletter content using LLM
+    autoGenerate: adminProcedure
+      .input(z.object({
+        winnerSpotlight: z.string().optional(),
+        customNote: z.string().optional(),
+        edition: z.enum(["tuesday", "friday", "special"]).default("tuesday"),
+      }))
+      .mutation(async ({ input }) => {
+        const programScheduleHtml = buildProgramScheduleHtml();
+        const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+        const editionLabel = input.edition === "friday" ? "Friday" : input.edition === "special" ? "Special" : "Tuesday";
+
+        const prompt = `You are writing a professional, warm, and motivating tennis academy newsletter for RI Tennis Academy (Coach Mario Llano, Rhode Island). 
+Today is ${today}. This is the ${editionLabel} edition.
+
+Generate:
+1. A catchy subject line (max 80 chars)
+2. A compelling headline (max 120 chars) 
+3. A weekly tennis technique tip (2-3 sentences, practical and actionable)
+4. A mental performance tip (2-3 sentences, based on Mario's "Delete Fear" philosophy)
+5. A brief motivational intro paragraph for the newsletter body (3-4 sentences)
+
+${input.winnerSpotlight ? `Winner to spotlight this week: ${input.winnerSpotlight}` : ""}
+${input.customNote ? `Special note to include: ${input.customNote}` : ""}
+
+Respond in JSON with keys: subject, headline, tennisTip, mentalTip, bodyIntro`;
+
+        const response = await invokeLLM({
+          messages: [{ role: "user", content: prompt }],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "newsletter_content",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  subject: { type: "string" },
+                  headline: { type: "string" },
+                  tennisTip: { type: "string" },
+                  mentalTip: { type: "string" },
+                  bodyIntro: { type: "string" },
+                },
+                required: ["subject", "headline", "tennisTip", "mentalTip", "bodyIntro"],
+                additionalProperties: false,
+              },
+            },
+          } as any,
+        });
+
+        const raw = (response.choices[0]?.message?.content as string) || "{}";
+        const generated = JSON.parse(raw);
+        return { ...generated, programScheduleHtml };
+      }),
+
+    // Admin: delete a newsletter draft
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.delete(newsletters).where(and(eq(newsletters.id, input.id), eq(newsletters.status, "draft")));
+        return { success: true };
+      }),
   }),
 
   // ─── Stripe Payments ────────────────────────────────────────────────────────

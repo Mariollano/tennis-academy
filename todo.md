@@ -213,3 +213,8 @@
 - [x] Feature: Jump-to-date picker on Schedule page
 - [x] Feature: Show clinic start/end time on booking confirmation email
 - [x] Feature: Admin Recalculate Counts button for participant sync
+- [x] Feature: Newsletter DB schema (subscribers, newsletters, sent_log tables)
+- [x] Feature: Admin Newsletter Composer page with preview + send
+- [x] Feature: Newsletter sections: programs/schedule/cost, tennis tip, mental tip, winner spotlight, best practices
+- [x] Feature: March 16 restart newsletter draft and send
+- [x] Feature: Twice-weekly automated newsletter (Tue + Fri)
