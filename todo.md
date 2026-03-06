@@ -221,3 +221,5 @@
 - [ ] Fix: Redesign newsletter email template to look professional and on-brand (RI Tennis Academy colors, clean layout)
 - [x] Newsletter feature rebuilt inside main app: compose/preview/send, AI generate, history, subscriber management (bulk CSV import), premium navy/gold email template
 - [x] Remove newsletter feature completely from the app (moving to separate project)
+- [x] Fix Twilio SMS delivery — upgraded Twilio to paid account, tested live send to +14019655873, confirmed working
+- [x] Audit and fix all booking prices: fixed Clinic 105 ($30->$35), Junior Daily ($0->$80), added Junior Weekly ($350), Summer Camp Daily ($90), Summer Camp Weekly ($420) to DB

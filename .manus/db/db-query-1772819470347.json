@@ -1,0 +1,42 @@
+{
+  "query": "SELECT id, name, type, priceInCents, isActive, description FROM programs ORDER BY type, name LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, name, type, priceInCents, isActive, description FROM programs ORDER BY type, name LIMIT 20;",
+  "rows": [
+    {
+      "id": "2",
+      "name": "Private Lesson",
+      "type": "private_lesson",
+      "priceInCents": "12000",
+      "isActive": "1",
+      "description": "NULL"
+    },
+    {
+      "id": "1",
+      "name": "Clinic 105",
+      "type": "clinic_105",
+      "priceInCents": "3000",
+      "isActive": "1",
+      "description": "NULL"
+    },
+    {
+      "id": "60001",
+      "name": "Junior Daily",
+      "type": "junior_daily",
+      "priceInCents": "0",
+      "isActive": "1",
+      "description": "NULL"
+    },
+    {
+      "id": "30001",
+      "name": "Mental Coaching",
+      "type": "mental_coaching",
+      "priceInCents": "0",
+      "isActive": "1",
+      "description": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\ttype\tpriceInCents\tisActive\tdescription\n2\tPrivate Lesson\tprivate_lesson\t12000\t1\tNULL\n1\tClinic 105\tclinic_105\t3000\t1\tNULL\n60001\tJunior Daily\tjunior_daily\t0\t1\tNULL\n30001\tMental Coaching\tmental_coaching\t0\t1\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}
