@@ -219,3 +219,4 @@
 - [x] Feature: March 16 restart newsletter draft and send
 - [x] Feature: Twice-weekly automated newsletter (Tue + Fri)
 - [ ] Fix: Redesign newsletter email template to look professional and on-brand (RI Tennis Academy colors, clean layout)
+- [x] Newsletter feature rebuilt inside main app: compose/preview/send, AI generate, history, subscriber management (bulk CSV import), premium navy/gold email template

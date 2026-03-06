@@ -141,6 +141,12 @@ export default function AdminDashboard() {
                 Manage My Schedule
               </Button>
             </Link>
+            <Link href="/admin/newsletter">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 gap-2">
+                <MessageSquare className="w-4 h-4 text-accent" />
+                Newsletter
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

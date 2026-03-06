@@ -23,8 +23,9 @@ import { getDb } from "./db";
 import {
   users, bookings, programs, scheduleSlots, payments,
   smsBroadcasts, mentalCoachingResources, merchandise, tournamentBookings, tournamentParticipants,
-  blockedTimes, sessionWaitlist
+  blockedTimes, sessionWaitlist, newsletterSubscribers, newsletters
 } from "../drizzle/schema";
+import { sendNewsletterEmail, buildNewsletterHtml } from "./newsletterEmail";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
 
 // ─── Program Schedule HTML helper (used in newsletter) ─────────────────────
@@ -1164,6 +1165,181 @@ export const appRouter = router({
       if (!db) return [];
       return db.select().from(programs).where(eq(programs.isActive, true)).orderBy(programs.name);
     }),
+  }),
+
+  // ─── Newsletter ────────────────────────────────────────────────────────────
+  newsletter: router({
+    subscriberCount: protectedProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return { count: 0 };
+      const result = await db.select({ count: sql<number>`count(*)` }).from(newsletterSubscribers).where(eq(newsletterSubscribers.isActive, true));
+      return { count: Number(result[0]?.count ?? 0) };
+    }),
+    listSubscribers: protectedProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return db.select().from(newsletterSubscribers).orderBy(desc(newsletterSubscribers.createdAt));
+    }),
+    addSubscriber: protectedProcedure
+      .input(z.object({ email: z.string().email(), name: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.insert(newsletterSubscribers).values({ email: input.email.toLowerCase().trim(), name: input.name, isActive: true });
+        return { success: true };
+      }),
+    bulkImport: protectedProcedure
+      .input(z.object({ subscribers: z.array(z.object({ email: z.string().email(), name: z.string().optional() })) }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        let added = 0; let skipped = 0;
+        for (const s of input.subscribers) {
+          try {
+            await db.insert(newsletterSubscribers).values({ email: s.email.toLowerCase().trim(), name: s.name, isActive: true });
+            added++;
+          } catch { skipped++; }
+        }
+        return { added, skipped };
+      }),
+    unsubscribe: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.update(newsletterSubscribers).set({ isActive: false, unsubscribedAt: new Date() }).where(eq(newsletterSubscribers.id, input.id));
+        return { success: true };
+      }),
+    deleteSubscriber: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.delete(newsletterSubscribers).where(eq(newsletterSubscribers.id, input.id));
+        return { success: true };
+      }),
+    list: protectedProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return db.select().from(newsletters).orderBy(desc(newsletters.createdAt));
+    }),
+    saveDraft: protectedProcedure
+      .input(z.object({
+        id: z.number().optional(),
+        subject: z.string().min(1),
+        headline: z.string().optional(),
+        body: z.string().optional(),
+        tennisTip: z.string().optional(),
+        mentalTip: z.string().optional(),
+        winnerSpotlight: z.string().optional(),
+        includeSchedule: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { id, ...data } = input;
+        if (id) {
+          await db.update(newsletters).set({ ...data, updatedAt: new Date() }).where(eq(newsletters.id, id));
+          return { id };
+        }
+        const result = await db.insert(newsletters).values({ ...data, status: "draft" });
+        return { id: Number((result[0] as any).insertId) };
+      }),
+    preview: protectedProcedure
+      .input(z.object({
+        subject: z.string(),
+        headline: z.string().optional(),
+        body: z.string().optional(),
+        tennisTip: z.string().optional(),
+        mentalTip: z.string().optional(),
+        winnerSpotlight: z.string().optional(),
+        includeSchedule: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const html = buildNewsletterHtml(input);
+        return { html };
+      }),
+    sendTest: protectedProcedure
+      .input(z.object({
+        toEmail: z.string().email(),
+        subject: z.string(),
+        headline: z.string().optional(),
+        body: z.string().optional(),
+        tennisTip: z.string().optional(),
+        mentalTip: z.string().optional(),
+        winnerSpotlight: z.string().optional(),
+        includeSchedule: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { toEmail, ...content } = input;
+        const html = buildNewsletterHtml(content);
+        const result = await sendNewsletterEmail({ toEmail, subject: content.subject, html });
+        if (!result.success) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: result.error || "Failed to send" });
+        return { success: true };
+      }),
+    sendToAll: protectedProcedure
+      .input(z.object({
+        id: z.number().optional(),
+        subject: z.string(),
+        headline: z.string().optional(),
+        body: z.string().optional(),
+        tennisTip: z.string().optional(),
+        mentalTip: z.string().optional(),
+        winnerSpotlight: z.string().optional(),
+        includeSchedule: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const subs = await db.select().from(newsletterSubscribers).where(eq(newsletterSubscribers.isActive, true));
+        if (subs.length === 0) throw new TRPCError({ code: "BAD_REQUEST", message: "No active subscribers" });
+        const { id, ...content } = input;
+        const html = buildNewsletterHtml(content);
+        let sent = 0;
+        for (const sub of subs) {
+          const r = await sendNewsletterEmail({ toEmail: sub.email, toName: sub.name ?? undefined, subject: content.subject, html });
+          if (r.success) sent++;
+        }
+        const now = new Date();
+        if (id) {
+          await db.update(newsletters).set({ status: "sent", sentAt: now, recipientCount: sent, updatedAt: now }).where(eq(newsletters.id, id));
+        } else {
+          await db.insert(newsletters).values({ ...content, status: "sent", sentAt: now, recipientCount: sent });
+        }
+        return { success: true, recipientCount: sent };
+      }),
+    generate: protectedProcedure
+      .input(z.object({ type: z.enum(["tuesday", "friday", "special"]), context: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+        const typeLabel = input.type === "tuesday" ? "Tuesday Update" : input.type === "friday" ? "Friday Recap" : "Special Announcement";
+        const prompt = `You are Coach Mario Llano writing the RI Tennis Academy weekly newsletter (${typeLabel}, ${today}). ${input.context ? `Additional context: ${input.context}` : ""}
+
+Write a newsletter with these sections. Respond with valid JSON only:
+{
+  "subject": "engaging email subject line",
+  "headline": "main headline (1 sentence)",
+  "body": "warm personal message from Coach Mario (2-3 paragraphs, conversational tone, mentions Delete Fear philosophy)",
+  "tennisTip": "one practical tennis technique tip (2-3 sentences)",
+  "mentalTip": "one mental game / Delete Fear tip (2-3 sentences)",
+  "winnerSpotlight": "brief shoutout to a student or achievement (1-2 sentences)"
+}`;
+        const response = await invokeLLM({
+          messages: [{ role: "user", content: prompt }],
+          response_format: { type: "json_object" } as any,
+        });
+        const raw = (response.choices[0]?.message?.content as string) || "{}";
+        try { return JSON.parse(raw); }
+        catch { return { subject: "", headline: "", body: raw, tennisTip: "", mentalTip: "", winnerSpotlight: "" }; }
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.delete(newsletters).where(eq(newsletters.id, input.id));
+        return { success: true };
+      }),
   }),
 
   // ─── Stripe Payments ────────────────────────────────────────────────────────
