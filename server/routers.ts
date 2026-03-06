@@ -288,7 +288,25 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        // Fetch current booking to check previous status and scheduleSlotId
+        const [existing] = await db.select().from(bookings).where(eq(bookings.id, input.id)).limit(1);
         await db.update(bookings).set({ status: input.status, updatedAt: new Date() }).where(eq(bookings.id, input.id));
+        // Sync slot participant counter when moving to/from active statuses
+        if (existing?.scheduleSlotId) {
+          const wasActive = ["pending", "confirmed"].includes(existing.status);
+          const isNowActive = ["pending", "confirmed"].includes(input.status);
+          if (wasActive && !isNowActive) {
+            // Booking deactivated — decrement counter
+            await db.update(scheduleSlots)
+              .set({ currentParticipants: sql`GREATEST(currentParticipants - 1, 0)`, updatedAt: new Date() })
+              .where(eq(scheduleSlots.id, existing.scheduleSlotId));
+          } else if (!wasActive && isNowActive) {
+            // Booking reactivated — increment counter
+            await db.update(scheduleSlots)
+              .set({ currentParticipants: sql`${scheduleSlots.currentParticipants} + 1`, updatedAt: new Date() })
+              .where(eq(scheduleSlots.id, existing.scheduleSlotId));
+          }
+        }
         return { success: true };
       }),
 
@@ -365,7 +383,7 @@ export const appRouter = router({
     listAvailable: publicProcedure
       .input(z.object({
         programType: z.enum(["clinic_105", "private_lesson"]),
-        from: z.string().optional(), // ISO date
+        from: z.string().optional(), // ISO date YYYY-MM-DD
         to: z.string().optional(),
       }))
       .query(async ({ input }) => {
@@ -377,32 +395,44 @@ export const appRouter = router({
           .where(and(eq(programs.type, input.programType as any), eq(programs.isActive, true)));
         if (!matchingPrograms.length) return [];
         const programIds = matchingPrograms.map(p => p.id);
-        const fromDate = input.from ? new Date(input.from) : new Date();
-        const toDate = input.to ? new Date(input.to) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+        // Use DATE() SQL comparison to avoid UTC offset issues (same as listAvailableMulti)
+        const fromStr = input.from ?? new Date().toISOString().slice(0, 10);
+        const toStr = input.to ?? new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
         const slots = await db.select({
           slot: scheduleSlots,
           programName: programs.name,
           programType: programs.type,
           priceInCents: programs.priceInCents,
+          // Real-time booking count — self-healing even if cached counter drifts
+          activeBookings: sql<number>`(
+            SELECT COUNT(*) FROM bookings b
+            WHERE b.scheduleSlotId = ${scheduleSlots.id}
+            AND b.status IN ('pending','confirmed')
+          )`,
         })
           .from(scheduleSlots)
           .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
           .where(and(
             eq(scheduleSlots.isAvailable, true),
-            gte(scheduleSlots.slotDate, fromDate as any),
-            lte(scheduleSlots.slotDate, toDate as any),
+            sql`DATE(${scheduleSlots.slotDate}) >= ${fromStr}`,
+            sql`DATE(${scheduleSlots.slotDate}) <= ${toStr}`,
             sql`${scheduleSlots.programId} IN (${sql.join(programIds.map(id => sql`${id}`), sql`, `)})`
           ))
           .orderBy(scheduleSlots.slotDate, scheduleSlots.startTime)
           .limit(60);
-        return slots.map(s => ({
-          ...s.slot,
-          programName: s.programName,
-          programType: s.programType,
-          priceInCents: s.priceInCents,
-          spotsLeft: Math.max(0, s.slot.maxParticipants - s.slot.currentParticipants),
-          isFull: s.slot.currentParticipants >= s.slot.maxParticipants,
-        }));
+        return slots.map(s => {
+          const realCount = Number(s.activeBookings ?? 0);
+          const spotsLeft = Math.max(0, s.slot.maxParticipants - realCount);
+          return {
+            ...s.slot,
+            currentParticipants: realCount, // override cached value with live count
+            programName: s.programName,
+            programType: s.programType,
+            priceInCents: s.priceInCents,
+            spotsLeft,
+            isFull: spotsLeft <= 0,
+          };
+        });
       }),
 
     // Public: list available slots for multiple program types (used by Schedule page)
@@ -432,6 +462,12 @@ export const appRouter = router({
           programName: programs.name,
           programType: programs.type,
           priceInCents: programs.priceInCents,
+          // Real-time booking count — self-healing even if cached counter drifts
+          activeBookings: sql<number>`(
+            SELECT COUNT(*) FROM bookings b
+            WHERE b.scheduleSlotId = ${scheduleSlots.id}
+            AND b.status IN ('pending','confirmed')
+          )`,
         })
           .from(scheduleSlots)
           .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
@@ -443,14 +479,19 @@ export const appRouter = router({
           ))
           .orderBy(scheduleSlots.slotDate, scheduleSlots.startTime)
           .limit(200);
-        return slots.map(s => ({
-          ...s.slot,
-          programName: s.programName,
-          programType: s.programType,
-          priceInCents: s.priceInCents,
-          spotsLeft: Math.max(0, s.slot.maxParticipants - s.slot.currentParticipants),
-          isFull: s.slot.currentParticipants >= s.slot.maxParticipants,
-        }));
+        return slots.map(s => {
+          const realCount = Number(s.activeBookings ?? s.slot.currentParticipants ?? 0);
+          const spotsLeft = Math.max(0, s.slot.maxParticipants - realCount);
+          return {
+            ...s.slot,
+            currentParticipants: realCount,
+            programName: s.programName,
+            programType: s.programType,
+            priceInCents: s.priceInCents,
+            spotsLeft,
+            isFull: spotsLeft <= 0,
+          };
+        });
       }),
 
     // Authenticated: list the current user's active private lesson bookings as calendar events
@@ -518,6 +559,11 @@ export const appRouter = router({
             slot: scheduleSlots,
             programName: programs.name,
             programType: programs.type,
+            activeBookings: sql<number>`(
+              SELECT COUNT(*) FROM bookings b
+              WHERE b.scheduleSlotId = ${scheduleSlots.id}
+              AND b.status IN ('pending','confirmed')
+            )`,
           })
             .from(scheduleSlots)
             .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
@@ -562,13 +608,18 @@ export const appRouter = router({
             .limit(100),
         ]);
         return {
-          slots: slots.map(s => ({
-            ...s.slot,
-            programName: s.programName,
-            programType: s.programType,
-            spotsLeft: Math.max(0, s.slot.maxParticipants - s.slot.currentParticipants),
-            isFull: s.slot.currentParticipants >= s.slot.maxParticipants,
-          })),
+          slots: slots.map(s => {
+            const realCount = Number(s.activeBookings ?? s.slot.currentParticipants ?? 0);
+            const spotsLeft = Math.max(0, s.slot.maxParticipants - realCount);
+            return {
+              ...s.slot,
+              currentParticipants: realCount,
+              programName: s.programName,
+              programType: s.programType,
+              spotsLeft,
+              isFull: spotsLeft <= 0,
+            };
+          }),
           bookings: calBookings,
           blocked,
         };
@@ -587,6 +638,11 @@ export const appRouter = router({
             slot: scheduleSlots,
             programName: programs.name,
             programType: programs.type,
+            activeBookings: sql<number>`(
+              SELECT COUNT(*) FROM bookings b
+              WHERE b.scheduleSlotId = ${scheduleSlots.id}
+              AND b.status IN ('pending','confirmed')
+            )`,
           })
             .from(scheduleSlots)
             .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
@@ -605,13 +661,18 @@ export const appRouter = router({
             .limit(100),
         ]);
         return {
-          slots: slots.map(s => ({
-            ...s.slot,
-            programName: s.programName,
-            programType: s.programType,
-            spotsLeft: Math.max(0, s.slot.maxParticipants - s.slot.currentParticipants),
-            isFull: s.slot.currentParticipants >= s.slot.maxParticipants,
-          })),
+          slots: slots.map(s => {
+            const realCount = Number(s.activeBookings ?? s.slot.currentParticipants ?? 0);
+            const spotsLeft = Math.max(0, s.slot.maxParticipants - realCount);
+            return {
+              ...s.slot,
+              currentParticipants: realCount,
+              programName: s.programName,
+              programType: s.programType,
+              spotsLeft,
+              isFull: spotsLeft <= 0,
+            };
+          }),
           blocked,
         };
       }),

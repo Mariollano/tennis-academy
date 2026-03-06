@@ -1,0 +1,9 @@
+{
+  "query": "\nUPDATE schedule_slots ss\nSET currentParticipants = (\n  SELECT COUNT(*)\n  FROM bookings b\n  WHERE b.scheduleSlotId = ss.id\n  AND b.status IN ('pending', 'confirmed')\n)\nWHERE ss.id IN (\n  SELECT id FROM (\n    SELECT ss2.id\n    FROM schedule_slots ss2\n    WHERE ss2.currentParticipants != (\n      SELECT COUNT(*) FROM bookings b2\n      WHERE b2.scheduleSlotId = ss2.id\n      AND b2.status IN ('pending', 'confirmed')\n    )\n  ) AS mismatched\n);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \nUPDATE schedule_slots ss\nSET currentParticipants = (\n  SELECT COUNT(*)\n  FROM bookings b\n  WHERE b.scheduleSlotId = ss.id\n  AND b.status IN ('pending', 'confirmed')\n)\nWHERE ss.id IN (\n  SELECT id FROM (\n    SELECT ss2.id\n    FROM schedule_slots ss2\n    WHERE ss2.currentParticipants != (\n      SELECT COUNT(*) FROM bookings b2\n      WHERE b2.scheduleSlotId = ss2.id\n      AND b2.status IN ('pending', 'confirmed')\n    )\n  ) AS mismatched\n);\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 113
+}

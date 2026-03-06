@@ -208,3 +208,4 @@
 - [x] Junior Programs: replace day-count selector with multi-day date picker (select specific days)
 - [x] Fix: Junior Program bookings not showing on Schedule page after multi-day picker refactor
 - [x] Fix: Schedule Day view shows nothing even though Week view shows bookings correctly
+- [x] Fix: 105 Game Clinic shows "Full" incorrectly even when not enough participants have signed up
