@@ -204,10 +204,11 @@ export const appRouter = router({
           programId,
           scheduleSlotId: input.scheduleSlotId || null,
           totalAmountCents: input.totalAmountCents,
-          sessionDate: input.sessionDate ? new Date(input.sessionDate) as any : undefined,
+          // Append T12:00:00 to avoid UTC midnight shifting the date by one day in EST
+          sessionDate: input.sessionDate ? new Date(input.sessionDate + "T12:00:00") as any : undefined,
           sessionStartTime: input.sessionStartTime || null,
           sessionEndTime: input.sessionEndTime || null,
-          weekStartDate: input.weekStartDate ? new Date(input.weekStartDate) as any : undefined,
+          weekStartDate: input.weekStartDate ? new Date(input.weekStartDate + "T12:00:00") as any : undefined,
           sharedStudentCount: input.sharedStudentCount || 1,
           stringProvidedBy: input.stringProvidedBy,
           merchandiseSize: input.merchandiseSize,
@@ -477,7 +478,6 @@ export const appRouter = router({
           .leftJoin(programs, eq(bookings.programId, programs.id))
           .where(and(
             eq(bookings.userId, ctx.user.id),
-            sql`${programs.type} = 'private_lesson'`,
             sql`${bookings.status} IN ('pending', 'confirmed')`,
             sql`${bookings.sessionDate} IS NOT NULL`,
             sql`DATE(${bookings.sessionDate}) >= ${fromStr}`,

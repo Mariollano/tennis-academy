@@ -188,8 +188,6 @@ function WeekView({ weekStart, slots, onDayClick }: { weekStart: Date; slots: an
         const dayKey = isoDate(day);
         const daySlots = slots.filter((s) => normalizeSlotDate(s.slotDate) === dayKey);
         const isToday = dayKey === today;
-        const privateSlots = daySlots.filter((s) => s.programType === "private_lesson");
-        const clinicSlots = daySlots.filter((s) => s.programType === "clinic_105");
 
         return (
           <div
@@ -213,8 +211,7 @@ function WeekView({ weekStart, slots, onDayClick }: { weekStart: Date; slots: an
               <p className="text-xs text-muted-foreground/50 uppercase tracking-widest font-medium">No sessions</p>
             ) : (
               <div className="grid sm:grid-cols-2 gap-2">
-                {privateSlots.map((s) => <SlotBlock key={s.id} slot={s} />)}
-                {clinicSlots.map((s) => <SlotBlock key={s.id} slot={s} />)}
+                {daySlots.map((s) => <SlotBlock key={s.id} slot={s} />)}
               </div>
             )}
           </div>
@@ -345,11 +342,15 @@ export default function Schedule() {
     { enabled: isAuthenticated }
   );
 
-  // Merge: use the public slots for 105 Clinic, plus user's own private lesson bookings
+  // Merge: public 105 Clinic slots + all of the user's own bookings (any program type)
   const allSlots = useMemo(() => {
-    // Remove any public private_lesson slots (there are none currently), then add user's bookings
     const clinicSlots = slots.filter((s) => s.programType === "clinic_105");
-    return [...clinicSlots, ...myPrivateLessons];
+    // Ensure every user booking has a startTime so it can be placed on the hour grid
+    const myBookingsNormalized = myPrivateLessons.map((b) => ({
+      ...b,
+      startTime: b.startTime || "09:00:00", // default to 9 AM for non-timed programs
+    }));
+    return [...clinicSlots, ...myBookingsNormalized];
   }, [slots, myPrivateLessons]);
 
   const navigate = (dir: 1 | -1) => {
