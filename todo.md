@@ -195,3 +195,4 @@
 - [x] Auto-scroll to time slots section when a date is picked on the calendar
 - [x] Fix stray "0" showing next to date in booking form date badge
 - [x] Add time preference selector (Morning/Afternoon/Evening) to Private Lesson booking
+- [x] Replace Morning/Afternoon/Evening buttons with hourly time grid (6 AM – 7 PM) for private lesson

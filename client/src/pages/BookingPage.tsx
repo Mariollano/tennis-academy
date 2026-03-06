@@ -765,30 +765,34 @@ export default function BookingPage() {
                     {/* Time Preference — private lesson only */}
                     {programType === "private_lesson" && sessionDate && (
                       <div>
-                        <Label className="text-sm font-semibold">Preferred Time of Day</Label>
-                        <div className="grid grid-cols-3 gap-2 mt-2">
-                          {[
-                            { value: "morning", label: "Morning", sub: "7 AM – 12 PM" },
-                            { value: "afternoon", label: "Afternoon", sub: "12 PM – 5 PM" },
-                            { value: "evening", label: "Evening", sub: "5 PM – 8 PM" },
-                          ].map((opt) => (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              onClick={() => setTimePreference(opt.value)}
-                              className={`p-3 rounded-xl border-2 text-center transition-all ${
-                                timePreference === opt.value
-                                  ? "border-primary bg-primary/10 ring-2 ring-primary/30"
-                                  : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
-                              }`}
-                            >
-                              <p className="font-semibold text-sm">{opt.label}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5">{opt.sub}</p>
-                            </button>
-                          ))}
+                        <Label className="text-sm font-semibold">Preferred Start Time</Label>
+                        <p className="text-xs text-muted-foreground mb-2">Select your preferred lesson start time. Mario will confirm availability.</p>
+                        <div className="grid grid-cols-4 gap-2 mt-1">
+                          {Array.from({ length: 14 }, (_, i) => {
+                            const hour24 = i + 6; // 6 AM to 7 PM
+                            const ampm = hour24 < 12 ? "AM" : "PM";
+                            const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+                            const label = `${hour12}:00 ${ampm}`;
+                            const value = `${String(hour24).padStart(2, "0")}:00`;
+                            const isSelected = timePreference === value;
+                            return (
+                              <button
+                                key={value}
+                                type="button"
+                                onClick={() => setTimePreference(value)}
+                                className={`py-2 px-1 rounded-lg border-2 text-center text-sm font-medium transition-all ${
+                                  isSelected
+                                    ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                    : "border-border bg-card hover:border-primary/60 hover:bg-primary/5 text-foreground"
+                                }`}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
                         </div>
                         {timePreference && (
-                          <p className="text-xs text-green-700 mt-1.5">✓ Mario will schedule your lesson in the {timePreference}.</p>
+                          <p className="text-xs text-green-700 mt-2">✓ Preferred start time: {(() => { const h = parseInt(timePreference); const ampm = h < 12 ? "AM" : "PM"; const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h; return `${h12}:00 ${ampm}`; })()}</p>
                         )}
                       </div>
                     )}
