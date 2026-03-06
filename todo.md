@@ -193,3 +193,5 @@
 - [x] Fix booking submission error
 - [x] Fix time slots not appearing after clicking a date on 105 Clinic calendar
 - [x] Auto-scroll to time slots section when a date is picked on the calendar
+- [x] Fix stray "0" showing next to date in booking form date badge
+- [x] Add time preference selector (Morning/Afternoon/Evening) to Private Lesson booking

@@ -393,6 +393,7 @@ export default function BookingPage() {
     isFree?: boolean;
   } | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
+  const [timePreference, setTimePreference] = useState("");
 
   const searchString = useSearch();
   const searchParams = new URLSearchParams(searchString);
@@ -483,13 +484,17 @@ export default function BookingPage() {
     }
     const chargeAmount = finalAmountCents;
 
+    const fullNotes = timePreference && programType === "private_lesson"
+      ? `[Preferred time: ${timePreference}]${notes ? " " + notes : ""}`
+      : notes;
+
     createBookingMutation.mutate({
       programType: config.type,
       sessionDate: sessionDate || undefined,
       scheduleSlotId: selectedSlotId || undefined,
       pricingOption: selectedPricing,
       afterCampAddon: afterCamp,
-      notes,
+      notes: fullNotes,
       totalAmountCents: chargeAmount,
     });
 
@@ -745,7 +750,7 @@ export default function BookingPage() {
                         <span className="text-sm font-medium text-foreground">
                           {new Date(sessionDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
                         </span>
-                        {selectedSlotId && selectedSlotId > 0 && (
+                        {selectedSlotId !== null && selectedSlotId > 0 && (
                           <span className="ml-auto text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-semibold">Slot selected ✓</span>
                         )}
                       </div>
@@ -754,6 +759,37 @@ export default function BookingPage() {
                       <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                         <CalendarIcon className="w-4 h-4 text-amber-500 shrink-0" />
                         <span className="text-sm text-amber-700">Please pick a date from the calendar above.</span>
+                      </div>
+                    )}
+
+                    {/* Time Preference — private lesson only */}
+                    {programType === "private_lesson" && sessionDate && (
+                      <div>
+                        <Label className="text-sm font-semibold">Preferred Time of Day</Label>
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                          {[
+                            { value: "morning", label: "Morning", sub: "7 AM – 12 PM" },
+                            { value: "afternoon", label: "Afternoon", sub: "12 PM – 5 PM" },
+                            { value: "evening", label: "Evening", sub: "5 PM – 8 PM" },
+                          ].map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => setTimePreference(opt.value)}
+                              className={`p-3 rounded-xl border-2 text-center transition-all ${
+                                timePreference === opt.value
+                                  ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                                  : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
+                              }`}
+                            >
+                              <p className="font-semibold text-sm">{opt.label}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{opt.sub}</p>
+                            </button>
+                          ))}
+                        </div>
+                        {timePreference && (
+                          <p className="text-xs text-green-700 mt-1.5">✓ Mario will schedule your lesson in the {timePreference}.</p>
+                        )}
                       </div>
                     )}
 
