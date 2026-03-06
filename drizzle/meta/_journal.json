@@ -50,6 +50,13 @@
       "when": 1772806364261,
       "tag": "0006_conscious_wild_child",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1772811502442,
+      "tag": "0007_faithful_nekra",
+      "breakpoints": true
     }
   ]
 }
