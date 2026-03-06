@@ -71,6 +71,28 @@ export const appRouter = router({
         .limit(50);
       return rows;
     }),
+
+    cancelBooking: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        // Fetch the booking and verify ownership
+        const [booking] = await db.select().from(bookings).where(eq(bookings.id, input.id)).limit(1);
+        if (!booking) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found." });
+        if (booking.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "You can only cancel your own bookings." });
+        if (booking.status === "cancelled") throw new TRPCError({ code: "BAD_REQUEST", message: "Booking is already cancelled." });
+        if (booking.status === "completed") throw new TRPCError({ code: "BAD_REQUEST", message: "Completed bookings cannot be cancelled." });
+        // Cancel the booking
+        await db.update(bookings).set({ status: "cancelled", updatedAt: new Date() }).where(eq(bookings.id, input.id));
+        // If it was a 105 Clinic slot, decrement enrollment count
+        if (booking.scheduleSlotId) {
+          await db.update(scheduleSlots)
+            .set({ currentParticipants: sql`GREATEST(currentParticipants - 1, 0)` })
+            .where(eq(scheduleSlots.id, booking.scheduleSlotId));
+        }
+        return { success: true };
+      }),
   }),
 
   // ─── Programs ───────────────────────────────────────────────────────────────

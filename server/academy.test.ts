@@ -260,6 +260,18 @@ describe("user.getMyBookings", () => {
   });
 });
 
+describe("user.cancelBooking", () => {
+  it("throws UNAUTHORIZED for unauthenticated users", async () => {
+    const caller = appRouter.createCaller(makePublicCtx());
+    await expect(caller.user.cancelBooking({ id: 1 })).rejects.toThrow();
+  });
+
+  it("throws when db is unavailable", async () => {
+    const caller = appRouter.createCaller(makeUserCtx());
+    await expect(caller.user.cancelBooking({ id: 1 })).rejects.toThrow();
+  });
+});
+
 // ─── Pricing Validation Tests ─────────────────────────────────────────────────
 describe("Pricing constants", () => {
   it("105 Game clinic is priced at $35 (3500 cents)", () => {

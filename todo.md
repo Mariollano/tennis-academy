@@ -199,3 +199,4 @@
 - [x] Show already-booked private lesson times as "Booked" (grayed out) on hour grid
 - [x] Admin can block specific hours on specific dates for private lessons
 - [x] Blocked times show as "Unavailable" (grayed out) on student hour grid
+- [x] Add student-facing "Cancel Booking" button on Profile page (pending/confirmed bookings only)

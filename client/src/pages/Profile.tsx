@@ -6,6 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { User, Phone, Bell, Calendar, CheckCircle, Clock, XCircle, MessageSquare } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -33,6 +38,20 @@ export default function Profile() {
   const [phone, setPhone] = useState("");
   const [smsOptIn, setSmsOptIn] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [cancelBookingId, setCancelBookingId] = useState<number | null>(null);
+
+  const utils = trpc.useUtils();
+  const cancelBookingMutation = trpc.user.cancelBooking.useMutation({
+    onSuccess: () => {
+      toast.success("Booking cancelled successfully.");
+      utils.user.getMyBookings.invalidate();
+      setCancelBookingId(null);
+    },
+    onError: (e) => {
+      toast.error(e.message || "Failed to cancel booking.");
+      setCancelBookingId(null);
+    },
+  });
 
   useEffect(() => {
     if (user) {
@@ -201,6 +220,7 @@ export default function Profile() {
                     </Link>
                   </div>
                 ) : (
+                  <>
                   <div className="space-y-3">
                     {bookings.map((booking) => (
                       <div key={booking.id} className="flex items-center justify-between p-4 border border-border rounded-xl hover:bg-muted/30 transition-colors">
@@ -222,10 +242,42 @@ export default function Profile() {
                             {statusIcons[booking.status]}
                             {booking.status}
                           </Badge>
+                          {(booking.status === "pending" || booking.status === "confirmed") && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-2 h-7"
+                              onClick={() => setCancelBookingId(booking.id)}
+                            >
+                              <XCircle className="w-3.5 h-3.5 mr-1" /> Cancel
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))}
                   </div>
+
+                  {/* Cancel confirmation dialog */}
+                  <AlertDialog open={cancelBookingId !== null} onOpenChange={(open) => { if (!open) setCancelBookingId(null); }}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Cancel this booking?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will cancel your booking. If you paid, please contact Coach Mario at ritennismario@gmail.com to arrange a refund.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                          onClick={() => cancelBookingId !== null && cancelBookingMutation.mutate({ id: cancelBookingId })}
+                        >
+                          Yes, Cancel Booking
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  </>
                 )}
               </CardContent>
             </Card>
