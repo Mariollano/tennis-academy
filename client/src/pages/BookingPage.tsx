@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -160,6 +160,7 @@ function AvailabilityPanel({
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   });
   const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined);
+  const timeSlotsRef = useRef<HTMLDivElement>(null);
 
   const { data: slots, isLoading } = trpc.schedule.listAvailable.useQuery(
     { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
@@ -268,7 +269,14 @@ function AvailabilityPanel({
               <Calendar
                 mode="single"
                 selected={selectedDay}
-                onSelect={setSelectedDay}
+                onSelect={(day) => {
+                  setSelectedDay(day);
+                  if (day) {
+                    setTimeout(() => {
+                      timeSlotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 80);
+                  }
+                }}
                 disabled={(date) => {
                   const ds = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
                   return date < today || (!availableDates.has(ds) && !fullDates.has(ds));
@@ -299,7 +307,7 @@ function AvailabilityPanel({
 
             {/* Time slots for selected day */}
             {selectedDay && (
-              <div className="mt-1">
+              <div className="mt-1" ref={timeSlotsRef}>
                 <p className="text-sm font-semibold mb-2 text-foreground">
                   {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
                 </p>

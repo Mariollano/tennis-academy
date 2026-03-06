@@ -192,3 +192,4 @@
 - [x] Fix time slots not showing after picking a date on 105 Clinic calendar
 - [x] Fix booking submission error
 - [x] Fix time slots not appearing after clicking a date on 105 Clinic calendar
+- [x] Auto-scroll to time slots section when a date is picked on the calendar
