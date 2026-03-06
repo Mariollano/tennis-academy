@@ -39,6 +39,7 @@ export default function AdminNewsletter() {
   const [edition, setEdition] = useState<"tuesday" | "friday" | "special">("tuesday");
   const [customNote, setCustomNote] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
 
   const utils = trpc.useUtils();
   const { data: newsletters = [], isLoading: loadingList } = trpc.newsletter.list.useQuery();
@@ -71,6 +72,14 @@ export default function AdminNewsletter() {
     onError: (e) => toast.error(`Delete failed: ${e.message}`),
   });
 
+  const getPreviewHtml = trpc.newsletter.getPreviewHtml.useMutation({
+    onSuccess: (data) => {
+      setPreviewHtml(data.html);
+      setShowPreview(true);
+    },
+    onError: (e) => toast.error(`Preview failed: ${e.message}`),
+  });
+
   const autoGenerate = trpc.newsletter.autoGenerate.useMutation({
     onSuccess: (data) => {
       setForm(f => ({
@@ -86,6 +95,18 @@ export default function AdminNewsletter() {
     },
     onError: (e) => toast.error(`Generation failed: ${e.message}`),
   });
+
+  const handlePreview = () => {
+    getPreviewHtml.mutate({
+      subject: form.subject,
+      headline: form.headline,
+      bodyHtml: form.bodyHtml,
+      tennisTip: form.tennisTip,
+      mentalTip: form.mentalTip,
+      winnerSpotlight: form.winnerSpotlight,
+      programScheduleHtml: form.programScheduleHtml || undefined,
+    });
+  };
 
   const handleSaveDraft = () => {
     if (!form.subject.trim() || !form.bodyHtml.trim()) {
@@ -299,7 +320,7 @@ export default function AdminNewsletter() {
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => setShowPreview(!showPreview)}
+                    onClick={handlePreview}
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     {showPreview ? "Hide Preview" : "Preview Email"}
@@ -357,23 +378,23 @@ export default function AdminNewsletter() {
           </div>
 
           {/* Preview */}
-          {showPreview && (
+          {showPreview && previewHtml && (
             <div className="mt-8">
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                 <Eye className="w-5 h-5" /> Email Preview
+                <span className="text-sm font-normal text-muted-foreground ml-2">(exact email rendering)</span>
               </h3>
               <div className="border rounded-xl overflow-hidden shadow-lg">
-                <div className="bg-gray-100 px-4 py-2 text-sm text-gray-600 border-b">
-                  <strong>Subject:</strong> {form.subject || "(no subject)"}
+                <div className="bg-gray-100 px-4 py-2 text-sm text-gray-600 border-b flex items-center justify-between">
+                  <span><strong>Subject:</strong> {form.subject || "(no subject)"}</span>
+                  <button onClick={() => setShowPreview(false)} className="text-gray-400 hover:text-gray-600 text-xs">✕ Close</button>
                 </div>
-                <div className="bg-white p-6 max-h-[600px] overflow-y-auto">
-                  <div
-                    className="prose max-w-none"
-                    dangerouslySetInnerHTML={{
-                      __html: buildPreviewHtml(form),
-                    }}
-                  />
-                </div>
+                <iframe
+                  srcDoc={previewHtml}
+                  style={{ width: "100%", height: "1200px", border: "none", background: "#e8eaf0" }}
+                  title="Newsletter Preview"
+                  sandbox="allow-same-origin"
+                />
               </div>
             </div>
           )}

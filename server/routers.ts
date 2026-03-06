@@ -1382,6 +1382,32 @@ Respond in JSON with keys: subject, headline, tennisTip, mentalTip, bodyIntro`;
         return { ...generated, programScheduleHtml };
       }),
 
+    // Admin: get preview HTML for in-page preview
+    getPreviewHtml: adminProcedure
+      .input(z.object({
+        subject: z.string().optional(),
+        headline: z.string().optional(),
+        bodyHtml: z.string().optional(),
+        tennisTip: z.string().optional(),
+        mentalTip: z.string().optional(),
+        winnerSpotlight: z.string().optional(),
+        programScheduleHtml: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { buildNewsletterHtml } = await import("./newsletterEmail");
+        const html = buildNewsletterHtml({
+          toEmail: "",
+          subject: input.subject || "Preview",
+          headline: input.headline,
+          bodyHtml: input.bodyHtml || "",
+          tennisTip: input.tennisTip,
+          mentalTip: input.mentalTip,
+          winnerSpotlight: input.winnerSpotlight,
+          programScheduleHtml: input.programScheduleHtml || buildProgramScheduleHtml(),
+        });
+        return { html };
+      }),
+
     // Admin: delete a newsletter draft
     delete: adminProcedure
       .input(z.object({ id: z.number() }))

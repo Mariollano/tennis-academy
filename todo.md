@@ -218,3 +218,4 @@
 - [x] Feature: Newsletter sections: programs/schedule/cost, tennis tip, mental tip, winner spotlight, best practices
 - [x] Feature: March 16 restart newsletter draft and send
 - [x] Feature: Twice-weekly automated newsletter (Tue + Fri)
+- [ ] Fix: Redesign newsletter email template to look professional and on-brand (RI Tennis Academy colors, clean layout)
