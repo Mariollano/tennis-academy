@@ -19,8 +19,12 @@ function formatDate(d: Date) {
 function formatDateFull(d: Date) {
   return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 }
+// Use local date components (not UTC) to avoid off-by-one when browser is behind UTC
 function isoDate(d: Date) {
-  return d.toISOString().split("T")[0];
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 function addDays(d: Date, n: number) {
   const r = new Date(d);
