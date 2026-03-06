@@ -395,6 +395,15 @@ export default function BookingPage() {
   const [promoLoading, setPromoLoading] = useState(false);
   const [timePreference, setTimePreference] = useState("");
 
+  // Fetch booked + blocked hours for the selected date (private lesson only)
+  const { data: unavailableHours } = trpc.schedule.getUnavailableHours.useQuery(
+    { date: sessionDate },
+    { enabled: programType === "private_lesson" && sessionDate.length === 10 }
+  );
+  const bookedHours = new Set(unavailableHours?.bookedHours ?? []);
+  const blockedHours = new Set(unavailableHours?.blockedHours ?? []);
+  const allDayBlocked = unavailableHours?.allDayBlocked ?? false;
+
   const searchString = useSearch();
   const searchParams = new URLSearchParams(searchString);
   const paymentStatus = searchParams.get("payment");
@@ -488,10 +497,16 @@ export default function BookingPage() {
       ? `[Preferred time: ${timePreference}]${notes ? " " + notes : ""}`
       : notes;
 
+    // For private lessons, store the preferred start time so it shows as "Booked" for future students
+    const sessionStartTime = (programType === "private_lesson" && timePreference) ? timePreference + ":00" : undefined;
+    const sessionEndTime = (programType === "private_lesson" && timePreference) ? `${String(parseInt(timePreference) + 1).padStart(2, "0")}:00:00` : undefined;
+
     createBookingMutation.mutate({
       programType: config.type,
       sessionDate: sessionDate || undefined,
       scheduleSlotId: selectedSlotId || undefined,
+      sessionStartTime,
+      sessionEndTime,
       pricingOption: selectedPricing,
       afterCampAddon: afterCamp,
       notes: fullNotes,
@@ -766,33 +781,50 @@ export default function BookingPage() {
                     {programType === "private_lesson" && sessionDate && (
                       <div>
                         <Label className="text-sm font-semibold">Preferred Start Time</Label>
-                        <p className="text-xs text-muted-foreground mb-2">Select your preferred lesson start time. Mario will confirm availability.</p>
-                        <div className="grid grid-cols-4 gap-2 mt-1">
-                          {Array.from({ length: 14 }, (_, i) => {
-                            const hour24 = i + 6; // 6 AM to 7 PM
-                            const ampm = hour24 < 12 ? "AM" : "PM";
-                            const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-                            const label = `${hour12}:00 ${ampm}`;
-                            const value = `${String(hour24).padStart(2, "0")}:00`;
-                            const isSelected = timePreference === value;
-                            return (
-                              <button
-                                key={value}
-                                type="button"
-                                onClick={() => setTimePreference(value)}
-                                className={`py-2 px-1 rounded-lg border-2 text-center text-sm font-medium transition-all ${
-                                  isSelected
-                                    ? "border-primary bg-primary text-primary-foreground shadow-md"
-                                    : "border-border bg-card hover:border-primary/60 hover:bg-primary/5 text-foreground"
-                                }`}
-                              >
-                                {label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {timePreference && (
-                          <p className="text-xs text-green-700 mt-2">✓ Preferred start time: {(() => { const h = parseInt(timePreference); const ampm = h < 12 ? "AM" : "PM"; const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h; return `${h12}:00 ${ampm}`; })()}</p>
+                        {allDayBlocked ? (
+                          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                            This date is fully blocked by Coach Mario. Please pick a different date.
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-xs text-muted-foreground mb-2">Select your preferred lesson start time. Grayed-out slots are already booked or unavailable.</p>
+                            <div className="grid grid-cols-4 gap-2 mt-1">
+                              {Array.from({ length: 14 }, (_, i) => {
+                                const hour24 = i + 6; // 6 AM to 7 PM
+                                const ampm = hour24 < 12 ? "AM" : "PM";
+                                const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+                                const label = `${hour12}:00 ${ampm}`;
+                                const value = `${String(hour24).padStart(2, "0")}:00`;
+                                const isSelected = timePreference === value;
+                                const isBooked = bookedHours.has(hour24);
+                                const isBlocked = blockedHours.has(hour24);
+                                const isUnavailable = isBooked || isBlocked;
+                                return (
+                                  <button
+                                    key={value}
+                                    type="button"
+                                    disabled={isUnavailable}
+                                    onClick={() => !isUnavailable && setTimePreference(value)}
+                                    title={isBooked ? "Already booked" : isBlocked ? "Unavailable" : label}
+                                    className={`py-2 px-1 rounded-lg border-2 text-center text-xs font-medium transition-all relative ${
+                                      isUnavailable
+                                        ? "border-muted bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                                        : isSelected
+                                          ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                          : "border-border bg-card hover:border-primary/60 hover:bg-primary/5 text-foreground"
+                                    }`}
+                                  >
+                                    <span className="block">{label}</span>
+                                    {isBooked && <span className="block text-[10px] leading-tight text-red-500 font-semibold">Booked</span>}
+                                    {isBlocked && !isBooked && <span className="block text-[10px] leading-tight text-orange-500 font-semibold">Blocked</span>}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {timePreference && (
+                              <p className="text-xs text-green-700 mt-2">✓ Preferred start time: {(() => { const h = parseInt(timePreference); const ampm = h < 12 ? "AM" : "PM"; const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h; return `${h12}:00 ${ampm}`; })()}</p>
+                            )}
+                          </>
                         )}
                       </div>
                     )}

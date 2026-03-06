@@ -122,6 +122,8 @@ export const appRouter = router({
         programType: z.string(),
         sessionDate: z.string().optional(),
         scheduleSlotId: z.number().optional(), // link booking to a specific schedule slot
+        sessionStartTime: z.string().optional(), // HH:MM:SS for private lessons
+        sessionEndTime: z.string().optional(),   // HH:MM:SS for private lessons
         pricingOption: z.string(),
         afterCampAddon: z.boolean().optional(),
         notes: z.string().optional(),
@@ -170,6 +172,8 @@ export const appRouter = router({
           scheduleSlotId: input.scheduleSlotId || null,
           totalAmountCents: input.totalAmountCents,
           sessionDate: input.sessionDate ? new Date(input.sessionDate) as any : undefined,
+          sessionStartTime: input.sessionStartTime || null,
+          sessionEndTime: input.sessionEndTime || null,
           weekStartDate: input.weekStartDate ? new Date(input.weekStartDate) as any : undefined,
           sharedStudentCount: input.sharedStudentCount || 1,
           stringProvidedBy: input.stringProvidedBy,
@@ -656,6 +660,57 @@ export const appRouter = router({
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
         await db.delete(blockedTimes).where(eq(blockedTimes.id, input.id));
         return { success: true };
+      }),
+
+    // Public: get unavailable hours for a specific date (booked + admin-blocked)
+    getUnavailableHours: publicProcedure
+      .input(z.object({
+        date: z.string(), // YYYY-MM-DD
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { bookedHours: [], blockedHours: [], allDayBlocked: false };
+
+        const dateStart = new Date(input.date + 'T00:00:00');
+        const dateEnd = new Date(input.date + 'T23:59:59');
+
+        // Get confirmed/pending private lesson bookings for this date
+        const existingBookings = await db.select({
+          sessionStartTime: bookings.sessionStartTime,
+        })
+          .from(bookings)
+          .where(and(
+            eq(bookings.sessionDate, dateStart as any),
+            sql`${bookings.status} IN ('pending', 'confirmed')`,
+          ));
+
+        const bookedHours = existingBookings
+          .filter(b => b.sessionStartTime)
+          .map(b => {
+            // sessionStartTime is "HH:MM:SS" — extract hour
+            const t = b.sessionStartTime as string;
+            return parseInt(t.split(':')[0], 10);
+          });
+
+        // Get admin-blocked times for this date that affect private lessons
+        const blocks = await db.select().from(blockedTimes)
+          .where(and(
+            eq(blockedTimes.blockedDate, dateStart as any),
+            eq(blockedTimes.affectsPrivateLessons, true),
+          ));
+
+        const allDayBlocked = blocks.some(b => b.isAllDay);
+        const blockedHours: number[] = [];
+        for (const block of blocks) {
+          if (block.isAllDay) continue; // handled by allDayBlocked flag
+          if (block.startTime && block.endTime) {
+            const startH = parseInt((block.startTime as string).split(':')[0], 10);
+            const endH = parseInt((block.endTime as string).split(':')[0], 10);
+            for (let h = startH; h <= endH; h++) blockedHours.push(h);
+          }
+        }
+
+        return { bookedHours, blockedHours, allDayBlocked };
       }),
 
     // Public: get blocked dates (for student calendar)

@@ -196,3 +196,6 @@
 - [x] Fix stray "0" showing next to date in booking form date badge
 - [x] Add time preference selector (Morning/Afternoon/Evening) to Private Lesson booking
 - [x] Replace Morning/Afternoon/Evening buttons with hourly time grid (6 AM – 7 PM) for private lesson
+- [x] Show already-booked private lesson times as "Booked" (grayed out) on hour grid
+- [x] Admin can block specific hours on specific dates for private lessons
+- [x] Blocked times show as "Unavailable" (grayed out) on student hour grid

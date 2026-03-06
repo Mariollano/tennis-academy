@@ -271,12 +271,38 @@ function AddSessionDialog({ onClose, onRefetch }: { onClose: () => void; onRefet
 
 // ─── Block Time dialog ────────────────────────────────────────────────────────
 function BlockTimeDialog({ onClose, onRefetch }: { onClose: () => void; onRefetch: () => void }) {
-  const [form, setForm] = useState({ title: "", blockedDate: "", startTime: "", endTime: "", isAllDay: true });
+  const [form, setForm] = useState({ title: "", blockedDate: "", isAllDay: true });
+  const [selectedHours, setSelectedHours] = useState<Set<number>>(new Set());
   const blockTime = trpc.schedule.blockTime.useMutation({
     onSuccess: () => { toast.success("Time blocked!"); onRefetch(); onClose(); },
     onError: (e) => toast.error(e.message || "Failed to block time."),
   });
   const set = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
+  const toggleHour = (h: number) => setSelectedHours(prev => {
+    const next = new Set(prev);
+    next.has(h) ? next.delete(h) : next.add(h);
+    return next;
+  });
+
+  const handleBlock = () => {
+    if (!form.title || !form.blockedDate) { toast.error("Reason and date are required."); return; }
+    if (!form.isAllDay && selectedHours.size === 0) { toast.error("Please select at least one hour to block."); return; }
+    if (form.isAllDay) {
+      blockTime.mutate({ title: form.title, blockedDate: form.blockedDate, isAllDay: true, affectsPrivateLessons: true, affects105Clinic: true });
+    } else {
+      // Block each selected hour as a separate 1-hour block
+      const hours = Array.from(selectedHours).sort();
+      let pending = hours.length;
+      hours.forEach(h => {
+        const startTime = `${String(h).padStart(2, "0")}:00`;
+        const endTime = `${String(h + 1).padStart(2, "0")}:00`;
+        blockTime.mutate({ title: form.title, blockedDate: form.blockedDate, startTime, endTime, isAllDay: false, affectsPrivateLessons: true, affects105Clinic: false },
+          { onSettled: () => { pending--; if (pending === 0) { onRefetch(); onClose(); } } }
+        );
+      });
+    }
+  };
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">
@@ -285,22 +311,39 @@ function BlockTimeDialog({ onClose, onRefetch }: { onClose: () => void; onRefetc
           <div><Label>Reason / Label</Label><Input value={form.title} onChange={e => set("title", e.target.value)} placeholder="e.g. Vacation, Tournament" /></div>
           <div><Label>Date</Label><Input type="date" value={form.blockedDate} onChange={e => set("blockedDate", e.target.value)} /></div>
           <div className="flex items-center gap-3">
-            <input type="checkbox" id="allday" checked={form.isAllDay} onChange={e => set("isAllDay", e.target.checked)} className="w-4 h-4" />
-            <Label htmlFor="allday">All day</Label>
+            <input type="checkbox" id="allday" checked={form.isAllDay} onChange={e => { set("isAllDay", e.target.checked); setSelectedHours(new Set()); }} className="w-4 h-4" />
+            <Label htmlFor="allday">Block entire day</Label>
           </div>
           {!form.isAllDay && (
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Start</Label><Input type="time" value={form.startTime} onChange={e => set("startTime", e.target.value)} /></div>
-              <div><Label>End</Label><Input type="time" value={form.endTime} onChange={e => set("endTime", e.target.value)} /></div>
+            <div>
+              <Label className="text-sm font-semibold mb-2 block">Select hours to block (6 AM – 7 PM)</Label>
+              <p className="text-xs text-muted-foreground mb-2">Tap each hour you want to block. Students won't be able to book these times.</p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {Array.from({ length: 14 }, (_, i) => {
+                  const h = i + 6;
+                  const ampm = h < 12 ? "AM" : "PM";
+                  const h12 = h > 12 ? h - 12 : h;
+                  const label = `${h12}:00 ${ampm}`;
+                  const isSelected = selectedHours.has(h);
+                  return (
+                    <button key={h} type="button" onClick={() => toggleHour(h)}
+                      className={`py-1.5 px-1 rounded border-2 text-center text-xs font-medium transition-all ${
+                        isSelected ? "border-destructive bg-destructive text-destructive-foreground" : "border-border bg-card hover:border-destructive/60 hover:bg-destructive/5"
+                      }`}>
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedHours.size > 0 && (
+                <p className="text-xs text-destructive mt-2">{selectedHours.size} hour{selectedHours.size > 1 ? "s" : ""} will be blocked</p>
+              )}
             </div>
           )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button variant="destructive" onClick={() => {
-            if (!form.title || !form.blockedDate) { toast.error("Reason and date are required."); return; }
-            blockTime.mutate({ title: form.title, blockedDate: form.blockedDate, startTime: form.startTime || undefined, endTime: form.endTime || undefined, isAllDay: form.isAllDay, affectsPrivateLessons: true, affects105Clinic: true });
-          }} disabled={blockTime.isPending}>
+          <Button variant="destructive" onClick={handleBlock} disabled={blockTime.isPending}>
             {blockTime.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null} Block
           </Button>
         </DialogFooter>
