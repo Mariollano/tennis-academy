@@ -206,7 +206,19 @@ function WaitlistButton({ slotId, programId, isAuthenticated }: { slotId: number
 }
 
 // ── Availability Panel (for clinic_105 and private_lesson) ──────────────────────
-function AvailabilityPanel({
+// Outer guard: renders nothing for unsupported program types WITHOUT calling any hooks
+function AvailabilityPanel(props: {
+  programType: string;
+  onSelectSlot: (slotId: number, date: string) => void;
+  selectedSlotId: number | null;
+  programId: number;
+  isAuthenticated: boolean;
+}) {
+  if (props.programType !== "clinic_105" && props.programType !== "private_lesson") return null;
+  return <AvailabilityPanelInner {...props} />;
+}
+
+function AvailabilityPanelInner({
   programType,
   onSelectSlot,
   selectedSlotId,
@@ -219,7 +231,6 @@ function AvailabilityPanel({
   programId: number;
   isAuthenticated: boolean;
 }) {
-  const isSupported = programType === "clinic_105" || programType === "private_lesson";
   // Use local date strings to avoid UTC offset issues
   const [fromDate] = useState(() => {
     const d = new Date();
@@ -235,10 +246,10 @@ function AvailabilityPanel({
 
   const { data: slots, isLoading } = trpc.schedule.listAvailable.useQuery(
     { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
-    { enabled: isSupported }
+    { enabled: true }
   );
 
-  if (!isSupported) return null;
+  const isSupported = true; // guard above ensures this is always true here
 
   // Private lessons are flexible — no fixed slots, just let the user pick any future date
   if (programType === "private_lesson") {
