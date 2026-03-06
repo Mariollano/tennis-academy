@@ -1,0 +1,8 @@
+{
+  "query": "SELECT b.id, b.session_date, b.session_start_time, b.status, b.created_at, p.type as program_type, u.name FROM bookings b JOIN programs p ON b.program_id = p.id JOIN users u ON b.user_id = u.id WHERE p.type = 'junior_daily' ORDER BY b.created_at DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT b.id, b.session_date, b.session_start_time, b.status, b.created_at, p.type as program_type, u.name FROM bookings b JOIN programs p ON b.program_id = p.id JOIN users u ON b.user_id = u.id WHERE p.type = 'junior_daily' ORDER BY b.created_at DESC LIMIT 10;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'b.program_id' in 'on clause'"
+  ]
+}

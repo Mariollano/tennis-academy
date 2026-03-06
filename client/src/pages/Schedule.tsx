@@ -51,37 +51,67 @@ function parseHour(timeStr: string): number {
 // Normalize a slotDate value that may be a full ISO timestamp or a plain YYYY-MM-DD string
 function normalizeSlotDate(d: string | Date | null | undefined): string {
   if (!d) return "";
-  const s = typeof d === "string" ? d : d.toISOString();
+  if (d instanceof Date) {
+    // Use local date components to avoid UTC offset shifting
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+  const s = d as string;
   return s.split("T")[0];
 }
 
-const PROGRAM_COLORS = {
-  private_lesson: {
-    bg: "bg-blue-500",
-    light: "bg-blue-50 border-blue-300",
-    text: "text-blue-800",
-    dot: "bg-blue-500",
-    label: "Private Lesson",
-  },
-  clinic_105: {
-    bg: "bg-amber-500",
-    light: "bg-amber-50 border-amber-300",
-    text: "text-amber-800",
-    dot: "bg-amber-500",
-    label: "105 Game Clinic",
-  },
-} as const;
+// Human-readable labels for all program types
+function getProgramLabel(programType: string | null | undefined): string {
+  switch (programType) {
+    case "private_lesson": return "Private Lesson";
+    case "clinic_105": return "105 Game Clinic";
+    case "junior_daily": return "Junior Program";
+    case "junior_weekly": return "Junior Program (Week)";
+    case "summer_camp_daily": return "Summer Camp";
+    case "summer_camp_weekly": return "Summer Camp (Week)";
+    case "after_camp": return "After Camp";
+    case "mental_coaching": return "Mental Coaching";
+    case "tournament_attendance": return "Tournament";
+    case "stringing": return "Stringing";
+    case "merchandise": return "Merchandise";
+    default: return programType ? programType.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : "Session";
+  }
+}
+
+// Color scheme for each program type
+function getProgramColors(programType: string | null | undefined) {
+  switch (programType) {
+    case "private_lesson":
+      return { light: "bg-blue-50 border-blue-300", text: "text-blue-800", dot: "bg-blue-500" };
+    case "clinic_105":
+      return { light: "bg-amber-50 border-amber-300", text: "text-amber-800", dot: "bg-amber-500" };
+    case "junior_daily":
+    case "junior_weekly":
+      return { light: "bg-purple-50 border-purple-300", text: "text-purple-800", dot: "bg-purple-500" };
+    case "summer_camp_daily":
+    case "summer_camp_weekly":
+    case "after_camp":
+      return { light: "bg-orange-50 border-orange-300", text: "text-orange-800", dot: "bg-orange-500" };
+    case "mental_coaching":
+      return { light: "bg-teal-50 border-teal-300", text: "text-teal-800", dot: "bg-teal-500" };
+    default:
+      return { light: "bg-gray-50 border-gray-300", text: "text-gray-800", dot: "bg-gray-500" };
+  }
+}
 
 function SlotBlock({ slot }: { slot: any }) {
-  const colors = PROGRAM_COLORS[slot.programType as keyof typeof PROGRAM_COLORS] || {
-    light: "bg-gray-50 border-gray-300", text: "text-gray-800", label: "Session",
-  };
-  const isPrivate = slot.programType === "private_lesson";
+  const isMyBooking = !!slot.isMyBooking;
+  const programType = slot.programType as string | null;
+  const colors = getProgramColors(programType);
+  const isPrivate = programType === "private_lesson";
+  const isClinic = programType === "clinic_105";
   const spotsLeft = (slot.maxParticipants ?? 0) - (slot.currentParticipants ?? 0);
   const isFull = spotsLeft <= 0;
-  const isMyBooking = !!slot.isMyBooking;
+  const label = getProgramLabel(programType);
 
-  // For user's own private lesson bookings, use a green tint
+  // For user's own bookings, use a green tint
   const containerClass = isMyBooking
     ? "rounded-lg border-2 px-3 py-2 bg-green-50 border-green-300 flex items-center justify-between gap-2"
     : `rounded-lg border-2 px-3 py-2 ${colors.light} flex items-center justify-between gap-2`;
@@ -92,16 +122,16 @@ function SlotBlock({ slot }: { slot: any }) {
         {isPrivate ? (
           <User className={`w-4 h-4 shrink-0 ${isMyBooking ? "text-green-700" : colors.text}`} />
         ) : (
-          <Users className={`w-4 h-4 shrink-0 ${colors.text}`} />
+          <Users className={`w-4 h-4 shrink-0 ${isMyBooking ? "text-green-700" : colors.text}`} />
         )}
         <div className="min-w-0">
           <div className={`font-semibold text-sm truncate ${isMyBooking ? "text-green-800" : colors.text}`}>
-            {isPrivate ? "Private Lesson" : "105 Game Clinic"}
+            {label}
             {isMyBooking && <span className="ml-1 text-xs font-normal text-green-600">(you)</span>}
           </div>
           <div className="text-xs text-gray-500">
-            {slot.startTime?.slice(0, 5)} – {slot.endTime?.slice(0, 5)}
-            {!isPrivate && (
+            {slot.startTime ? `${slot.startTime?.slice(0, 5)} – ${slot.endTime?.slice(0, 5)}` : "All day"}
+            {isClinic && !isMyBooking && (
               <span className={`ml-2 font-medium ${isFull ? "text-red-600" : "text-green-700"}`}>
                 {isFull ? "Full" : `${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`}
               </span>
@@ -111,8 +141,12 @@ function SlotBlock({ slot }: { slot: any }) {
       </div>
       {isMyBooking ? (
         <Badge variant="outline" className="text-xs text-green-700 border-green-400 bg-green-100 shrink-0">Booked</Badge>
-      ) : !isFull ? (
-        <Link href={`/book/${isPrivate ? "private_lesson" : "clinic_105"}`}>
+      ) : isClinic && !isFull ? (
+        <Link href="/book/clinic_105">
+          <Button size="sm" className="h-7 text-xs px-3 shrink-0">Book</Button>
+        </Link>
+      ) : isPrivate && !isFull ? (
+        <Link href="/book/private_lesson">
           <Button size="sm" className="h-7 text-xs px-3 shrink-0">Book</Button>
         </Link>
       ) : (
@@ -129,8 +163,9 @@ function HourlyDayView({ date, slots }: { date: Date; slots: any[] }) {
 
   // Map each slot to its start hour
   const slotsByHour: Record<number, any[]> = {};
+  // Slots without a startTime get placed at 9 AM by default
   daySlots.forEach((s) => {
-    const h = parseHour(s.startTime || "0:00");
+    const h = s.startTime ? parseHour(s.startTime) : 9;
     if (!slotsByHour[h]) slotsByHour[h] = [];
     slotsByHour[h].push(s);
   });
@@ -259,6 +294,11 @@ function MonthView({ monthStart, slots, onDayClick }: { monthStart: Date; slots:
           const daySessions = slotsByDate[key] || [];
           const privateCount = daySessions.filter((s) => s.programType === "private_lesson").length;
           const clinicCount = daySessions.filter((s) => s.programType === "clinic_105").length;
+          const juniorCount = daySessions.filter((s) => s.programType === "junior_daily" || s.programType === "junior_weekly").length;
+          const otherCount = daySessions.filter((s) =>
+            s.programType !== "private_lesson" && s.programType !== "clinic_105" &&
+            s.programType !== "junior_daily" && s.programType !== "junior_weekly"
+          ).length;
           const isToday = key === today;
           const hasAny = daySessions.length > 0;
 
@@ -294,6 +334,22 @@ function MonthView({ monthStart, slots, onDayClick }: { monthStart: Date; slots:
                       <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
                       <span className="text-[10px] text-amber-700 font-medium truncate">
                         {clinicCount} clinic
+                      </span>
+                    </div>
+                  )}
+                  {juniorCount > 0 && (
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
+                      <span className="text-[10px] text-purple-700 font-medium truncate">
+                        {juniorCount} junior
+                      </span>
+                    </div>
+                  )}
+                  {otherCount > 0 && (
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-gray-500 shrink-0" />
+                      <span className="text-[10px] text-gray-700 font-medium truncate">
+                        {otherCount} other
                       </span>
                     </div>
                   )}
@@ -336,8 +392,8 @@ export default function Schedule() {
     programTypes: ["private_lesson", "clinic_105"],
   });
 
-  // Fetch the logged-in user's own private lesson bookings and merge them into the calendar
-  const { data: myPrivateLessons = [] } = trpc.schedule.listMyPrivateLessons.useQuery(
+  // Fetch the logged-in user's own bookings (all types) and merge them into the calendar
+  const { data: myBookings = [] } = trpc.schedule.listMyPrivateLessons.useQuery(
     { from: fromDate, to: toDate },
     { enabled: isAuthenticated }
   );
@@ -346,12 +402,12 @@ export default function Schedule() {
   const allSlots = useMemo(() => {
     const clinicSlots = slots.filter((s) => s.programType === "clinic_105");
     // Ensure every user booking has a startTime so it can be placed on the hour grid
-    const myBookingsNormalized = myPrivateLessons.map((b) => ({
+    const myBookingsNormalized = myBookings.map((b) => ({
       ...b,
       startTime: b.startTime || "09:00:00", // default to 9 AM for non-timed programs
     }));
     return [...clinicSlots, ...myBookingsNormalized];
-  }, [slots, myPrivateLessons]);
+  }, [slots, myBookings]);
 
   const navigate = (dir: 1 | -1) => {
     setCurrentDate((prev) => {
@@ -385,6 +441,7 @@ export default function Schedule() {
   const totalSpotsLeft = allSlots
     .filter((s) => s.programType === "clinic_105")
     .reduce((sum, s) => sum + Math.max(0, (s.maxParticipants ?? 0) - (s.currentParticipants ?? 0)), 0);
+  const totalMyBookings = myBookings.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -409,6 +466,12 @@ export default function Schedule() {
               <span className="font-bold text-accent">{totalSpotsLeft}</span>
               <span className="text-primary-foreground/70 ml-1">clinic spots available</span>
             </div>
+            {isAuthenticated && totalMyBookings > 0 && (
+              <div className="bg-green-500/20 rounded-lg px-4 py-2 text-sm">
+                <span className="font-bold text-green-300">{totalMyBookings}</span>
+                <span className="text-primary-foreground/70 ml-1">your booking{totalMyBookings !== 1 ? "s" : ""} this period</span>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -424,6 +487,14 @@ export default function Schedule() {
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-amber-500 inline-block" />
             <span className="text-amber-700 font-medium">105 Game Clinic</span> — Group competitive play
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-purple-500 inline-block" />
+            <span className="text-purple-700 font-medium">Junior Program</span> — Youth training
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-green-500 inline-block" />
+            <span className="text-green-700 font-medium">Your Booking</span> — Sessions you've booked
           </span>
           <span className="flex items-center gap-1.5">
             <span className="text-muted-foreground/40 font-medium uppercase tracking-widest text-[10px]">Free</span>

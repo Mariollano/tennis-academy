@@ -1,0 +1,64 @@
+{
+  "query": "SELECT b.id, b.sessionDate, b.sessionStartTime, b.status, b.createdAt, p.type as program_type, u.name FROM bookings b JOIN programs p ON b.programId = p.id JOIN users u ON b.userId = u.id WHERE p.type = 'junior_daily' ORDER BY b.createdAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT b.id, b.sessionDate, b.sessionStartTime, b.status, b.createdAt, p.type as program_type, u.name FROM bookings b JOIN programs p ON b.programId = p.id JOIN users u ON b.userId = u.id WHERE p.type = 'junior_daily' ORDER BY b.createdAt DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "330006",
+      "sessionDate": "2026-03-09",
+      "sessionStartTime": "NULL",
+      "status": "pending",
+      "createdAt": "2026-03-06 05:32:18",
+      "program_type": "junior_daily",
+      "name": "Mario Llano"
+    },
+    {
+      "id": "330005",
+      "sessionDate": "2026-03-11",
+      "sessionStartTime": "NULL",
+      "status": "pending",
+      "createdAt": "2026-03-06 05:32:18",
+      "program_type": "junior_daily",
+      "name": "Mario Llano"
+    },
+    {
+      "id": "330004",
+      "sessionDate": "2026-03-13",
+      "sessionStartTime": "NULL",
+      "status": "pending",
+      "createdAt": "2026-03-06 05:32:18",
+      "program_type": "junior_daily",
+      "name": "Mario Llano"
+    },
+    {
+      "id": "330003",
+      "sessionDate": "2026-03-10",
+      "sessionStartTime": "NULL",
+      "status": "pending",
+      "createdAt": "2026-03-06 05:00:14",
+      "program_type": "junior_daily",
+      "name": "Mario Llano"
+    },
+    {
+      "id": "330002",
+      "sessionDate": "2026-03-10",
+      "sessionStartTime": "NULL",
+      "status": "completed",
+      "createdAt": "2026-03-06 04:43:04",
+      "program_type": "junior_daily",
+      "name": "Mario Llano"
+    },
+    {
+      "id": "300002",
+      "sessionDate": "2026-03-08",
+      "sessionStartTime": "NULL",
+      "status": "completed",
+      "createdAt": "2026-03-06 03:12:37",
+      "program_type": "junior_daily",
+      "name": "Mario Llano"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsessionDate\tsessionStartTime\tstatus\tcreatedAt\tprogram_type\tname\n330006\t2026-03-09\tNULL\tpending\t2026-03-06 05:32:18\tjunior_daily\tMario Llano\n330005\t2026-03-11\tNULL\tpending\t2026-03-06 05:32:18\tjunior_daily\tMario Llano\n330004\t2026-03-13\tNULL\tpending\t2026-03-06 05:32:18\tjunior_daily\tMario Llano\n330003\t2026-03-10\tNULL\tpending\t2026-03-06 05:00:14\tjunior_daily\tMario Llano\n330002\t2026-03-10\tNULL\tcompleted\t2026-03-06 04:43:04\tjunior_daily\tMario Llano\n300002\t2026-03-08\tNULL\tcompleted\t2026-03-06 03:12:37\tjunior_daily\tMario Llano\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

@@ -1,0 +1,8 @@
+{
+  "query": "SELECT b.id, b.session_date, b.session_start_time, b.status, b.created_at, p.type as program_type FROM bookings b JOIN programs p ON b.schedule_slot_id = p.id OR b.id > 0 LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT b.id, b.session_date, b.session_start_time, b.status, b.created_at, p.type as program_type FROM bookings b JOIN programs p ON b.schedule_slot_id = p.id OR b.id > 0 LIMIT 1;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'b.schedule_slot_id' in 'on clause'"
+  ]
+}
