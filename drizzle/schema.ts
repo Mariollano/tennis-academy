@@ -255,16 +255,6 @@ export type PromoCode = typeof promoCodes.$inferSelect;
 export type InsertPromoCode = typeof promoCodes.$inferInsert;
 
 // ─── Newsletter ───────────────────────────────────────────────────────────────
-export const newsletterSubscribers = mysqlTable("newsletter_subscribers", {
-  id: int("id").autoincrement().primaryKey(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  name: varchar("name", { length: 255 }),
-  isActive: boolean("isActive").notNull().default(true),
-  unsubscribedAt: timestamp("unsubscribedAt"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
-export type InsertNewsletterSubscriber = typeof newsletterSubscribers.$inferInsert;
 
 export const newsletters = mysqlTable("newsletters", {
   id: int("id").autoincrement().primaryKey(),

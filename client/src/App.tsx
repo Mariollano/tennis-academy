@@ -14,7 +14,6 @@ import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import Gallery from "./pages/Gallery";
 import AdminSchedule from "./pages/AdminSchedule";
-import AdminNewsletter from "./pages/AdminNewsletter";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ChatBot from "./components/ChatBot";
@@ -38,7 +37,6 @@ function Router() {
           <Route path="/gallery" component={Gallery} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/schedule" component={AdminSchedule} />
-          <Route path="/admin/newsletter" component={AdminNewsletter} />
           <Route path="/schedule" component={Schedule} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>
           <Route path="/404" component={NotFound} />
