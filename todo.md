@@ -189,3 +189,5 @@
 - [x] Redesign booking slot picker: calendar month view to pick date, then show time slots for selected day only
 - [x] Fix calendar bleeding over booking form fields (z-index / layout containment issue)
 - [x] Fix calendar not showing available dates even though slots exist in DB
+- [x] Fix time slots not showing after picking a date on 105 Clinic calendar
+- [x] Fix booking submission error

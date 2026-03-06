@@ -149,11 +149,15 @@ function AvailabilityPanel({
   isAuthenticated: boolean;
 }) {
   const isSupported = programType === "clinic_105" || programType === "private_lesson";
-  const [fromDate] = useState(() => new Date().toISOString().slice(0, 10));
+  // Use local date strings to avoid UTC offset issues
+  const [fromDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  });
   const [toDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 90);
-    return d.toISOString().slice(0, 10);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   });
   const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined);
 
@@ -184,7 +188,7 @@ function AvailabilityPanel({
                 setSelectedDay(day);
                 if (day) {
                   const dateStr = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`;
-                  onSelectSlot(-1, dateStr);
+                  onSelectSlot(0, dateStr); // 0 = no fixed slot (private lesson)
                 }
               }}
               disabled={(date) => {
@@ -215,20 +219,24 @@ function AvailabilityPanel({
   // Build a set of date strings that have available slots (for calendar dot indicators)
   const availableDates = new Set<string>();
   const fullDates = new Set<string>();
+  // Normalize a slot date to local YYYY-MM-DD string (avoids UTC offset issues)
+  function toLocalDateStr(raw: unknown): string {
+    if (typeof raw === "string") return (raw as string).slice(0, 10);
+    const d = new Date(raw as any);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
   (slots || []).forEach(slot => {
-    const rawDate = slot.slotDate as unknown;
-    const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
+    const dateStr = toLocalDateStr(slot.slotDate);
     if (slot.isFull) fullDates.add(dateStr);
     else availableDates.add(dateStr);
   });
 
-  // Slots for the selected day
-  const selectedDayStr = selectedDay ? selectedDay.toISOString().slice(0, 10) : null;
-  const daySlots = (slots || []).filter(slot => {
-    const rawDate = slot.slotDate as unknown;
-    const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
-    return dateStr === selectedDayStr;
-  });
+  // Slots for the selected day — use local date string for comparison
+  const selectedDayStr = selectedDay
+    ? `${selectedDay.getFullYear()}-${String(selectedDay.getMonth()+1).padStart(2,'0')}-${String(selectedDay.getDate()).padStart(2,'0')}`
+    : null;
+  const daySlots = (slots || []).filter(slot => toLocalDateStr(slot.slotDate) === selectedDayStr);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -262,12 +270,18 @@ function AvailabilityPanel({
                 selected={selectedDay}
                 onSelect={setSelectedDay}
                 disabled={(date) => {
-                  const ds = date.toISOString().slice(0, 10);
+                  const ds = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
                   return date < today || (!availableDates.has(ds) && !fullDates.has(ds));
                 }}
                 modifiers={{
-                  available: (date) => availableDates.has(date.toISOString().slice(0, 10)),
-                  full: (date) => fullDates.has(date.toISOString().slice(0, 10)),
+                  available: (date) => {
+                    const ds = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                    return availableDates.has(ds);
+                  },
+                  full: (date) => {
+                    const ds = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                    return fullDates.has(ds);
+                  },
                 }}
                 modifiersClassNames={{
                   available: "!font-bold after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-green-500",
@@ -302,7 +316,7 @@ function AvailabilityPanel({
                             disabled={isFull}
                             onClick={() => {
                               const rawDate = slot.slotDate as unknown;
-                              const dateStr = typeof rawDate === "string" ? (rawDate as string).slice(0, 10) : new Date(rawDate as any).toISOString().slice(0, 10);
+                              const dateStr = toLocalDateStr(slot.slotDate);
                               onSelectSlot(slot.id, dateStr);
                             }}
                             className={`w-full text-left p-3 rounded-xl border transition-all ${
@@ -453,6 +467,16 @@ export default function BookingPage() {
     e.preventDefault();
     if (!isAuthenticated) {
       window.location.href = getLoginUrl();
+      return;
+    }
+    // Require date for clinic and private lesson
+    if ((programType === "clinic_105" || programType === "private_lesson") && !sessionDate) {
+      toast.error("Please pick a date from the calendar above before booking.");
+      return;
+    }
+    // Require a time slot for clinic_105
+    if (programType === "clinic_105" && (!selectedSlotId || selectedSlotId <= 0)) {
+      toast.error("Please select a time slot from the calendar above.");
       return;
     }
     const chargeAmount = finalAmountCents;
@@ -701,16 +725,35 @@ export default function BookingPage() {
                       </div>
                     )}
 
-                    {/* Date */}
-                    <div>
-                      <Label>Preferred Date</Label>
-                      <Input
-                        type="date"
-                        value={sessionDate}
-                        onChange={(e) => setSessionDate(e.target.value)}
-                        min={new Date().toISOString().split("T")[0]}
-                      />
-                    </div>
+                    {/* Date — hidden for clinic/private (calendar above handles it) */}
+                    {(programType !== "clinic_105" && programType !== "private_lesson") && (
+                      <div>
+                        <Label>Preferred Date</Label>
+                        <Input
+                          type="date"
+                          value={sessionDate}
+                          onChange={(e) => setSessionDate(e.target.value)}
+                          min={new Date().toISOString().split("T")[0]}
+                        />
+                      </div>
+                    )}
+                    {(programType === "clinic_105" || programType === "private_lesson") && sessionDate && (
+                      <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                        <CalendarIcon className="w-4 h-4 text-primary shrink-0" />
+                        <span className="text-sm font-medium text-foreground">
+                          {new Date(sessionDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                        </span>
+                        {selectedSlotId && selectedSlotId > 0 && (
+                          <span className="ml-auto text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-semibold">Slot selected ✓</span>
+                        )}
+                      </div>
+                    )}
+                    {(programType === "clinic_105" || programType === "private_lesson") && !sessionDate && (
+                      <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <CalendarIcon className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span className="text-sm text-amber-700">Please pick a date from the calendar above.</span>
+                      </div>
+                    )}
 
                     {/* After Camp Add-on */}
                     {(programType === "summer_camp_daily" || programType === "summer_camp_weekly") && (
