@@ -132,6 +132,77 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
   }
 }
 
+// ─── Booking CANCELLED (admin cancelled) ─────────────────────────────────
+export async function sendBookingCancelled(data: BookingConfirmationData): Promise<{ success: boolean; error?: string }> {
+  try {
+    const transporter = getTransporter();
+    const summaryTable = buildSummaryTable(data, `<span style="color:#dc2626;font-weight:bold;">❌ Cancelled</span>`);
+    const bodyHtml = `
+      <h2 style="margin:0 0 8px;color:#1a3a8f;font-size:20px;">Booking Cancelled 🎾</h2>
+      <p style="margin:0 0 24px;color:#444;font-size:15px;">
+        Hi ${data.toName || "there"},<br><br>
+        Your booking has been <strong>cancelled</strong> by Coach Mario. We're sorry for any inconvenience.
+        If you'd like to reschedule or have any questions, please reach out directly.
+      </p>
+      ${summaryTable}
+      <p style="margin:0 0 16px;color:#444;font-size:14px;">
+        We hope to see you back on the court soon! Feel free to book another session at any time.
+      </p>
+      ${contactBlock}`;
+
+    const text = `Hi ${data.toName || "there"},\n\nYour booking has been cancelled by Coach Mario.\n\nProgram: ${data.programLabel}\n${data.sessionDate ? `Date: ${data.sessionDate}\n` : ""}${data.sessionTime ? `Time: ${data.sessionTime}\n` : ""}Booking #: ${data.bookingId}\nStatus: Cancelled\n\nWe hope to see you back on the court soon! Questions? Email ritennismario@gmail.com or call 401-965-5873.\n\n— RI Tennis Academy`;
+
+    await transporter.sendMail({
+      from: `"RI Tennis Academy" <${gmailUser}>`,
+      to: `"${data.toName}" <${data.toEmail}>`,
+      subject: `Booking Cancelled – ${data.programLabel} | RI Tennis Academy`,
+      text,
+      html: buildEmailShell(bodyHtml),
+    });
+
+    console.log(`[Email] Cancellation email sent to ${data.toEmail} for booking #${data.bookingId}`);
+    return { success: true };
+  } catch (err: any) {
+    console.error(`[Email] Failed to send cancellation email to ${data.toEmail}:`, err?.message || err);
+    return { success: false, error: err?.message || "Unknown error" };
+  }
+}
+
+// ─── Booking REMINDER (day-before SMS companion) ───────────────────────────
+export async function sendBookingReminder(data: BookingConfirmationData): Promise<{ success: boolean; error?: string }> {
+  try {
+    const transporter = getTransporter();
+    const summaryTable = buildSummaryTable(data, `<span style="color:#1a3a8f;font-weight:bold;">🔔 Reminder</span>`);
+    const bodyHtml = `
+      <h2 style="margin:0 0 8px;color:#1a3a8f;font-size:20px;">Lesson Reminder – See You Tomorrow! 🎾</h2>
+      <p style="margin:0 0 24px;color:#444;font-size:15px;">
+        Hi ${data.toName || "there"},<br><br>
+        Just a friendly reminder that your lesson is <strong>tomorrow</strong>! Please arrive 5–10 minutes early.
+      </p>
+      ${summaryTable}
+      <p style="margin:0 0 16px;color:#444;font-size:14px;">
+        If you need to reschedule or have any questions, please contact Coach Mario as soon as possible.
+      </p>
+      ${contactBlock}`;
+
+    const text = `Hi ${data.toName || "there"},\n\nJust a friendly reminder that your lesson is tomorrow!\n\nProgram: ${data.programLabel}\n${data.sessionDate ? `Date: ${data.sessionDate}\n` : ""}${data.sessionTime ? `Time: ${data.sessionTime}\n` : ""}Booking #: ${data.bookingId}\n\nPlease arrive 5–10 minutes early. Questions? Email ritennismario@gmail.com or call 401-965-5873.\n\n— RI Tennis Academy`;
+
+    await transporter.sendMail({
+      from: `"RI Tennis Academy" <${gmailUser}>`,
+      to: `"${data.toName}" <${data.toEmail}>`,
+      subject: `Reminder: Your Lesson is Tomorrow – ${data.programLabel} | RI Tennis Academy`,
+      text,
+      html: buildEmailShell(bodyHtml),
+    });
+
+    console.log(`[Email] Reminder email sent to ${data.toEmail} for booking #${data.bookingId}`);
+    return { success: true };
+  } catch (err: any) {
+    console.error(`[Email] Failed to send reminder email to ${data.toEmail}:`, err?.message || err);
+    return { success: false, error: err?.message || "Unknown error" };
+  }
+}
+
 // ─── Booking CONFIRMED (admin approved) ───────────────────────────────────
 export async function sendBookingConfirmed(data: BookingConfirmationData): Promise<{ success: boolean; error?: string }> {
   try {

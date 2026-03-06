@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Users, Calendar, DollarSign, MessageSquare, CheckCircle,
-  Clock, XCircle, Send, Trophy, BarChart3, Shield, Tag, Trash2, Plus, Percent, Mail
+  Clock, XCircle, Send, Trophy, BarChart3, Shield, Tag, Trash2, Plus, Percent, Mail, Bell
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -57,6 +57,19 @@ export default function AdminDashboard() {
   const confirmNowMutation = trpc.booking.confirmNow.useMutation({
     onSuccess: () => { toast.success("Booking confirmed! Student notified via email & SMS."); refetchBookings(); },
     onError: () => toast.error("Failed to confirm booking."),
+  });
+
+  const cancelNowMutation = trpc.booking.cancelNow.useMutation({
+    onSuccess: () => { toast.success("Booking cancelled. Student notified via email & SMS."); refetchBookings(); },
+    onError: () => toast.error("Failed to cancel booking."),
+  });
+
+  const remindNowMutation = trpc.booking.remindNow.useMutation({
+    onSuccess: (data) => {
+      const channels = [data.emailSent && "email", data.smsSent && "SMS"].filter(Boolean).join(" & ");
+      toast.success(`Reminder sent to student${channels ? ` via ${channels}` : ""}.`);
+    },
+    onError: () => toast.error("Failed to send reminder."),
   });
 
   const updateStatusMutation = trpc.booking.updateStatus.useMutation({
@@ -254,16 +267,30 @@ export default function AdminDashboard() {
                                   <CheckCircle className="w-3 h-3 mr-1" /> Confirm
                                 </Button>
                                 <Button size="sm" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 h-7 text-xs px-2"
-                                  onClick={() => updateStatusMutation.mutate({ id: item.booking.id, status: "cancelled" })}>
+                                  onClick={() => cancelNowMutation.mutate({ id: item.booking.id })}
+                                  disabled={cancelNowMutation.isPending}>
                                   <XCircle className="w-3 h-3 mr-1" /> Cancel
                                 </Button>
                               </>
                             )}
                             {item.booking.status === "confirmed" && (
-                              <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700 h-7 text-xs px-2"
-                                onClick={() => updateStatusMutation.mutate({ id: item.booking.id, status: "completed" })}>
-                                <CheckCircle className="w-3 h-3 mr-1" /> Complete
-                              </Button>
+                              <>
+                                <Button size="sm" variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50 h-7 text-xs px-2"
+                                  onClick={() => remindNowMutation.mutate({ id: item.booking.id })}
+                                  disabled={remindNowMutation.isPending}
+                                  title="Send day-before reminder via email & SMS">
+                                  <Bell className="w-3 h-3 mr-1" /> Remind
+                                </Button>
+                                <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700 h-7 text-xs px-2"
+                                  onClick={() => updateStatusMutation.mutate({ id: item.booking.id, status: "completed" })}>
+                                  <CheckCircle className="w-3 h-3 mr-1" /> Complete
+                                </Button>
+                                <Button size="sm" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 h-7 text-xs px-2"
+                                  onClick={() => cancelNowMutation.mutate({ id: item.booking.id })}
+                                  disabled={cancelNowMutation.isPending}>
+                                  <XCircle className="w-3 h-3 mr-1" /> Cancel
+                                </Button>
+                              </>
                             )}
                           </div>
                         </div>

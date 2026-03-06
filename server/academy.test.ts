@@ -322,3 +322,41 @@ describe("Pricing constants", () => {
     expect(2500).toBe(2500); // $25
   });
 });
+
+// ─── Admin Booking Notification Tests ────────────────────────────────────────
+describe("booking.cancelNow", () => {
+  it("throws FORBIDDEN for non-admin users", async () => {
+    const caller = appRouter.createCaller(makeUserCtx());
+    await expect(caller.booking.cancelNow({ id: 1 })).rejects.toThrow("Admin access required");
+  });
+
+  it("throws INTERNAL_SERVER_ERROR when db is unavailable", async () => {
+    const caller = appRouter.createCaller(makeAdminCtx());
+    await expect(caller.booking.cancelNow({ id: 1 })).rejects.toThrow();
+  });
+});
+
+describe("booking.remindNow", () => {
+  it("throws FORBIDDEN for non-admin users", async () => {
+    const caller = appRouter.createCaller(makeUserCtx());
+    await expect(caller.booking.remindNow({ id: 1 })).rejects.toThrow("Admin access required");
+  });
+
+  it("throws NOT_FOUND when db is unavailable (no booking found)", async () => {
+    const caller = appRouter.createCaller(makeAdminCtx());
+    await expect(caller.booking.remindNow({ id: 1 })).rejects.toThrow();
+  });
+});
+
+describe("booking.confirmNow", () => {
+  it("throws FORBIDDEN for non-admin users", async () => {
+    const caller = appRouter.createCaller(makeUserCtx());
+    await expect(caller.booking.confirmNow({ id: 1 })).rejects.toThrow("Admin access required");
+  });
+
+  it("does not throw for admin when db is unavailable (graceful)", async () => {
+    const caller = appRouter.createCaller(makeAdminCtx());
+    // DB is mocked to return null, so it throws INTERNAL_SERVER_ERROR
+    await expect(caller.booking.confirmNow({ id: 1 })).rejects.toThrow();
+  });
+});

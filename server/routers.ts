@@ -8,7 +8,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "./_core/llm";
 import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
-import { sendBookingConfirmation, sendBookingConfirmed, isEmailConfigured } from "./email";
+import { sendBookingConfirmation, sendBookingConfirmed, sendBookingCancelled, sendBookingReminder, isEmailConfigured } from "./email";
 
 // Convert "HH:MM:SS" or "HH:MM" to "9:00 AM" style
 function formatTime12h(t: string): string {
@@ -392,6 +392,135 @@ export const appRouter = router({
         }
 
         return { success: true };
+      }),
+
+    // Admin: cancel a booking and notify the student via email + SMS
+    cancelNow: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        // Fetch current booking to check scheduleSlotId and status
+        const [existing] = await db.select().from(bookings).where(eq(bookings.id, input.id)).limit(1);
+        if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+
+        // Update status to cancelled
+        await db.update(bookings)
+          .set({ status: "cancelled", updatedAt: new Date() })
+          .where(eq(bookings.id, input.id));
+
+        // Decrement slot counter if applicable
+        if (existing.scheduleSlotId && ["pending", "confirmed"].includes(existing.status)) {
+          await db.update(scheduleSlots)
+            .set({ currentParticipants: sql`GREATEST(currentParticipants - 1, 0)`, updatedAt: new Date() })
+            .where(eq(scheduleSlots.id, existing.scheduleSlotId));
+        }
+
+        // Send cancellation email + SMS to the student
+        try {
+          const rows = await db.select({
+            booking: bookings,
+            user: { id: users.id, name: users.name, email: users.email, phone: users.phone },
+            programName: programs.name,
+          })
+            .from(bookings)
+            .leftJoin(users, eq(bookings.userId, users.id))
+            .leftJoin(programs, eq(bookings.programId, programs.id))
+            .where(eq(bookings.id, input.id))
+            .limit(1);
+
+          if (rows.length) {
+            const { booking, user, programName } = rows[0];
+            const sessionDate = booking.sessionDate
+              ? new Date(booking.sessionDate).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+              : undefined;
+            const sessionTime = booking.sessionStartTime && booking.sessionEndTime
+              ? `${formatTime12h(booking.sessionStartTime)} \u2013 ${formatTime12h(booking.sessionEndTime)}`
+              : undefined;
+
+            if (user?.email && isEmailConfigured()) {
+              await sendBookingCancelled({
+                toEmail: user.email,
+                toName: user.name || "Student",
+                programLabel: programName || "Tennis Session",
+                sessionDate,
+                sessionTime,
+                bookingId: booking.id,
+              });
+            }
+
+            if (user?.phone && isTwilioConfigured()) {
+              const dateStr = sessionDate ? ` on ${sessionDate}` : "";
+              const timeStr = sessionTime ? ` at ${sessionTime}` : "";
+              await sendSms(
+                user.phone,
+                `Hi ${user.name || "there"}, your ${programName || "tennis session"} booking #${booking.id}${dateStr}${timeStr} has been CANCELLED by Coach Mario. Please contact us to reschedule. — RI Tennis Academy`
+              );
+            }
+          }
+        } catch (notifyErr: any) {
+          console.error("[cancelNow] Failed to send cancellation notification:", notifyErr?.message);
+          // Don't fail the mutation — booking is cancelled regardless
+        }
+
+        return { success: true };
+      }),
+
+    // Admin: send a day-before reminder to the student via email + SMS
+    remindNow: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        const rows = await db.select({
+          booking: bookings,
+          user: { id: users.id, name: users.name, email: users.email, phone: users.phone },
+          programName: programs.name,
+        })
+          .from(bookings)
+          .leftJoin(users, eq(bookings.userId, users.id))
+          .leftJoin(programs, eq(bookings.programId, programs.id))
+          .where(eq(bookings.id, input.id))
+          .limit(1);
+
+        if (!rows.length) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
+
+        const { booking, user, programName } = rows[0];
+        const sessionDate = booking.sessionDate
+          ? new Date(booking.sessionDate).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+          : undefined;
+        const sessionTime = booking.sessionStartTime && booking.sessionEndTime
+          ? `${formatTime12h(booking.sessionStartTime)} \u2013 ${formatTime12h(booking.sessionEndTime)}`
+          : undefined;
+
+        let emailSent = false;
+        let smsSent = false;
+
+        if (user?.email && isEmailConfigured()) {
+          await sendBookingReminder({
+            toEmail: user.email,
+            toName: user.name || "Student",
+            programLabel: programName || "Tennis Session",
+            sessionDate,
+            sessionTime,
+            bookingId: booking.id,
+          });
+          emailSent = true;
+        }
+
+        if (user?.phone && isTwilioConfigured()) {
+          const dateStr = sessionDate ? ` on ${sessionDate}` : "";
+          const timeStr = sessionTime ? ` at ${sessionTime}` : "";
+          await sendSms(
+            user.phone,
+            `\ud83c\udfbe Reminder: Hi ${user.name || "there"}, your ${programName || "tennis session"} booking #${booking.id} is TOMORROW${dateStr}${timeStr}. Please arrive 5\u201310 min early. See you on the court! \u2014 Coach Mario`
+          );
+          smsSent = true;
+        }
+
+        return { success: true, emailSent, smsSent };
       }),
 
     // Admin: create a Stripe checkout link to charge the student, then confirm on payment

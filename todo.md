@@ -227,3 +227,11 @@
 - [x] Add confirmation email + SMS to student when admin confirms a booking (confirmNow procedure updated)
 - [x] Phone number field already in profile page — confirmed present and saving correctly
 - [x] Fix: Admin Dashboard Confirm button now uses confirmNow (sends confirmed email + SMS) instead of updateStatus
+
+## Follow-up Features (Session 3)
+- [x] Add cancellation notification: when Mario cancels a booking, send cancellation email + SMS to student
+- [x] Add Remind button: one-click SMS reminder to student the day before their lesson
+- [x] Wire Cancel button in Admin Dashboard to new cancelNow procedure (email + SMS)
+- [x] Wire Cancel button in Admin Schedule to new cancelNow procedure (email + SMS)
+- [x] Add Remind button to Admin Dashboard booking rows
+- [x] Add Remind button to Admin Schedule booking rows

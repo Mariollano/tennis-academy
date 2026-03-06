@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowLeft, ChevronLeft, ChevronRight, Plus, Ban, Zap,
   Users, CalendarDays, CalendarRange, LayoutGrid, Loader2, Trash2, Edit2, Eye,
-  CreditCard, CheckCircle, RefreshCw,
+  CreditCard, CheckCircle, RefreshCw, Bell, XCircle,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -92,8 +92,19 @@ function EventDetailDialog({
     onError: () => toast.error("Update failed."),
   });
   const confirmNow = trpc.booking.confirmNow.useMutation({
-    onSuccess: () => { toast.success("Booking confirmed!"); onRefetch(); onClose(); },
+    onSuccess: () => { toast.success("Booking confirmed! Student notified via email & SMS."); onRefetch(); onClose(); },
     onError: (e) => toast.error(e.message || "Failed to confirm."),
+  });
+  const cancelNow = trpc.booking.cancelNow.useMutation({
+    onSuccess: () => { toast.success("Booking cancelled. Student notified via email & SMS."); onRefetch(); onClose(); },
+    onError: (e) => toast.error(e.message || "Failed to cancel."),
+  });
+  const remindNow = trpc.booking.remindNow.useMutation({
+    onSuccess: (data) => {
+      const channels = [data.emailSent && "email", data.smsSent && "SMS"].filter(Boolean).join(" & ");
+      toast.success(`Reminder sent${channels ? ` via ${channels}` : ""}.`);
+    },
+    onError: (e) => toast.error(e.message || "Failed to send reminder."),
   });
   const sendPaymentLink = trpc.booking.sendPaymentLink.useMutation({
     onSuccess: (data) => {
@@ -189,12 +200,47 @@ function EventDetailDialog({
                       Mark Confirmed (cash/check paid)
                     </Button>
                   </div>
-                  <p className="text-[10px] text-amber-700">“Charge via Stripe” opens a checkout page you can share with the student or complete yourself. “Mark Confirmed” is for cash or check payments already received.</p>
+                  <p className="text-[10px] text-amber-700">"Charge via Stripe" opens a checkout page you can share with the student or complete yourself. "Mark Confirmed" is for cash or check payments already received.</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full gap-1.5 border-red-300 text-red-600 hover:bg-red-50"
+                    onClick={() => cancelNow.mutate({ id: r.id })}
+                    disabled={cancelNow.isPending}
+                  >
+                    {cancelNow.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                    Cancel Booking (notify student)
+                  </Button>
                 </div>
               )}
               {r.status === "confirmed" && (
-                <div className="border border-green-200 bg-green-50 rounded-lg p-2 text-xs text-green-800 flex items-center gap-1.5">
-                  <CheckCircle className="w-3.5 h-3.5" /> Booking confirmed and paid.
+                <div className="space-y-2">
+                  <div className="border border-green-200 bg-green-50 rounded-lg p-2 text-xs text-green-800 flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5" /> Booking confirmed and paid.
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50"
+                      onClick={() => remindNow.mutate({ id: r.id })}
+                      disabled={remindNow.isPending}
+                      title="Send day-before reminder via email & SMS"
+                    >
+                      {remindNow.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Bell className="w-3.5 h-3.5" />}
+                      Remind Student
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 gap-1.5 border-red-300 text-red-600 hover:bg-red-50"
+                      onClick={() => cancelNow.mutate({ id: r.id })}
+                      disabled={cancelNow.isPending}
+                    >
+                      {cancelNow.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                      Cancel Booking
+                    </Button>
+                  </div>
                 </div>
               )}
             </>
