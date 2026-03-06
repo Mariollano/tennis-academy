@@ -210,3 +210,6 @@
 - [x] Fix: Schedule Day view shows nothing even though Week view shows bookings correctly
 - [x] Fix: 105 Game Clinic shows "Full" incorrectly even when not enough participants have signed up
 - [x] Fix: 105 Game Clinic bookings not showing in Schedule Day view (Week view works fine)
+- [x] Feature: Jump-to-date picker on Schedule page
+- [x] Feature: Show clinic start/end time on booking confirmation email
+- [x] Feature: Admin Recalculate Counts button for participant sync

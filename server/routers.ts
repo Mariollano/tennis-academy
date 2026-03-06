@@ -837,6 +837,25 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    // Admin: sync currentParticipants to match actual active booking counts
+    syncParticipantCounts: adminProcedure
+      .mutation(async () => {{
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        // Update each slot's currentParticipants to the real count of pending/confirmed bookings
+        await db.execute(sql`
+          UPDATE schedule_slots ss
+          SET ss.currentParticipants = (
+            SELECT COUNT(*)
+            FROM bookings b
+            WHERE b.scheduleSlotId = ss.id
+            AND b.status IN ('pending', 'confirmed')
+          ),
+          ss.updatedAt = NOW()
+        `);
+        return { success: true };
+      }}),
+
     // Public: get unavailable hours for a specific date (booked + admin-blocked)
     getUnavailableHours: publicProcedure
       .input(z.object({

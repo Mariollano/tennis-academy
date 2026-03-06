@@ -521,15 +521,30 @@ export default function Schedule() {
             </TabsList>
           </Tabs>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={goToToday} className="text-xs">Today</Button>
             <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-sm font-semibold text-foreground min-w-[220px] text-center">{periodLabel}</span>
+            <span className="text-sm font-semibold text-foreground min-w-[180px] text-center">{periodLabel}</span>
             <Button variant="outline" size="icon" onClick={() => navigate(1)}>
               <ChevronRight className="w-4 h-4" />
             </Button>
+            {/* Jump-to-date input */}
+            <input
+              type="date"
+              value={isoDate(currentDate)}
+              onChange={(e) => {
+                if (e.target.value) {
+                  // Parse as local date to avoid UTC offset shifting
+                  const [y, m, d] = e.target.value.split("-").map(Number);
+                  setCurrentDate(new Date(y, m - 1, d));
+                  if (view === "month") setView("day");
+                }
+              }}
+              className="text-xs border border-border rounded-md px-2 py-1.5 bg-background text-foreground cursor-pointer hover:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
+              title="Jump to date"
+            />
           </div>
         </div>
 

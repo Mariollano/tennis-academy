@@ -209,7 +209,7 @@ function WaitlistButton({ slotId, programId, isAuthenticated }: { slotId: number
 // Outer guard: renders nothing for unsupported program types WITHOUT calling any hooks
 function AvailabilityPanel(props: {
   programType: string;
-  onSelectSlot: (slotId: number, date: string) => void;
+  onSelectSlot: (slotId: number, date: string, times?: { startTime: string; endTime: string }) => void;
   selectedSlotId: number | null;
   programId: number;
   isAuthenticated: boolean;
@@ -226,7 +226,7 @@ function AvailabilityPanelInner({
   isAuthenticated,
 }: {
   programType: string;
-  onSelectSlot: (slotId: number, date: string) => void;
+  onSelectSlot: (slotId: number, date: string, times?: { startTime: string; endTime: string }) => void;
   selectedSlotId: number | null;
   programId: number;
   isAuthenticated: boolean;
@@ -402,7 +402,7 @@ function AvailabilityPanelInner({
                           <div key={slot.id}>
                             <button
                               disabled={isFull}
-                              onClick={() => onSelectSlot(slot.id, toLocalDateStr(slot.slotDate))}
+                              onClick={() => onSelectSlot(slot.id, toLocalDateStr(slot.slotDate), slot.startTime && slot.endTime ? { startTime: slot.startTime, endTime: slot.endTime } : undefined)}
                               className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
                                 isFull
                                   ? "cursor-not-allowed border-border bg-muted opacity-60"
@@ -462,6 +462,7 @@ export default function BookingPage() {
   const [selectedPricing, setSelectedPricing] = useState(config.pricing[0].value);
   const [sessionDate, setSessionDate] = useState("");
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
+  const [selectedSlotTimes, setSelectedSlotTimes] = useState<{ startTime: string; endTime: string } | null>(null);
   const [afterCamp, setAfterCamp] = useState(false);
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -584,9 +585,13 @@ export default function BookingPage() {
       : notes;
 
     // For private lessons, store the preferred start time so it shows as "Booked" for future students
-    const sessionStartTime = (programType === "private_lesson" && timePreference) ? timePreference + ":00" : undefined;
-    const sessionEndTime = (programType === "private_lesson" && timePreference) ? `${String(parseInt(timePreference) + 1).padStart(2, "0")}:00:00` : undefined;
-
+    // For clinic_105, use the selected slot's actual start/end time so it appears in the confirmation email
+    const sessionStartTime = programType === "clinic_105" && selectedSlotTimes
+      ? selectedSlotTimes.startTime
+      : (programType === "private_lesson" && timePreference) ? timePreference + ":00" : undefined;
+    const sessionEndTime = programType === "clinic_105" && selectedSlotTimes
+      ? selectedSlotTimes.endTime
+      : (programType === "private_lesson" && timePreference) ? `${String(parseInt(timePreference) + 1).padStart(2, "00")}:00:00` : undefined;
     if (programType === "junior_daily" && juniorSelectedDates.length > 0) {
       // Create one booking per selected date; charge the full total on the first one
       juniorSelectedDates.forEach((date, idx) => {
@@ -785,9 +790,10 @@ export default function BookingPage() {
                 selectedSlotId={selectedSlotId}
                 programId={0}
                 isAuthenticated={isAuthenticated}
-                onSelectSlot={(slotId, date) => {
+                onSelectSlot={(slotId, date, times) => {
                   setSelectedSlotId(slotId);
                   setSessionDate(date);
+                  if (times) setSelectedSlotTimes(times);
                 }}
               />
             </div>

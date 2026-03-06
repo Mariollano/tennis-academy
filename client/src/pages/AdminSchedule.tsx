@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowLeft, ChevronLeft, ChevronRight, Plus, Ban, Zap,
   Users, CalendarDays, CalendarRange, LayoutGrid, Loader2, Trash2, Edit2, Eye,
-  CreditCard, CheckCircle,
+  CreditCard, CheckCircle, RefreshCw,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -720,6 +720,10 @@ export default function AdminSchedule() {
     onSuccess: () => { toast.success("Block removed."); refetch(); setSelectedEvent(null); },
     onError: () => toast.error("Delete failed."),
   });
+  const syncCounts = trpc.schedule.syncParticipantCounts.useMutation({
+    onSuccess: () => { toast.success("Participant counts recalculated successfully."); refetch(); },
+    onError: () => toast.error("Failed to recalculate counts."),
+  });
 
   // Build unified event list
   const events: CalEvent[] = useMemo(() => {
@@ -854,6 +858,17 @@ export default function AdminSchedule() {
           </Button>
           <Button size="sm" variant="outline" className="h-8 border-red-300 text-red-600 hover:bg-red-50 gap-1 text-xs" onClick={() => setShowBlockTime(true)}>
             <Ban className="w-3.5 h-3.5" /> Block Time
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 border-amber-300 text-amber-700 hover:bg-amber-50 gap-1 text-xs"
+            onClick={() => syncCounts.mutate()}
+            disabled={syncCounts.isPending}
+            title="Recalculate all slot participant counts from actual bookings"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${syncCounts.isPending ? "animate-spin" : ""}`} />
+            {syncCounts.isPending ? "Syncing…" : "Recalculate Counts"}
           </Button>
         </div>
       </div>
