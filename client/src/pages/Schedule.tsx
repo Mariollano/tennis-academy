@@ -47,6 +47,12 @@ function formatHour(h: number) {
 function parseHour(timeStr: string): number {
   return parseInt(timeStr.split(":")[0], 10);
 }
+// Normalize a slotDate value that may be a full ISO timestamp or a plain YYYY-MM-DD string
+function normalizeSlotDate(d: string | Date | null | undefined): string {
+  if (!d) return "";
+  const s = typeof d === "string" ? d : d.toISOString();
+  return s.split("T")[0];
+}
 
 const PROGRAM_COLORS = {
   private_lesson: {
@@ -108,7 +114,7 @@ function SlotBlock({ slot }: { slot: any }) {
 
 function HourlyDayView({ date, slots }: { date: Date; slots: any[] }) {
   const dateKey = isoDate(date);
-  const daySlots = slots.filter((s) => s.slotDate === dateKey);
+  const daySlots = slots.filter((s) => normalizeSlotDate(s.slotDate) === dateKey);
   const hours = Array.from({ length: DAY_END_HOUR - DAY_START_HOUR }, (_, i) => DAY_START_HOUR + i);
 
   // Map each slot to its start hour
@@ -170,7 +176,7 @@ function WeekView({ weekStart, slots, onDayClick }: { weekStart: Date; slots: an
     <div className="space-y-3">
       {days.map((day) => {
         const dayKey = isoDate(day);
-        const daySlots = slots.filter((s) => s.slotDate === dayKey);
+        const daySlots = slots.filter((s) => normalizeSlotDate(s.slotDate) === dayKey);
         const isToday = dayKey === today;
         const privateSlots = daySlots.filter((s) => s.programType === "private_lesson");
         const clinicSlots = daySlots.filter((s) => s.programType === "clinic_105");
@@ -219,8 +225,9 @@ function MonthView({ monthStart, slots, onDayClick }: { monthStart: Date; slots:
   const slotsByDate = useMemo(() => {
     const map: Record<string, any[]> = {};
     slots.forEach((s) => {
-      if (!map[s.slotDate]) map[s.slotDate] = [];
-      map[s.slotDate].push(s);
+      const key = normalizeSlotDate(s.slotDate);
+      if (!map[key]) map[key] = [];
+      map[key].push(s);
     });
     return map;
   }, [slots]);

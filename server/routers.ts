@@ -385,8 +385,9 @@ export const appRouter = router({
           ));
         if (!matchingPrograms.length) return [];
         const programIds = matchingPrograms.map(p => p.id);
-        const fromDate = input.from ? new Date(input.from) : new Date();
-        const toDate = input.to ? new Date(input.to) : new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+        // Use plain date strings (YYYY-MM-DD) for comparison to avoid timezone conversion issues
+        const fromStr = input.from ?? new Date().toISOString().slice(0, 10);
+        const toStr = input.to ?? new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
         const slots = await db.select({
           slot: scheduleSlots,
           programName: programs.name,
@@ -397,8 +398,8 @@ export const appRouter = router({
           .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
           .where(and(
             eq(scheduleSlots.isAvailable, true),
-            gte(scheduleSlots.slotDate, fromDate as any),
-            lte(scheduleSlots.slotDate, toDate as any),
+            sql`DATE(${scheduleSlots.slotDate}) >= ${fromStr}`,
+            sql`DATE(${scheduleSlots.slotDate}) <= ${toStr}`,
             sql`${scheduleSlots.programId} IN (${sql.join(programIds.map(id => sql`${id}`), sql`, `)})`
           ))
           .orderBy(scheduleSlots.slotDate, scheduleSlots.startTime)
