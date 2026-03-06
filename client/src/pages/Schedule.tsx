@@ -52,14 +52,17 @@ function formatHour(h: number) {
 function parseHour(timeStr: string): number {
   return parseInt(timeStr.split(":")[0], 10);
 }
-// Normalize a slotDate value that may be a full ISO timestamp or a plain YYYY-MM-DD string
+// Normalize a slotDate value that may be a full ISO timestamp or a plain YYYY-MM-DD string.
+// DB dates are stored as midnight UTC (e.g. 2026-03-06T00:00:00.000Z), so we MUST use UTC
+// components to recover the correct calendar date — local components would shift the date
+// backward by the UTC offset (e.g. midnight UTC = 7 PM EST the previous day).
 function normalizeSlotDate(d: string | Date | null | undefined): string {
   if (!d) return "";
   if (d instanceof Date) {
-    // Use local date components to avoid UTC offset shifting
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
+    // Use UTC components: DB stores all slot/session dates as midnight UTC
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }
   const s = d as string;
