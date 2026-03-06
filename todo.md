@@ -203,3 +203,4 @@
 - [x] Fix Schedule page showing empty even when user has booked lessons
 - [x] Private lesson bookings should appear on the Schedule page
 - [x] Send booking confirmation email to student after successful booking
+- [x] Junior Programs: add 1–5 day selector so students can pay for multiple days in one checkout ($80 × days)

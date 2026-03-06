@@ -394,6 +394,7 @@ export default function BookingPage() {
   } | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
   const [timePreference, setTimePreference] = useState("");
+  const [juniorDays, setJuniorDays] = useState(1);
 
   // Fetch booked + blocked hours for the selected date (private lesson only)
   const { data: unavailableHours } = trpc.schedule.getUnavailableHours.useQuery(
@@ -449,7 +450,8 @@ export default function BookingPage() {
   });
 
   const selectedPrice = config.pricing.find((p) => p.value === selectedPricing);
-  const totalCents = (selectedPrice?.cents || 0) + (afterCamp ? 2000 : 0);
+  const baseCents = selectedPrice?.cents || 0;
+  const totalCents = (programType === "junior_daily" ? baseCents * juniorDays : baseCents) + (afterCamp ? 2000 : 0);
 
   // Promo code validation query - placed after totalCents is declared
   const validatePromoQuery = trpc.promoCodes.validate.useQuery(
@@ -826,6 +828,33 @@ export default function BookingPage() {
                             )}
                           </>
                         )}
+                      </div>
+                    )}
+
+                    {/* Junior Days Selector */}
+                    {programType === "junior_daily" && (
+                      <div>
+                        <Label className="text-sm font-semibold">Number of Days</Label>
+                        <p className="text-xs text-muted-foreground mb-2">Select how many days you'd like to book ($80 per day).</p>
+                        <div className="flex gap-2 mt-1">
+                          {[1, 2, 3, 4, 5].map((d) => (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={() => setJuniorDays(d)}
+                              className={`flex-1 py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${
+                                juniorDays === d
+                                  ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                  : "border-border bg-card hover:border-primary/60 hover:bg-primary/5 text-foreground"
+                              }`}
+                            >
+                              {d}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-green-700 mt-2 font-medium">
+                          {juniorDays} day{juniorDays > 1 ? "s" : ""} × $80 = <strong>${juniorDays * 80}</strong>
+                        </p>
                       </div>
                     )}
 
