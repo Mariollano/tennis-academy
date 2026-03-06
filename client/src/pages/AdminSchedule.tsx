@@ -101,10 +101,13 @@ function EventDetailDialog({
   });
   const remindNow = trpc.booking.remindNow.useMutation({
     onSuccess: (data) => {
-      const channels = [data.emailSent && "email", data.smsSent && "SMS"].filter(Boolean).join(" & ");
-      toast.success(`Reminder sent${channels ? ` via ${channels}` : ""}.`);
+      if (data.scheduledFor) {
+        toast.success(`Reminder scheduled for ${data.scheduledFor} (2 hours before lesson).`);
+      } else {
+        toast.success("Reminder scheduled successfully.");
+      }
     },
-    onError: (e) => toast.error(e.message || "Failed to send reminder."),
+    onError: (e) => toast.error(e.message || "Failed to schedule reminder."),
   });
   const sendPaymentLink = trpc.booking.sendPaymentLink.useMutation({
     onSuccess: (data) => {

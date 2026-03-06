@@ -273,3 +273,20 @@ export const newsletters = mysqlTable("newsletters", {
 });
 export type Newsletter = typeof newsletters.$inferSelect;
 export type InsertNewsletter = typeof newsletters.$inferInsert;
+
+// ─── Scheduled Reminders ──────────────────────────────────────────────────────
+// When admin clicks "Remind", a reminder is queued to fire 2 hours before lesson
+export const scheduledReminders = mysqlTable("scheduled_reminders", {
+  id: int("id").autoincrement().primaryKey(),
+  bookingId: int("bookingId").notNull(),
+  userId: int("userId").notNull(),
+  sendAt: timestamp("sendAt").notNull(), // UTC time to fire the reminder
+  status: mysqlEnum("status", ["pending", "sent", "failed", "cancelled"]).notNull().default("pending"),
+  emailSent: boolean("emailSent").notNull().default(false),
+  smsSent: boolean("smsSent").notNull().default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  sentAt: timestamp("sentAt"),
+  error: text("error"),
+});
+export type ScheduledReminder = typeof scheduledReminders.$inferSelect;
+export type InsertScheduledReminder = typeof scheduledReminders.$inferInsert;

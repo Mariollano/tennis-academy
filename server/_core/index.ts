@@ -12,6 +12,7 @@ import { getDb } from "../db";
 import { bookings, payments, programs, users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { notifyOwner } from "./notification";
+import { startReminderScheduler } from "../reminderScheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -126,6 +127,8 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    // Start the reminder scheduler after server is up
+    startReminderScheduler();
   });
 }
 

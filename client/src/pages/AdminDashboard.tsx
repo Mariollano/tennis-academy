@@ -66,10 +66,13 @@ export default function AdminDashboard() {
 
   const remindNowMutation = trpc.booking.remindNow.useMutation({
     onSuccess: (data) => {
-      const channels = [data.emailSent && "email", data.smsSent && "SMS"].filter(Boolean).join(" & ");
-      toast.success(`Reminder sent to student${channels ? ` via ${channels}` : ""}.`);
+      if (data.scheduledFor) {
+        toast.success(`Reminder scheduled for ${data.scheduledFor} (2 hours before lesson).`);
+      } else {
+        toast.success("Reminder scheduled successfully.");
+      }
     },
-    onError: () => toast.error("Failed to send reminder."),
+    onError: () => toast.error("Failed to schedule reminder."),
   });
 
   const updateStatusMutation = trpc.booking.updateStatus.useMutation({

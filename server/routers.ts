@@ -23,7 +23,7 @@ import { getDb } from "./db";
 import {
   users, bookings, programs, scheduleSlots, payments,
   smsBroadcasts, mentalCoachingResources, merchandise, tournamentBookings, tournamentParticipants,
-  blockedTimes, sessionWaitlist
+  blockedTimes, sessionWaitlist, scheduledReminders
 } from "../drizzle/schema";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
 
@@ -467,7 +467,7 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    // Admin: send a day-before reminder to the student via email + SMS
+    // Admin: schedule a reminder to fire 2 hours before the lesson time
     remindNow: adminProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
@@ -487,40 +487,45 @@ export const appRouter = router({
 
         if (!rows.length) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found" });
 
-        const { booking, user, programName } = rows[0];
-        const sessionDate = booking.sessionDate
-          ? new Date(booking.sessionDate).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
-          : undefined;
-        const sessionTime = booking.sessionStartTime && booking.sessionEndTime
-          ? `${formatTime12h(booking.sessionStartTime)} \u2013 ${formatTime12h(booking.sessionEndTime)}`
-          : undefined;
+        const { booking, user } = rows[0];
 
-        let emailSent = false;
-        let smsSent = false;
-
-        if (user?.email && isEmailConfigured()) {
-          await sendBookingReminder({
-            toEmail: user.email,
-            toName: user.name || "Student",
-            programLabel: programName || "Tennis Session",
-            sessionDate,
-            sessionTime,
-            bookingId: booking.id,
-          });
-          emailSent = true;
+        // Calculate sendAt = session date + start time - 2 hours
+        // If no session date/time, fall back to sending immediately
+        let sendAt: Date;
+        let scheduledFor: string | undefined;
+        if (booking.sessionDate && booking.sessionStartTime) {
+          // sessionDate is a date string like "2026-03-07", sessionStartTime is "HH:MM:SS"
+          const [h, m] = booking.sessionStartTime.split(":").map(Number);
+          // Parse as local date at the session time
+          const lessonTime = new Date(booking.sessionDate);
+          lessonTime.setHours(h, m, 0, 0);
+          sendAt = new Date(lessonTime.getTime() - 2 * 60 * 60 * 1000); // 2 hours before
+          scheduledFor = lessonTime.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+        } else {
+          // No session time — send in 1 minute (immediate fallback)
+          sendAt = new Date(Date.now() + 60 * 1000);
         }
 
-        if (user?.phone && isTwilioConfigured()) {
-          const dateStr = sessionDate ? ` on ${sessionDate}` : "";
-          const timeStr = sessionTime ? ` at ${sessionTime}` : "";
-          await sendSms(
-            user.phone,
-            `\ud83c\udfbe Reminder: Hi ${user.name || "there"}, your ${programName || "tennis session"} booking #${booking.id} is TOMORROW${dateStr}${timeStr}. Please arrive 5\u201310 min early. See you on the court! \u2014 Coach Mario`
-          );
-          smsSent = true;
-        }
+        // Cancel any existing pending reminder for this booking
+        await db.update(scheduledReminders)
+          .set({ status: "cancelled" })
+          .where(and(eq(scheduledReminders.bookingId, input.id), eq(scheduledReminders.status, "pending")));
 
-        return { success: true, emailSent, smsSent };
+        // Insert new scheduled reminder
+        await db.insert(scheduledReminders).values({
+          bookingId: input.id,
+          userId: user?.id ?? 0,
+          sendAt,
+          status: "pending",
+        });
+
+        return {
+          success: true,
+          scheduledFor: scheduledFor || sendAt.toLocaleString(),
+          sendAt: sendAt.toISOString(),
+          emailSent: false,
+          smsSent: false,
+        };
       }),
 
     // Admin: create a Stripe checkout link to charge the student, then confirm on payment
