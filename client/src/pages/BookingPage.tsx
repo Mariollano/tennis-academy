@@ -247,9 +247,9 @@ function AvailabilityPanel({
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <CalendarIcon className="w-4 h-4 text-primary" />
-          Pick a Date
+          Pick a Date &amp; Time
         </CardTitle>
-        <p className="text-xs text-muted-foreground">Dates with available spots are highlighted. Select one to see times.</p>
+        <p className="text-xs text-muted-foreground">Tap a highlighted date on the left to see available times on the right.</p>
       </CardHeader>
       <CardContent className="p-3 pt-0">
         {isLoading ? (
@@ -263,20 +263,13 @@ function AvailabilityPanel({
             <p className="text-xs mt-1">Contact Coach Mario to arrange a time.</p>
           </div>
         ) : (
-          <>
-            {/* Calendar */}
-            <div className="flex justify-center">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* LEFT: Calendar */}
+            <div className="flex-shrink-0">
               <Calendar
                 mode="single"
                 selected={selectedDay}
-                onSelect={(day) => {
-                  setSelectedDay(day);
-                  if (day) {
-                    setTimeout(() => {
-                      timeSlotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 80);
-                  }
-                }}
+                onSelect={(day) => setSelectedDay(day)}
                 disabled={(date) => {
                   const ds = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
                   return date < today || (!availableDates.has(ds) && !fullDates.has(ds));
@@ -295,82 +288,83 @@ function AvailabilityPanel({
                   available: "!font-bold after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-green-500",
                   full: "!font-bold after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-red-400 opacity-60",
                 }}
-                className="w-full"
               />
-            </div>
-
-            {/* Legend */}
-            <div className="flex items-center gap-4 justify-center mt-1 mb-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> Available</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Full</span>
-            </div>
-
-            {/* Time slots for selected day */}
-            {selectedDay && (
-              <div className="mt-1" ref={timeSlotsRef}>
-                <p className="text-sm font-semibold mb-2 text-foreground">
-                  {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-                </p>
-                {daySlots.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-3">No sessions on this day.</p>
-                ) : (
-                  <div className="space-y-2">
-                    {daySlots.map(slot => {
-                      const isSelected = selectedSlotId === slot.id;
-                      const isFull = slot.isFull;
-                      return (
-                        <div key={slot.id}>
-                          <button
-                            disabled={isFull}
-                            onClick={() => {
-                              const rawDate = slot.slotDate as unknown;
-                              const dateStr = toLocalDateStr(slot.slotDate);
-                              onSelectSlot(slot.id, dateStr);
-                            }}
-                            className={`w-full text-left p-3 rounded-xl border transition-all ${
-                              isFull
-                                ? "cursor-not-allowed border-border bg-muted"
-                                : isSelected
-                                ? "border-primary bg-primary/10 ring-2 ring-primary/30"
-                                : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
-                                <span className="font-semibold text-sm">
-                                  {fmtTime(slot.startTime)} – {fmtTime(slot.endTime)}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                {isFull ? (
-                                  <Badge className="bg-red-100 text-red-700 text-xs">Full</Badge>
-                                ) : (
-                                  <Badge className={`text-xs ${
-                                    slot.spotsLeft <= 2 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
-                                  }`}>
-                                    {slot.spotsLeft} spot{slot.spotsLeft !== 1 ? "s" : ""} left
-                                  </Badge>
-                                )}
-                                {isSelected && <CheckCircle2 className="w-4 h-4 text-primary" />}
-                              </div>
-                            </div>
-                          </button>
-                          {isFull && (
-                            <WaitlistButton slotId={slot.id} programId={programId} isAuthenticated={isAuthenticated} />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+              {/* Legend */}
+              <div className="flex items-center gap-4 justify-center mt-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> Available</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Full</span>
               </div>
-            )}
+            </div>
 
-            {!selectedDay && (
-              <p className="text-center text-xs text-muted-foreground py-2">Tap a highlighted date to see available times.</p>
-            )}
-          </>
+            {/* RIGHT: Time slots */}
+            <div className="flex-1 min-w-0">
+              {!selectedDay ? (
+                <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center text-muted-foreground gap-2">
+                  <CalendarIcon className="w-10 h-10 opacity-20" />
+                  <p className="text-sm font-medium">Select a date</p>
+                  <p className="text-xs">Tap any highlighted date on the calendar to see available times.</p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm font-bold mb-3 text-foreground">
+                    {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                  </p>
+                  {daySlots.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-3">No sessions on this day.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {daySlots.map(slot => {
+                        const isSelected = selectedSlotId === slot.id;
+                        const isFull = slot.isFull;
+                        return (
+                          <div key={slot.id}>
+                            <button
+                              disabled={isFull}
+                              onClick={() => onSelectSlot(slot.id, toLocalDateStr(slot.slotDate))}
+                              className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                                isFull
+                                  ? "cursor-not-allowed border-border bg-muted opacity-60"
+                                  : isSelected
+                                  ? "border-primary bg-primary/10 ring-2 ring-primary/30 shadow-md"
+                                  : "border-border bg-card hover:border-primary hover:bg-primary/5 hover:shadow-sm cursor-pointer"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-5 h-5 text-primary shrink-0" />
+                                  <span className="font-bold text-base">
+                                    {fmtTime(slot.startTime)} – {fmtTime(slot.endTime)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {isFull ? (
+                                    <Badge className="bg-red-100 text-red-700">Full</Badge>
+                                  ) : (
+                                    <Badge className={`${
+                                      slot.spotsLeft <= 2 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
+                                    }`}>
+                                      {slot.spotsLeft} spot{slot.spotsLeft !== 1 ? "s" : ""} left
+                                    </Badge>
+                                  )}
+                                  {isSelected && <CheckCircle2 className="w-5 h-5 text-primary" />}
+                                </div>
+                              </div>
+                              {isSelected && (
+                                <p className="text-xs text-primary font-semibold mt-1">✓ Selected — scroll down to complete booking</p>
+                              )}
+                            </button>
+                            {isFull && (
+                              <WaitlistButton slotId={slot.id} programId={programId} isAuthenticated={isAuthenticated} />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
