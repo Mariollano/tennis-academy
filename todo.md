@@ -223,3 +223,6 @@
 - [x] Remove newsletter feature completely from the app (moving to separate project)
 - [x] Fix Twilio SMS delivery — upgraded Twilio to paid account, tested live send to +14019655873, confirmed working
 - [x] Audit and fix all booking prices: fixed Clinic 105 ($30->$35), Junior Daily ($0->$80), added Junior Weekly ($350), Summer Camp Daily ($90), Summer Camp Weekly ($420) to DB
+- [x] Fix booking email: changed heading to "Booking Request Received" and body copy to clarify pending state
+- [x] Add confirmation email + SMS to student when admin confirms a booking (confirmNow procedure updated)
+- [x] Phone number field already in profile page — confirmed present and saving correctly

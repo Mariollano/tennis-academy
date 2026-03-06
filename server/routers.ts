@@ -8,7 +8,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "./_core/llm";
 import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
-import { sendBookingConfirmation, isEmailConfigured } from "./email";
+import { sendBookingConfirmation, sendBookingConfirmed, isEmailConfigured } from "./email";
 
 // Convert "HH:MM:SS" or "HH:MM" to "9:00 AM" style
 function formatTime12h(t: string): string {
@@ -343,6 +343,54 @@ export const appRouter = router({
         await db.update(bookings)
           .set({ status: "confirmed", paidAt: new Date(), updatedAt: new Date() })
           .where(eq(bookings.id, input.id));
+
+        // Send confirmation email + SMS to the student
+        try {
+          const rows = await db.select({
+            booking: bookings,
+            user: { id: users.id, name: users.name, email: users.email, phone: users.phone },
+            programName: programs.name,
+          })
+            .from(bookings)
+            .leftJoin(users, eq(bookings.userId, users.id))
+            .leftJoin(programs, eq(bookings.programId, programs.id))
+            .where(eq(bookings.id, input.id))
+            .limit(1);
+
+          if (rows.length) {
+            const { booking, user, programName } = rows[0];
+            const sessionDate = booking.sessionDate
+              ? new Date(booking.sessionDate).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+              : undefined;
+            const sessionTime = booking.sessionStartTime && booking.sessionEndTime
+              ? `${formatTime12h(booking.sessionStartTime)} – ${formatTime12h(booking.sessionEndTime)}`
+              : undefined;
+
+            if (user?.email && isEmailConfigured()) {
+              await sendBookingConfirmed({
+                toEmail: user.email,
+                toName: user.name || "Student",
+                programLabel: programName || "Tennis Session",
+                sessionDate,
+                sessionTime,
+                bookingId: booking.id,
+              });
+            }
+
+            if (user?.phone && isTwilioConfigured()) {
+              const dateStr = sessionDate ? ` on ${sessionDate}` : "";
+              const timeStr = sessionTime ? ` at ${sessionTime}` : "";
+              await sendSms(
+                user.phone,
+                `Hi ${user.name || "there"}! Your ${programName || "tennis session"} booking #${booking.id}${dateStr}${timeStr} has been CONFIRMED by Coach Mario. See you on the court! — RI Tennis Academy`
+              );
+            }
+          }
+        } catch (notifyErr: any) {
+          console.error("[confirmNow] Failed to send confirmation notification:", notifyErr?.message);
+          // Don't fail the mutation — booking is confirmed regardless
+        }
+
         return { success: true };
       }),
 
