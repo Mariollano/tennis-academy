@@ -15,6 +15,77 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
+// ── Junior multi-day date picker (must be a proper component to use useState) ──
+function JuniorDatePicker({
+  selectedDates,
+  onChange,
+}: {
+  selectedDates: string[];
+  onChange: (dates: string[]) => void;
+}) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const [calMonth, setCalMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
+  const daysInMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 0).getDate();
+  const firstDow = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1).getDay();
+
+  const toggleDate = (iso: string) => {
+    onChange(
+      selectedDates.includes(iso)
+        ? selectedDates.filter((d) => d !== iso)
+        : selectedDates.length < 5
+        ? [...selectedDates, iso]
+        : selectedDates
+    );
+  };
+
+  return (
+    <div className="border border-border rounded-xl p-3 bg-card">
+      <div className="flex items-center justify-between mb-3">
+        <button type="button" onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))} className="p-1 rounded hover:bg-muted">
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <span className="text-sm font-semibold">{calMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+        <button type="button" onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))} className="p-1 rounded hover:bg-muted">
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="grid grid-cols-7 mb-1">
+        {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
+          <div key={d} className="text-center text-[10px] font-semibold text-muted-foreground py-1">{d}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-0.5">
+        {Array.from({ length: firstDow }).map((_, i) => <div key={`pad-${i}`} />)}
+        {Array.from({ length: daysInMonth }, (_, i) => {
+          const day = i + 1;
+          const date = new Date(calMonth.getFullYear(), calMonth.getMonth(), day);
+          const iso = `${calMonth.getFullYear()}-${String(calMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+          const isPast = date < today;
+          const isSelected = selectedDates.includes(iso);
+          return (
+            <button
+              key={iso}
+              type="button"
+              disabled={isPast}
+              onClick={() => toggleDate(iso)}
+              className={`aspect-square rounded-lg text-xs font-semibold transition-all ${
+                isPast
+                  ? "text-muted-foreground/30 cursor-not-allowed"
+                  : isSelected
+                  ? "bg-green-500 text-white shadow-sm"
+                  : "hover:bg-primary/10 text-foreground"
+              }`}
+            >
+              {day}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const PROGRAM_CONFIG: Record<string, {
   title: string;
   type: string;
@@ -395,6 +466,7 @@ export default function BookingPage() {
   const [promoLoading, setPromoLoading] = useState(false);
   const [timePreference, setTimePreference] = useState("");
   const [juniorDays, setJuniorDays] = useState(1);
+  const [juniorSelectedDates, setJuniorSelectedDates] = useState<string[]>([]);
 
   // Fetch booked + blocked hours for the selected date (private lesson only)
   const { data: unavailableHours } = trpc.schedule.getUnavailableHours.useQuery(
@@ -451,7 +523,8 @@ export default function BookingPage() {
 
   const selectedPrice = config.pricing.find((p) => p.value === selectedPricing);
   const baseCents = selectedPrice?.cents || 0;
-  const totalCents = (programType === "junior_daily" ? baseCents * juniorDays : baseCents) + (afterCamp ? 2000 : 0);
+  const effectiveJuniorDays = programType === "junior_daily" && juniorSelectedDates.length > 0 ? juniorSelectedDates.length : juniorDays;
+  const totalCents = (programType === "junior_daily" ? baseCents * effectiveJuniorDays : baseCents) + (afterCamp ? 2000 : 0);
 
   // Promo code validation query - placed after totalCents is declared
   const validatePromoQuery = trpc.promoCodes.validate.useQuery(
@@ -503,17 +576,30 @@ export default function BookingPage() {
     const sessionStartTime = (programType === "private_lesson" && timePreference) ? timePreference + ":00" : undefined;
     const sessionEndTime = (programType === "private_lesson" && timePreference) ? `${String(parseInt(timePreference) + 1).padStart(2, "0")}:00:00` : undefined;
 
-    createBookingMutation.mutate({
-      programType: config.type,
-      sessionDate: sessionDate || undefined,
-      scheduleSlotId: selectedSlotId || undefined,
-      sessionStartTime,
-      sessionEndTime,
-      pricingOption: selectedPricing,
-      afterCampAddon: afterCamp,
-      notes: fullNotes,
-      totalAmountCents: chargeAmount,
-    });
+    if (programType === "junior_daily" && juniorSelectedDates.length > 0) {
+      // Create one booking per selected date; charge the full total on the first one
+      juniorSelectedDates.forEach((date, idx) => {
+        createBookingMutation.mutate({
+          programType: config.type,
+          sessionDate: date,
+          pricingOption: selectedPricing,
+          notes: fullNotes,
+          totalAmountCents: idx === 0 ? chargeAmount : 0,
+        });
+      });
+    } else {
+      createBookingMutation.mutate({
+        programType: config.type,
+        sessionDate: sessionDate || undefined,
+        scheduleSlotId: selectedSlotId || undefined,
+        sessionStartTime,
+        sessionEndTime,
+        pricingOption: selectedPricing,
+        afterCampAddon: afterCamp,
+        notes: fullNotes,
+        totalAmountCents: chargeAmount,
+      });
+    }
 
     // If free via promo, mark it used
     if (promoData?.isFree && promoCode) {
@@ -749,8 +835,8 @@ export default function BookingPage() {
                       </div>
                     )}
 
-                    {/* Date — hidden for clinic/private (calendar above handles it) */}
-                    {(programType !== "clinic_105" && programType !== "private_lesson") && (
+                    {/* Date — hidden for clinic/private/junior_daily (calendar above handles it) */}
+                    {(programType !== "clinic_105" && programType !== "private_lesson" && programType !== "junior_daily") && (
                       <div>
                         <Label>Preferred Date</Label>
                         <Input
@@ -831,30 +917,34 @@ export default function BookingPage() {
                       </div>
                     )}
 
-                    {/* Junior Days Selector */}
+                    {/* Junior Multi-Day Date Picker */}
                     {programType === "junior_daily" && (
                       <div>
-                        <Label className="text-sm font-semibold">Number of Days</Label>
-                        <p className="text-xs text-muted-foreground mb-2">Select how many days you'd like to book ($80 per day).</p>
-                        <div className="flex gap-2 mt-1">
-                          {[1, 2, 3, 4, 5].map((d) => (
-                            <button
-                              key={d}
-                              type="button"
-                              onClick={() => setJuniorDays(d)}
-                              className={`flex-1 py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${
-                                juniorDays === d
-                                  ? "border-primary bg-primary text-primary-foreground shadow-md"
-                                  : "border-border bg-card hover:border-primary/60 hover:bg-primary/5 text-foreground"
-                              }`}
-                            >
-                              {d}
-                            </button>
-                          ))}
-                        </div>
-                        <p className="text-xs text-green-700 mt-2 font-medium">
-                          {juniorDays} day{juniorDays > 1 ? "s" : ""} × $80 = <strong>${juniorDays * 80}</strong>
-                        </p>
+                        <Label className="text-sm font-semibold">Select Your Days</Label>
+                        <p className="text-xs text-muted-foreground mb-3">Tap each day you want to attend ($80 per day). You can pick up to 5 days.</p>
+                        <JuniorDatePicker
+                          selectedDates={juniorSelectedDates}
+                          onChange={setJuniorSelectedDates}
+                        />
+                        {juniorSelectedDates.length > 0 && (
+                          <div className="mt-3 space-y-1.5">
+                            <p className="text-xs font-semibold text-foreground">Selected days:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {[...juniorSelectedDates].sort().map((d) => (
+                                <span key={d} className="flex items-center gap-1 bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                                  {new Date(d + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                                  <button type="button" onClick={() => setJuniorSelectedDates((p) => p.filter((x) => x !== d))} className="ml-0.5 hover:text-red-600"><X className="w-3 h-3" /></button>
+                                </span>
+                              ))}
+                            </div>
+                            <p className="text-xs text-green-700 font-medium">
+                              {juniorSelectedDates.length} day{juniorSelectedDates.length !== 1 ? "s" : ""} × $80 = <strong>${juniorSelectedDates.length * 80}</strong>
+                            </p>
+                          </div>
+                        )}
+                        {juniorSelectedDates.length === 0 && (
+                          <p className="text-xs text-muted-foreground mt-2">No days selected yet — tap dates above to add them.</p>
+                        )}
                       </div>
                     )}
 
