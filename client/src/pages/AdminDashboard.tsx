@@ -196,6 +196,94 @@ export default function AdminDashboard() {
           ))}
         </div>
 
+        {/* Revenue Overview + Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* Revenue Breakdown */}
+          <Card className="border border-border">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-green-600" /> Revenue Breakdown
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {bookings && bookings.length > 0 ? (
+                <div className="space-y-2">
+                  {Object.entries(
+                    bookings.reduce((acc, item) => {
+                      const name = (item as any).program?.name || "Other";
+                      const amt = (item.booking.totalAmountCents || 0) / 100;
+                      acc[name] = (acc[name] || 0) + amt;
+                      return acc;
+                    }, {} as Record<string, number>)
+                  ).sort(([, a], [, b]) => b - a).slice(0, 5).map(([name, total]) => {
+                    const max = Math.max(...Object.values(
+                      bookings.reduce((acc, item) => {
+                        const n = (item as any).program?.name || "Other";
+                        acc[n] = (acc[n] || 0) + (item.booking.totalAmountCents || 0) / 100;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ));
+                    return (
+                      <div key={name}>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-muted-foreground truncate max-w-[60%]">{name}</span>
+                          <span className="font-bold text-foreground">${total.toFixed(0)}</span>
+                        </div>
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(total / max) * 100}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="pt-2 border-t border-border mt-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground font-medium">Total Revenue</span>
+                      <span className="font-extrabold text-primary">
+                        ${(bookings.reduce((sum, item) => sum + (item.booking.totalAmountCents || 0), 0) / 100).toFixed(0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6 text-muted-foreground text-sm">No booking data yet.</div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="border border-border">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-accent" /> Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { label: "Pending Bookings", count: stats?.pendingBookings as string | number | null | undefined, color: "bg-amber-50 border-amber-200 text-amber-800", action: () => { setBookingFilter("pending"); setActiveTab("bookings"); setTimeout(() => document.getElementById('admin-tabs')?.scrollIntoView({ behavior: 'smooth' }), 50); }, href: undefined },
+                  { label: "SMS Broadcast", count: stats?.smsSubscribers ? `${stats.smsSubscribers} subs` : null as string | null | undefined, color: "bg-purple-50 border-purple-200 text-purple-800", action: () => setActiveTab("sms"), href: undefined },
+                  { label: "Manage Schedule", count: null as null, color: "bg-blue-50 border-blue-200 text-blue-800", href: "/admin/schedule", action: undefined },
+                  { label: "Create Promo Code", count: null as null, color: "bg-green-50 border-green-200 text-green-800", action: () => setActiveTab("promos"), href: undefined },
+                ] as Array<{ label: string; count?: string | number | null; color: string; href?: string; action?: () => void }>).map((action) => (
+                  action.href ? (
+                    <Link key={action.label} href={action.href}>
+                      <button className={`w-full p-3 rounded-xl border text-left text-xs font-semibold transition-all hover:shadow-sm hover:-translate-y-0.5 ${action.color}`}>
+                        {action.label}
+                        {action.count !== null && action.count !== undefined && <div className="font-extrabold text-lg leading-none mt-1">{action.count}</div>}
+                      </button>
+                    </Link>
+                  ) : (
+                    <button key={action.label} onClick={action.action} className={`w-full p-3 rounded-xl border text-left text-xs font-semibold transition-all hover:shadow-sm hover:-translate-y-0.5 ${action.color}`}>
+                      {action.label}
+                      {action.count !== null && action.count !== undefined && <div className="font-extrabold text-lg leading-none mt-1">{action.count}</div>}
+                    </button>
+                  )
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div id="admin-tabs" />
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 flex flex-wrap gap-1 h-auto bg-muted p-1 rounded-xl">

@@ -29,6 +29,7 @@ const programs = [
     bookHref: "/book/private_lesson",
     bookLabel: "Book a Private Lesson",
     popular: false,
+    bestValue: false,
   },
   {
     id: "clinic_105",
@@ -51,6 +52,7 @@ const programs = [
     bookHref: "/book/clinic_105",
     bookLabel: "Book the 105 Clinic",
     popular: true,
+    bestValue: false,
   },
   {
     id: "junior",
@@ -76,6 +78,7 @@ const programs = [
     bookHref: "/book/junior_daily",
     bookLabel: "Book Junior Program",
     popular: false,
+    bestValue: false,
   },
   {
     id: "summer_camp",
@@ -104,6 +107,7 @@ const programs = [
     bookHref: "/book/summer_camp_daily",
     bookLabel: "Book Summer Camp",
     popular: false,
+    bestValue: true,
     note: "Weekly package requires all 5 days to be used within the same calendar week.",
   },
   {
@@ -129,6 +133,7 @@ const programs = [
     bookHref: "/mental-coaching",
     bookLabel: "Learn About Mental Coaching",
     popular: false,
+    bestValue: false,
   },
   {
     id: "tournament_attendance",
@@ -157,6 +162,7 @@ const programs = [
     bookHref: "/services",
     bookLabel: "Request Tournament Coaching",
     popular: false,
+    bestValue: false,
   },
 ];
 
@@ -179,6 +185,13 @@ function ProgramCard({ program }: { program: typeof programs[0] }) {
         <div className="absolute top-4 right-4 z-20">
           <Badge className="bg-accent text-accent-foreground font-bold text-xs px-3 py-1 shadow-lg">
             ⭐ Most Popular
+          </Badge>
+        </div>
+      )}
+      {program.bestValue && !program.popular && (
+        <div className="absolute top-4 right-4 z-20">
+          <Badge className="bg-green-500 text-white font-bold text-xs px-3 py-1 shadow-lg">
+            💰 Best Value
           </Badge>
         </div>
       )}
@@ -354,6 +367,92 @@ export default function Programs() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Program Comparison Table */}
+      <section className="py-12 border-t border-border">
+        <div className="container">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-extrabold text-foreground mb-2" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>COMPARE PROGRAMS</h2>
+            <p className="text-muted-foreground text-sm">Find the right fit at a glance</p>
+          </div>
+          <div className="overflow-x-auto rounded-2xl border border-border shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-primary text-primary-foreground">
+                  <th className="text-left px-5 py-4 font-bold">Program</th>
+                  <th className="text-center px-4 py-4 font-bold">Price</th>
+                  <th className="text-center px-4 py-4 font-bold">Who It's For</th>
+                  <th className="text-center px-4 py-4 font-bold">Schedule</th>
+                  <th className="text-center px-4 py-4 font-bold">Group Size</th>
+                  <th className="text-center px-4 py-4 font-bold">Book</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { name: "Private Lesson", price: "$120/hr", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/book/private_lesson", popular: false },
+                  { name: "105 Game Clinic", price: "$35/session", who: "Adults", schedule: "Mon/Wed/Fri/Sun 9–10:30 AM", size: "Up to 24", href: "/book/clinic_105", popular: true },
+                  { name: "Junior Program", price: "$80/day · $350/wk", who: "Juniors", schedule: "3:30–6:30 PM", size: "Small group", href: "/book/junior_daily", popular: false },
+                  { name: "Summer Camp", price: "$90/day · $420/wk", who: "All ages", schedule: "9 AM–2 PM daily", size: "Group", href: "/book/summer_camp_daily", popular: false },
+                  { name: "Mental Coaching", price: "Contact Mario", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/mental-coaching", popular: false },
+                ].map((row, i) => (
+                  <tr key={row.name} className={`border-t border-border ${i % 2 === 0 ? 'bg-card' : 'bg-muted/20'} ${row.popular ? 'ring-1 ring-inset ring-accent/40' : ''}`}>
+                    <td className="px-5 py-3.5 font-semibold text-foreground">
+                      <div className="flex items-center gap-2">
+                        {row.name}
+                        {row.popular && <span className="text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-bold">Popular</span>}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-center font-bold text-primary">{row.price}</td>
+                    <td className="px-4 py-3.5 text-center text-muted-foreground">{row.who}</td>
+                    <td className="px-4 py-3.5 text-center text-muted-foreground text-xs">{row.schedule}</td>
+                    <td className="px-4 py-3.5 text-center text-muted-foreground">{row.size}</td>
+                    <td className="px-4 py-3.5 text-center">
+                      <Link href={row.href}>
+                        <button className="px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors">
+                          Book →
+                        </button>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Strip */}
+      <section className="py-12 bg-primary text-primary-foreground">
+        <div className="container">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-extrabold mb-1" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>WHAT PLAYERS SAY</h2>
+            <p className="text-primary-foreground/60 text-sm">Real results from real Rhode Island players</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              { name: "Sarah M.", program: "Private Lessons", text: "Coach Mario completely transformed my serve in just 3 sessions. His mental coaching approach is unlike anything I've experienced.", stars: 5 },
+              { name: "James K.", program: "105 Game Clinic", text: "The 105 clinic is incredible value. I play with 20+ people every session and the competition has made me so much better.", stars: 5 },
+              { name: "Lisa T.", program: "Junior Program", text: "My daughter went from a beginner to competing in tournaments in one summer. Coach Mario is patient and incredibly skilled.", stars: 5 },
+            ].map((t) => (
+              <div key={t.name} className="bg-white/10 rounded-2xl p-5 border border-white/10">
+                <div className="flex gap-0.5 mb-3">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+                  ))}
+                </div>
+                <p className="text-primary-foreground/80 text-sm leading-relaxed mb-4">“{t.text}”</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-sm">{t.name[0]}</div>
+                  <div>
+                    <div className="font-semibold text-sm">{t.name}</div>
+                    <div className="text-primary-foreground/40 text-xs">{t.program}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

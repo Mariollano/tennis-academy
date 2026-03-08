@@ -20,13 +20,14 @@ import ChatBot from "./components/ChatBot";
 import { InstallPrompt } from "./components/InstallPrompt";
 import FloatingContact from "./components/FloatingContact";
 import QuickBook from "./components/QuickBook";
+import MobileBottomBar from "./components/MobileBottomBar";
 import Schedule from "./pages/Schedule";
 
 function Router() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 pb-16 md:pb-0">
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/programs" component={Programs} />
@@ -49,6 +50,7 @@ function Router() {
       <FloatingContact />
       <QuickBook />
       <InstallPrompt />
+      <MobileBottomBar />
     </div>
   );
 }

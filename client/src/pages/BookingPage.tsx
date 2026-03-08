@@ -713,6 +713,38 @@ export default function BookingPage() {
             </div>
           </Card>
 
+          {/* Refer a Friend Card */}
+          <Card className="border-2 border-green-400/50 bg-gradient-to-br from-green-50/50 to-emerald-50/30 dark:from-green-950/30 dark:to-emerald-950/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Users className="w-4 h-4 text-green-500" />
+                Refer a Friend — Both Save!
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Share your unique referral link. When a friend books their first session, you both get a discount on your next one.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2 bg-background rounded-lg border border-border p-3">
+                <span className="text-sm text-muted-foreground flex-1 truncate">
+                  {window.location.origin}/programs?ref={user?.id ?? 'you'}
+                </span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/programs?ref=${user?.id ?? 'you'}`);
+                    toast.success('Referral link copied! Share it with friends.');
+                  }}
+                  className="shrink-0 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
+                >
+                  <Copy className="w-3 h-3" /> Copy Link
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Contact Coach Mario to redeem your referral discount.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Social Sharing Card */}
           <Card className="border-2 border-accent/40">
             <CardHeader className="pb-3">
@@ -1186,6 +1218,42 @@ export default function BookingPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Social proof */}
+            <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex -space-x-1">
+                  {['S','J','M','L'].map((l) => (
+                    <div key={l} className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center border-2 border-background">{l}</div>
+                  ))}
+                </div>
+                <span className="text-green-700 dark:text-green-400 text-xs font-semibold">12+ booked this week</span>
+              </div>
+              <p className="text-xs text-green-600 dark:text-green-500">Join other Rhode Island players already on the court with Coach Mario.</p>
+            </div>
+
+            {/* Cancellation Policy */}
+            <div className="bg-muted/50 border border-border rounded-xl p-4 text-xs text-muted-foreground">
+              <div className="font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-500" /> Cancellation Policy
+              </div>
+              <p className="leading-relaxed">To cancel or reschedule, please contact Coach Mario at least 24 hours in advance at <a href="mailto:ritennismario@gmail.com" className="text-primary underline">ritennismario@gmail.com</a> or <a href="tel:+14019655873" className="text-primary underline">(401) 965-5873</a>.</p>
+            </div>
+
+            {/* What to Bring */}
+            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+              <div className="font-semibold text-blue-800 dark:text-blue-300 mb-2 text-xs flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5" /> What to Bring
+              </div>
+              <ul className="space-y-1 text-xs text-blue-700 dark:text-blue-400">
+                {['Tennis racquet', 'Water bottle', 'Athletic shoes', 'Positive attitude!'].map(item => (
+                  <li key={item} className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             <Card className="bg-primary text-primary-foreground">
               <CardContent className="p-4 text-sm">

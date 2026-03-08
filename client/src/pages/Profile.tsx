@@ -133,6 +133,43 @@ export default function Profile() {
         </div>
       </section>
 
+      {/* Next Session Countdown Banner */}
+      {bookings && (() => {
+        const today = new Date();
+        const nextSession = bookings
+          .filter(b => (b.status === 'confirmed' || b.status === 'pending') && b.sessionDate)
+          .map(b => ({ ...b, date: new Date(b.sessionDate! + 'T12:00:00') }))
+          .filter(b => b.date >= today)
+          .sort((a, b) => a.date.getTime() - b.date.getTime())[0];
+        if (!nextSession) return null;
+        const daysUntil = Math.ceil((nextSession.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        return (
+          <div className="bg-accent/10 border-b border-accent/20">
+            <div className="container py-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Next Session</div>
+                    <div className="font-bold text-foreground text-sm">
+                      {nextSession.programName || 'Session'} — {nextSession.date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-2xl font-extrabold text-primary" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                    {daysUntil === 0 ? 'TODAY!' : daysUntil === 1 ? 'TOMORROW' : `${daysUntil} DAYS`}
+                  </div>
+                  <div className="text-xs text-muted-foreground">{nextSession.status === 'confirmed' ? '✓ Confirmed' : 'Pending confirmation'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="container py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Settings */}

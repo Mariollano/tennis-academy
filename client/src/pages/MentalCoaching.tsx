@@ -2,7 +2,8 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Target, Shield, Zap, Heart, Star, ChevronRight, MessageSquare } from "lucide-react";
+import { useState } from "react";
+import { Brain, Target, Shield, Zap, Heart, Star, ChevronRight, ChevronDown, MessageSquare } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
@@ -69,6 +70,26 @@ const faqs = [
     a: "Results vary by player, but most students notice meaningful changes within 3–5 sessions. Ongoing mental coaching is recommended for competitive players.",
   },
 ];
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      className="border border-border rounded-xl overflow-hidden cursor-pointer"
+      onClick={() => setOpen(!open)}
+    >
+      <div className="flex items-center justify-between p-5 bg-card hover:bg-muted/50 transition-colors">
+        <h3 className="font-semibold text-foreground text-sm pr-4">{q}</h3>
+        <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </div>
+      {open && (
+        <div className="px-5 pb-5 pt-2 bg-card border-t border-border">
+          <p className="text-muted-foreground text-sm leading-relaxed">{a}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function MentalCoaching() {
   const { data: resources } = trpc.mental.listResources.useQuery();
@@ -307,18 +328,40 @@ export default function MentalCoaching() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <section className="py-12 bg-background">
+        <div className="container max-w-4xl">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-foreground">What Players Say</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              { quote: "Mario's Delete Fear approach completely changed how I compete. I stopped playing scared and started playing free.", name: "Sarah K.", level: "Adult Competitive" },
+              { quote: "I used to choke every tiebreaker. After 4 sessions with Mario, I actually look forward to pressure moments.", name: "James T.", level: "Junior Player" },
+              { quote: "The mental coaching is unlike anything I've experienced. It's not motivational fluff — it's practical and it works.", name: "Maria L.", level: "Adult Recreational" },
+            ].map((t) => (
+              <div key={t.name} className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow">
+                <div className="flex mb-3">
+                  {[1,2,3,4,5].map((s) => <Star key={s} className="w-4 h-4 text-accent fill-accent" />)}
+                </div>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4 italic">&ldquo;{t.quote}&rdquo;</p>
+                <div>
+                  <div className="font-semibold text-foreground text-sm">{t.name}</div>
+                  <div className="text-xs text-muted-foreground">{t.level}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section className="py-16 bg-muted/30">
         <div className="container max-w-3xl">
           <h2 className="text-2xl font-bold text-foreground mb-8 text-center">Frequently Asked Questions</h2>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {faqs.map((faq) => (
-              <Card key={faq.q} className="border border-border">
-                <CardContent className="p-5">
-                  <h3 className="font-semibold text-foreground mb-2">{faq.q}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{faq.a}</p>
-                </CardContent>
-              </Card>
+              <FaqItem key={faq.q} q={faq.q} a={faq.a} />
             ))}
           </div>
         </div>

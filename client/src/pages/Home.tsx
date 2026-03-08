@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,43 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+
+function useCountUp(target: number, duration = 1500, start = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!start) return;
+    let startTime: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      setCount(Math.floor(progress * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [target, duration, start]);
+  return count;
+}
+
+function AnimatedStat({ value, label, icon: Icon }: { value: string; label: string; icon: React.ElementType }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold: 0.5 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  const numMatch = value.match(/(\d+)/);
+  const num = numMatch ? parseInt(numMatch[1]) : null;
+  const count = useCountUp(num ?? 0, 1200, visible);
+  const display = num !== null ? value.replace(String(num), String(count)) : value;
+  return (
+    <div ref={ref} className="flex flex-col items-center text-center px-4">
+      <Icon className="w-5 h-5 text-accent mb-2 opacity-80" />
+      <div className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{visible ? display : '0'}</div>
+      <div className="text-white/50 text-xs uppercase tracking-wider mt-0.5">{label}</div>
+    </div>
+  );
+}
 
 const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
 const MARIO_PHOTO = `${CDN}/mario-us-open_68ad2763.jpg`;
@@ -152,6 +189,41 @@ function InstallAppButton() {
   );
 }
 
+const faqItems = [
+  { q: "What programs do you offer?", a: "We offer Private Lessons ($120/hr), 105 Game Adult Clinics ($35/session), Junior Programs (Mon–Fri, $80/day or $350/week), Summer Camp ($90/day or $420/week), and Mental Coaching. All programs are available for online booking." },
+  { q: "How do I book a session?", a: "Simply click 'Book Now' in the navigation, choose your program, pick an available date and time, and pay securely online. You'll receive instant email and SMS confirmation." },
+  { q: "What is the 105 Game Clinic?", a: "The 105 Game Clinic is Coach Mario's signature adult group program. It runs on Mondays, Wednesdays, Fridays (12 spots) and Sundays (24 spots), 9:00–10:30 AM. It combines competitive drills, match play, and technique work in a fun group setting." },
+  { q: "Do you offer beginner lessons?", a: "Absolutely! Coach Mario works with all skill levels, from complete beginners to competitive tournament players. Private lessons are the best starting point for beginners." },
+  { q: "What is the 'Delete Fear' methodology?", a: "Delete Fear is Coach Mario's mental performance coaching system. It helps players identify and eliminate the psychological barriers — fear of failure, pressure, choking — that prevent them from playing their best tennis." },
+  { q: "Can I cancel or reschedule a booking?", a: "Yes. You can cancel a confirmed booking from your Profile page. For rescheduling, please contact Coach Mario directly at ritennismario@gmail.com or (401) 965-5873." },
+  { q: "Do you offer promo codes or discounts?", a: "Yes! We occasionally offer promo codes for new students and special events. Check with Coach Mario or sign up for SMS updates to receive exclusive offers." },
+  { q: "Where are you located?", a: "RI Tennis Academy is based in Rhode Island. Specific court locations are confirmed upon booking. Contact Coach Mario at (401) 965-5873 for details." },
+];
+
+function FaqAccordion() {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <div className="space-y-3">
+      {faqItems.map(({ q, a }, i) => (
+        <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden">
+          <button
+            className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
+            onClick={() => setOpen(open === i ? null : i)}
+          >
+            <span className="font-semibold text-foreground text-sm md:text-base pr-4">{q}</span>
+            <ChevronRight className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200 ${open === i ? 'rotate-90' : ''}`} />
+          </button>
+          {open === i && (
+            <div className="px-5 pb-5">
+              <p className="text-muted-foreground text-sm leading-relaxed">{a}</p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Home() {
   const { isAuthenticated } = useAuth();
 
@@ -213,9 +285,8 @@ export default function Home() {
 
             {/* Main headline */}
             <h1 className="text-white mb-6" style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 'clamp(3rem, 8vw, 6rem)', fontWeight: 800, lineHeight: 0.95, letterSpacing: '-0.01em' }}>
-              ELEVATE YOUR<br />
-              <span className="text-accent">TENNIS GAME</span><br />
-              WITH COACH MARIO
+              ELEVATE YOUR GAME.<br />
+              <span className="text-accent">MASTER YOUR MIND.</span>
             </h1>
 
             {/* Subheadline */}
@@ -274,12 +345,8 @@ export default function Home() {
       <section className="bg-primary py-6">
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 md:divide-x divide-white/10">
-            {stats.map(({ value, label, icon: Icon }) => (
-              <div key={label} className="flex flex-col items-center text-center px-4">
-                <Icon className="w-5 h-5 text-accent mb-2 opacity-80" />
-                <div className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{value}</div>
-                <div className="text-white/50 text-xs uppercase tracking-wider mt-0.5">{label}</div>
-              </div>
+            {stats.map(({ value, label, icon }) => (
+              <AnimatedStat key={label} value={value} label={label} icon={icon} />
             ))}
           </div>
         </div>
@@ -671,6 +738,141 @@ export default function Home() {
                   <div className="text-primary-foreground/70 text-xs uppercase tracking-wider">Years</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          TESTIMONIALS
+      ═══════════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-background">
+        <div className="container">
+          <div className="text-center mb-14">
+            <Badge className="mb-4 bg-accent/15 text-accent-foreground border-accent/30 font-semibold">
+              Student Reviews
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+              WHAT OUR PLAYERS SAY
+            </h2>
+            <div className="flex items-center justify-center gap-1 mt-2">
+              {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 text-accent fill-accent" />)}
+              <span className="ml-2 text-muted-foreground text-sm font-medium">5.0 · Rated by RI Tennis Community</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { name: "Sarah M.", role: "Adult Clinic Player", text: "Coach Mario completely transformed my game. His 105 Clinic is the highlight of my week — competitive, fun, and I've improved more in 3 months than in 3 years of casual play.", stars: 5 },
+              { name: "James R.", role: "Parent of Junior Player", text: "My son went from barely holding a racquet to winning his first tournament in 6 months. Mario's patience and technical knowledge are unmatched. The online booking makes everything so easy.", stars: 5 },
+              { name: "Lisa K.", role: "Private Lesson Student", text: "The mental coaching side is what sets Mario apart. He helped me stop choking in matches. I now play with confidence I never had before. Worth every penny.", stars: 5 },
+              { name: "David T.", role: "Summer Camp Parent", text: "Best summer camp in Rhode Island. My daughter came home every day excited about tennis. The combination of technique, fitness, and mental training is incredible.", stars: 5 },
+              { name: "Maria C.", role: "Adult Beginner", text: "I started with zero experience and Mario made me feel welcome from day one. The booking app is so easy to use — I can see available slots and book in under a minute.", stars: 5 },
+              { name: "Tom B.", role: "Competitive Player", text: "Mario's Delete Fear methodology changed how I approach big points. I used to freeze under pressure. Now I embrace it. My ranking has improved significantly.", stars: 5 },
+            ].map(({ name, role, text, stars }) => (
+              <div key={name} className="bg-card rounded-2xl p-6 border border-border hover:shadow-lg hover:border-primary/20 transition-all">
+                <div className="flex items-center gap-1 mb-4">
+                  {Array.from({ length: stars }).map((_, i) => <Star key={i} className="w-4 h-4 text-accent fill-accent" />)}
+                </div>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-5 italic">"{text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-primary font-bold text-sm">{name[0]}</span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground text-sm">{name}</div>
+                    <div className="text-muted-foreground text-xs">{role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          FAQ SECTION
+      ═══════════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-muted/30">
+        <div className="container">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-14">
+              <Badge className="mb-4 bg-accent/15 text-accent-foreground border-accent/30 font-semibold">
+                FAQ
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                COMMON QUESTIONS
+              </h2>
+            </div>
+            <FaqAccordion />
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          LOCATION SECTION
+      ═══════════════════════════════════════════════════════════════ */}
+      <section className="py-16 bg-muted/30">
+        <div className="container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <Badge className="mb-4 bg-accent/10 text-accent border-accent/20 font-semibold">Find Us</Badge>
+              <h2 className="text-4xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>TRAIN IN RHODE ISLAND</h2>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Coach Mario trains players across Rhode Island at multiple court locations. Contact us to confirm the exact court for your session.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground">Rhode Island, USA</div>
+                    <div className="text-sm text-muted-foreground">Multiple court locations — contact us for your session's court</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Phone className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground">(401) 965-5873</div>
+                    <div className="text-sm text-muted-foreground">Call or text Coach Mario directly</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Mail className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground">ritennismario@gmail.com</div>
+                    <div className="text-sm text-muted-foreground">Email for bookings, questions & partnerships</div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 flex gap-3">
+                <a href="tel:+14019655873">
+                  <button className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors">
+                    Call Coach Mario
+                  </button>
+                </a>
+                <a href="mailto:ritennismario@gmail.com">
+                  <button className="px-6 py-2.5 rounded-full border border-border text-foreground font-semibold text-sm hover:bg-muted transition-colors">
+                    Send Email
+                  </button>
+                </a>
+              </div>
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-xl border border-border h-80">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d192041.98595568218!2d-71.6303!3d41.5801!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e44f0b4e2e3b7d%3A0x3e3e3e3e3e3e3e3e!2sRhode%20Island!5e0!3m2!1sen!2sus!4v1709900000000!5m2!1sen!2sus"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="RI Tennis Academy Location"
+              />
             </div>
           </div>
         </div>

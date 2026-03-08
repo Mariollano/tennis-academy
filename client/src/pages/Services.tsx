@@ -270,11 +270,20 @@ export default function Services() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <section className="bg-primary text-primary-foreground py-16">
-        <div className="container">
-          <Badge className="mb-4 bg-accent/20 text-accent border-accent/30">Additional Services</Badge>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Services & Merchandise</h1>
-          <p className="text-primary-foreground/80 max-w-2xl text-lg">
+      <section className="bg-primary text-primary-foreground py-16 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
+        }} />
+        <div className="container relative">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-0.5 bg-accent" />
+            <span className="text-accent text-sm font-bold tracking-[0.2em] uppercase">RI Tennis Academy</span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold mb-4" style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '-0.01em' }}>
+            SERVICES &amp; MERCHANDISE
+          </h1>
+          <p className="text-primary-foreground/70 max-w-2xl text-lg leading-relaxed">
             Beyond coaching — tournament support, racquet stringing, and official RI Tennis Academy gear.
           </p>
         </div>

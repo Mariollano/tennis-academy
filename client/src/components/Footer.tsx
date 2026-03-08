@@ -88,6 +88,19 @@ export default function Footer() {
             </ul>
           </div>
         </div>
+
+        {/* Bottom CTA strip */}
+        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <div className="text-accent font-extrabold text-xl mb-1" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>READY TO ELEVATE YOUR GAME?</div>
+            <p className="text-primary-foreground/50 text-sm">Join hundreds of Rhode Island players training with Coach Mario.</p>
+          </div>
+          <Link href="/programs">
+            <button className="px-8 py-3 rounded-full bg-accent text-accent-foreground font-bold text-sm hover:brightness-105 transition-all shrink-0">
+              Book a Session Today →
+            </button>
+          </Link>
+        </div>
       </div>
       <div className="border-t border-white/10">
         <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-3">

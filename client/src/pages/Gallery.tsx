@@ -33,10 +33,18 @@ export default function Gallery() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground py-16">
-        <div className="container text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-3">Photo Gallery</h1>
-          <p className="text-primary-foreground/70 text-lg max-w-xl mx-auto">
+      <div className="bg-primary text-primary-foreground py-16 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
+        }} />
+        <div className="container relative">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-0.5 bg-accent" />
+            <span className="text-accent text-sm font-bold tracking-[0.2em] uppercase">RI Tennis Academy</span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold mb-3" style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '-0.01em' }}>PHOTO GALLERY</h1>
+          <p className="text-primary-foreground/70 text-lg max-w-xl">
             Real moments from the court — juniors, champions, summer camps, and the joy of tennis at RI Tennis Academy.
           </p>
         </div>
