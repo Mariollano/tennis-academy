@@ -299,3 +299,10 @@
 - [x] Student Progress Dashboard on Profile page (milestone tracker 🎾→⭐→🏆→🥇, progress bar, program breakdown, total invested)
 - [x] Admin Analytics tab: Revenue by Program (bar chart), Top Students leaderboard, Monthly Booking Trends (6-month bar chart)
 - [x] admin.getAnalytics procedure: revenue by program, monthly trends, top students by session count
+
+## Newsletter Bugs (Session 9)
+
+- [x] Fix: Newsletter save/draft button not working (form fills but doesn't save)
+- [x] Fix: AI Generate button not clickable / not responding
+- [x] Fix: Newsletter send button not working
+- [x] Fix: Newsletter form end-to-end flow (create draft → AI generate → preview → send)
