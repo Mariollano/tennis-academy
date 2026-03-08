@@ -346,41 +346,17 @@ export default function VoiceBooking() {
                               )}
                             </div>
                           )}
-                          {/* One-tap Confirm & Book for logged-in users */}
-                          {isAuthenticated && result.requestedDate && (
-                            <button
-                              onClick={async () => {
-                                try {
-                                  // Extract program type from redirectUrl (e.g. /book/private_lesson)
-                                  const urlParts = result.redirectUrl?.split("/") || [];
-                                  const programType = urlParts[urlParts.length - 1]?.split("?")[0] || "private_lesson";
-                                  await quickBookMutation.mutateAsync({
-                                    programType,
-                                    sessionDate: result.requestedDate!,
-                                    sessionTime: result.requestedTime || undefined,
-                                  });
-                                  setQuickBooked(true);
-                                  toast.success("Booking confirmed! Check your profile.");
-                                } catch (err: any) {
-                                  toast.error(err.message || "Could not complete quick booking.");
-                                }
-                              }}
-                              disabled={quickBookMutation.isPending}
-                              className="w-full py-3 rounded-xl bg-accent text-accent-foreground font-bold text-sm hover:brightness-105 transition-all flex items-center justify-center gap-2 mb-2 shadow-md"
-                            >
-                              {quickBookMutation.isPending ? (
-                                <><Loader2 className="w-5 h-5 animate-spin" /> Booking...</>
-                              ) : (
-                                <><Zap className="w-5 h-5" /> Confirm & Book Instantly</>
-                              )}
-                            </button>
-                          )}
+                          {/* Go to pre-filled booking form (supports promo codes) */}
                           <button
-                            onClick={() => handleRedirect(result.redirectUrl!)}
-                            className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 mb-3"
+                            onClick={() => {
+                              setIsOpen(false);
+                              handleRedirect(result.redirectUrl!);
+                            }}
+                            className="w-full py-3 rounded-xl bg-accent text-accent-foreground font-bold text-sm hover:brightness-105 transition-all flex items-center justify-center gap-2 mb-2 shadow-md"
                           >
-                            <Calendar className="w-5 h-5" /> {isAuthenticated ? "Review & Book" : "Book This Session"} <ArrowRight className="w-4 h-4" />
+                            <Zap className="w-5 h-5" /> Complete My Booking <ArrowRight className="w-4 h-4" />
                           </button>
+                          <p className="text-xs text-muted-foreground text-center mb-3">Date &amp; time pre-filled — enter your promo code on the next page</p>
                           <button onClick={reset} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                             Try a different request
                           </button>

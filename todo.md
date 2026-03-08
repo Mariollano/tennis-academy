@@ -330,3 +330,7 @@
 
 ## QuickBook Bug (Session 13)
 - [x] Fix: quickBook procedure trying to INSERT new program row instead of looking up existing program by type
+
+## Voice QuickBook Type Bug (Session 14)
+- [x] Fix: AI returns "private" instead of "private_lesson" causing NOT_FOUND error in quickBook — add alias normalization
+- [x] Change "Confirm & Book Instantly" to redirect to pre-filled booking form (with promo code support) instead of instant-booking

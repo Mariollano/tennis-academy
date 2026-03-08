@@ -39,6 +39,41 @@ const PROGRAM_IDS: Record<string, number> = {
   summer_camp: 70001,
 };
 
+// Normalize any alias the AI might return to the canonical program type
+function normalizeProgram(raw: string | null): string | null {
+  if (!raw) return null;
+  const s = raw.toLowerCase().trim().replace(/[\s-]+/g, "_");
+  const aliases: Record<string, string> = {
+    private: "private_lesson",
+    private_lesson: "private_lesson",
+    "1_on_1": "private_lesson",
+    one_on_one: "private_lesson",
+    lesson: "private_lesson",
+    private_lessons: "private_lesson",
+    clinic: "clinic_105",
+    clinic_105: "clinic_105",
+    "105": "clinic_105",
+    "105_clinic": "clinic_105",
+    game_clinic: "clinic_105",
+    adult_clinic: "clinic_105",
+    junior: "junior",
+    junior_program: "junior",
+    junior_daily: "junior",
+    junior_lesson: "junior",
+    kids: "junior",
+    summer: "summer_camp",
+    summer_camp: "summer_camp",
+    camp: "summer_camp",
+    mental: "mental_coaching",
+    mental_coaching: "mental_coaching",
+    mental_performance: "mental_coaching",
+    coaching: "mental_coaching",
+    tournament: "tournament",
+    tournaments: "tournament",
+  };
+  return aliases[s] ?? raw;
+}
+
 function formatTime12h(t: string): string {
   const [hStr, mStr] = t.split(":");
   const h = parseInt(hStr, 10);
@@ -173,6 +208,9 @@ If the request is unclear, set understood=false.`,
           slotAvailable: null as boolean | null,
         };
       }
+
+      // Normalize the program type (AI may return "private" instead of "private_lesson" etc.)
+      intent.program = normalizeProgram(intent.program) ?? intent.program;
 
       const programName = PROGRAM_DISPLAY_NAMES[intent.program] || intent.program;
       const bookingRoute = PROGRAM_ROUTE_MAP[intent.program] || "/programs";
@@ -370,6 +408,9 @@ If the request is unclear, set understood=false.`,
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
 
+      // Normalize program type in case the frontend passed an alias
+      const programType = normalizeProgram(input.programType) ?? input.programType;
+
       // Validate schedule slot if provided
       if (input.scheduleSlotId) {
         const slotRows = await db.select().from(scheduleSlots)
@@ -383,7 +424,7 @@ If the request is unclear, set understood=false.`,
       }
 
       // Look up the program ID from the hardcoded map (avoids accidental INSERT)
-      const hardcodedId = PROGRAM_IDS[input.programType];
+      const hardcodedId = PROGRAM_IDS[programType];
       let programId: number | undefined;
 
       if (hardcodedId) {
@@ -407,7 +448,7 @@ If the request is unclear, set understood=false.`,
       if (!programId) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: `Program type "${input.programType}" not found. Please book through the booking page.`,
+          message: `Program type "${programType}" not found. Please book through the booking page.`,
         });
       }
 
@@ -424,7 +465,7 @@ If the request is unclear, set understood=false.`,
         mental_coaching: 0,
         tournament: 0,
       };
-      const totalAmountCents = PRICE_MAP[input.programType] ?? 0;
+      const totalAmountCents = PRICE_MAP[programType] ?? 0;
 
       // Build session start/end time
       const sessionStartTime = input.sessionTime ? `${input.sessionTime}:00` : null;
