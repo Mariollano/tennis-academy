@@ -306,3 +306,7 @@
 - [x] Fix: AI Generate button not clickable / not responding
 - [x] Fix: Newsletter send button not working
 - [x] Fix: Newsletter form end-to-end flow (create draft → AI generate → preview → send)
+
+## Voice Booking Fix (Session 9)
+
+- [ ] Fix: Voice booking date/time not pre-filling on booking form after redirect (e.g. "March 22 at 11 AM" should auto-populate the date picker and time on the BookingPage)
