@@ -377,7 +377,7 @@ export default function Home() {
         </div>
 
         {/* Download app button + Voice button — top right stack (desktop only) */}
-        <div className="absolute top-4 right-4 z-10 hidden md:flex flex-col items-center gap-3">
+        <div className="absolute top-4 right-4 z-20 hidden md:flex flex-col items-center gap-3">
           <InstallAppButton />
           {/* Voice Booking Round Button */}
           <div className="flex flex-col items-center gap-1">
@@ -409,7 +409,7 @@ export default function Home() {
         </div>
 
         {/* Mobile-only: Download App button top right */}
-        <div className="absolute top-4 right-4 z-10 flex md:hidden">
+        <div className="absolute top-4 right-4 z-20 flex md:hidden">
           <InstallAppButton />
         </div>
 
@@ -458,7 +458,7 @@ export default function Home() {
               </Link>
 
               {/* Voice Button — mobile only (inline with CTA buttons) */}
-              <div className="flex md:hidden flex-col items-center gap-1">
+              <div className="flex md:hidden flex-col items-center gap-1 relative z-20">
                 <button
                   onClick={() => {
                     const event = new CustomEvent('open-voice-booking');
