@@ -1,0 +1,80 @@
+{
+  "query": "SELECT id, sessionDate, sessionStartTime, sessionEndTime, status FROM bookings ORDER BY id DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, sessionDate, sessionStartTime, sessionEndTime, status FROM bookings ORDER BY id DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "480004",
+      "sessionDate": "2026-03-22",
+      "sessionStartTime": "NULL",
+      "sessionEndTime": "NULL",
+      "status": "pending"
+    },
+    {
+      "id": "480003",
+      "sessionDate": "2026-03-19",
+      "sessionStartTime": "NULL",
+      "sessionEndTime": "NULL",
+      "status": "confirmed"
+    },
+    {
+      "id": "480002",
+      "sessionDate": "2026-03-19",
+      "sessionStartTime": "NULL",
+      "sessionEndTime": "NULL",
+      "status": "confirmed"
+    },
+    {
+      "id": "480001",
+      "sessionDate": "2026-03-17",
+      "sessionStartTime": "NULL",
+      "sessionEndTime": "NULL",
+      "status": "confirmed"
+    },
+    {
+      "id": "450001",
+      "sessionDate": "2026-03-10",
+      "sessionStartTime": "08:00:00",
+      "sessionEndTime": "09:00:00",
+      "status": "confirmed"
+    },
+    {
+      "id": "420001",
+      "sessionDate": "2026-03-13",
+      "sessionStartTime": "12:00:00",
+      "sessionEndTime": "13:00:00",
+      "status": "completed"
+    },
+    {
+      "id": "390002",
+      "sessionDate": "2026-03-11",
+      "sessionStartTime": "NULL",
+      "sessionEndTime": "NULL",
+      "status": "cancelled"
+    },
+    {
+      "id": "390001",
+      "sessionDate": "2026-03-08",
+      "sessionStartTime": "09:00:00",
+      "sessionEndTime": "10:30:00",
+      "status": "completed"
+    },
+    {
+      "id": "360003",
+      "sessionDate": "2026-03-08",
+      "sessionStartTime": "06:00:00",
+      "sessionEndTime": "07:00:00",
+      "status": "cancelled"
+    },
+    {
+      "id": "360002",
+      "sessionDate": "2026-03-07",
+      "sessionStartTime": "16:00:00",
+      "sessionEndTime": "17:00:00",
+      "status": "completed"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsessionDate\tsessionStartTime\tsessionEndTime\tstatus\n480004\t2026-03-22\tNULL\tNULL\tpending\n480003\t2026-03-19\tNULL\tNULL\tconfirmed\n480002\t2026-03-19\tNULL\tNULL\tconfirmed\n480001\t2026-03-17\tNULL\tNULL\tconfirmed\n450001\t2026-03-10\t08:00:00\t09:00:00\tconfirmed\n420001\t2026-03-13\t12:00:00\t13:00:00\tcompleted\n390002\t2026-03-11\tNULL\tNULL\tcancelled\n390001\t2026-03-08\t09:00:00\t10:30:00\tcompleted\n360003\t2026-03-08\t06:00:00\t07:00:00\tcancelled\n360002\t2026-03-07\t16:00:00\t17:00:00\tcompleted\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

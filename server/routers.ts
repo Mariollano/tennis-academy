@@ -277,9 +277,20 @@ export const appRouter = router({
         const dateStr = input.sessionDate
           ? new Date(input.sessionDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
           : undefined;
-        const timeStr = input.sessionStartTime && input.sessionEndTime
-          ? `${formatTime12h(input.sessionStartTime)} – ${formatTime12h(input.sessionEndTime)}`
-          : undefined;
+        // Build time string: show range if both times present, just start if only one, or extract from notes
+        let timeStr: string | undefined;
+        if (input.sessionStartTime && input.sessionEndTime) {
+          timeStr = `${formatTime12h(input.sessionStartTime)} – ${formatTime12h(input.sessionEndTime)}`;
+        } else if (input.sessionStartTime) {
+          timeStr = formatTime12h(input.sessionStartTime);
+        } else if (input.notes) {
+          // Fallback: extract preferred time from notes (e.g. "[Preferred time: 11:00]")
+          const m = input.notes.match(/\[Preferred time:\s*([\d:]+)\]/);
+          if (m) {
+            const raw = m[1].includes(":") ? m[1] + ":00" : m[1] + ":00:00";
+            timeStr = formatTime12h(raw);
+          }
+        }
 
         // Send email confirmation to the student
         if (isEmailConfigured() && ctx.user.email) {

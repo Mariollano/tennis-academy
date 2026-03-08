@@ -342,3 +342,4 @@
 - [x] Fix "RESERVE QUICKLY" label: bold white text with dark semi-transparent pill background so it's always visible on any background
 - [x] Fix voice booking button not working on published site (investigate production issue)
 - [x] Fix voice booking microphone button not working on live site when opened in real browser
+- [x] Fix booking confirmation email missing lesson Time field (server now extracts time from sessionStartTime, sessionEndTime, or notes fallback)
