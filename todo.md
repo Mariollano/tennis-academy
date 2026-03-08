@@ -327,3 +327,6 @@
 ## Layout Bugs (Session 12)
 - [x] Remove stray green circle button appearing above "Contact Mario" button
 - [x] Fix mobile layout: Download App + mic button overlapping social icons and hero text
+
+## QuickBook Bug (Session 13)
+- [x] Fix: quickBook procedure trying to INSERT new program row instead of looking up existing program by type

@@ -1,0 +1,52 @@
+{
+  "query": "SELECT id, name, type, isActive FROM programs ORDER BY id LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, name, type, isActive FROM programs ORDER BY id LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Clinic 105",
+      "type": "clinic_105",
+      "isActive": "1"
+    },
+    {
+      "id": "2",
+      "name": "Private Lesson",
+      "type": "private_lesson",
+      "isActive": "1"
+    },
+    {
+      "id": "30001",
+      "name": "Mental Coaching",
+      "type": "mental_coaching",
+      "isActive": "1"
+    },
+    {
+      "id": "60001",
+      "name": "Junior Daily",
+      "type": "junior_daily",
+      "isActive": "1"
+    },
+    {
+      "id": "60002",
+      "name": "Junior Weekly",
+      "type": "junior_weekly",
+      "isActive": "1"
+    },
+    {
+      "id": "70001",
+      "name": "Summer Camp Daily",
+      "type": "summer_camp_daily",
+      "isActive": "1"
+    },
+    {
+      "id": "70002",
+      "name": "Summer Camp Weekly",
+      "type": "summer_camp_weekly",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\ttype\tisActive\n1\tClinic 105\tclinic_105\t1\n2\tPrivate Lesson\tprivate_lesson\t1\n30001\tMental Coaching\tmental_coaching\t1\n60001\tJunior Daily\tjunior_daily\t1\n60002\tJunior Weekly\tjunior_weekly\t1\n70001\tSummer Camp Daily\tsummer_camp_daily\t1\n70002\tSummer Camp Weekly\tsummer_camp_weekly\t1\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

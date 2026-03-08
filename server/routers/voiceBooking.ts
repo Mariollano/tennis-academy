@@ -26,14 +26,17 @@ const PROGRAM_DISPLAY_NAMES: Record<string, string> = {
   tournament: "Tournament Attendance",
 };
 
-// Program IDs in the database
+// Program IDs in the database (verified against actual DB rows)
 const PROGRAM_IDS: Record<string, number> = {
-  private_lesson: 1,
-  clinic_105: 2,
-  junior: 3,
-  summer_camp: 4,
-  mental_coaching: 5,
-  tournament: 6,
+  clinic_105: 1,
+  private_lesson: 2,
+  mental_coaching: 30001,
+  junior_daily: 60001,
+  junior_weekly: 60002,
+  summer_camp_daily: 70001,
+  // aliases used by voice assistant
+  junior: 60001,
+  summer_camp: 70001,
 };
 
 function formatTime12h(t: string): string {
@@ -379,19 +382,33 @@ If the request is unclear, set understood=false.`,
         }
       }
 
-      // Find or create matching program
-      const existingPrograms = await db.select().from(programs)
-        .where(and(eq(programs.type, input.programType as any), eq(programs.isActive, true)))
-        .limit(1);
-      let programId = existingPrograms[0]?.id;
+      // Look up the program ID from the hardcoded map (avoids accidental INSERT)
+      const hardcodedId = PROGRAM_IDS[input.programType];
+      let programId: number | undefined;
+
+      if (hardcodedId) {
+        // Verify the program actually exists in the DB
+        const existingPrograms = await db.select({ id: programs.id })
+          .from(programs)
+          .where(eq(programs.id, hardcodedId))
+          .limit(1);
+        programId = existingPrograms[0]?.id;
+      }
+
       if (!programId) {
-        const result = await db.insert(programs).values({
-          name: input.programType.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-          type: input.programType as any,
-          priceInCents: 0,
-          isActive: true,
+        // Fallback: search by type without inserting
+        const existingPrograms = await db.select({ id: programs.id })
+          .from(programs)
+          .where(and(eq(programs.type, input.programType as any), eq(programs.isActive, true)))
+          .limit(1);
+        programId = existingPrograms[0]?.id;
+      }
+
+      if (!programId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Program type "${input.programType}" not found. Please book through the booking page.`,
         });
-        programId = Number((result as any).insertId);
       }
 
       // Determine price from program type
@@ -399,8 +416,13 @@ If the request is unclear, set understood=false.`,
         private_lesson: 12000,
         clinic_105: 3500,
         junior_daily: 8000,
+        junior_weekly: 32000,
+        junior: 8000,
         summer_camp_daily: 9000,
+        summer_camp_weekly: 36000,
+        summer_camp: 9000,
         mental_coaching: 0,
+        tournament: 0,
       };
       const totalAmountCents = PRICE_MAP[input.programType] ?? 0;
 
