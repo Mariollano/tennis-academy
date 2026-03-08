@@ -19,6 +19,7 @@ import Footer from "./components/Footer";
 import ChatBot from "./components/ChatBot";
 import { InstallPrompt } from "./components/InstallPrompt";
 import FloatingContact from "./components/FloatingContact";
+import QuickBook from "./components/QuickBook";
 import Schedule from "./pages/Schedule";
 
 function Router() {
@@ -46,6 +47,7 @@ function Router() {
       <Footer />
       <ChatBot />
       <FloatingContact />
+      <QuickBook />
       <InstallPrompt />
     </div>
   );

@@ -453,32 +453,35 @@ export default function Schedule() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <section className="bg-primary text-primary-foreground py-12">
+      <section className="bg-primary text-primary-foreground py-10">
         <div className="container">
-          <Badge className="mb-3 bg-accent/20 text-accent border-accent/30">Live Schedule</Badge>
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-2">Session Schedule</h1>
-          <p className="text-primary-foreground/80 max-w-xl">
-            Browse available private lessons and 105 Game Clinic sessions. Click any session to book directly.
-          </p>
-          <div className="flex flex-wrap gap-4 mt-5">
-            <div className="bg-white/10 rounded-lg px-4 py-2 text-sm">
-              <span className="font-bold text-accent">{totalPrivate}</span>
-              <span className="text-primary-foreground/70 ml-1">private lesson{totalPrivate !== 1 ? "s" : ""} this period</span>
-            </div>
-            <div className="bg-white/10 rounded-lg px-4 py-2 text-sm">
-              <span className="font-bold text-accent">{totalClinic}</span>
-              <span className="text-primary-foreground/70 ml-1">105 Game session{totalClinic !== 1 ? "s" : ""} this period</span>
-            </div>
-            <div className="bg-white/10 rounded-lg px-4 py-2 text-sm">
-              <span className="font-bold text-accent">{totalSpotsLeft}</span>
-              <span className="text-primary-foreground/70 ml-1">clinic spots available</span>
-            </div>
-            {isAuthenticated && totalMyBookings > 0 && (
-              <div className="bg-green-500/20 rounded-lg px-4 py-2 text-sm">
-                <span className="font-bold text-green-300">{totalMyBookings}</span>
-                <span className="text-primary-foreground/70 ml-1">your booking{totalMyBookings !== 1 ? "s" : ""} this period</span>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-0.5 bg-accent" />
+                <span className="text-accent text-sm font-bold tracking-[0.2em] uppercase">Live Schedule</span>
               </div>
-            )}
+              <h1 className="text-3xl md:text-4xl font-extrabold mb-2" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>SESSION SCHEDULE</h1>
+              <p className="text-primary-foreground/70 max-w-xl text-sm">
+                Browse available sessions. Click any slot to book directly.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <div className="bg-white/10 rounded-xl px-4 py-2.5 text-sm border border-white/10">
+                <div className="font-bold text-accent text-xl leading-none">{totalPrivate}</div>
+                <div className="text-primary-foreground/60 text-xs mt-0.5">Private lessons</div>
+              </div>
+              <div className="bg-white/10 rounded-xl px-4 py-2.5 text-sm border border-white/10">
+                <div className="font-bold text-accent text-xl leading-none">{totalSpotsLeft}</div>
+                <div className="text-primary-foreground/60 text-xs mt-0.5">Clinic spots open</div>
+              </div>
+              {isAuthenticated && totalMyBookings > 0 && (
+                <div className="bg-green-500/20 rounded-xl px-4 py-2.5 text-sm border border-green-500/20">
+                  <div className="font-bold text-green-300 text-xl leading-none">{totalMyBookings}</div>
+                  <div className="text-primary-foreground/60 text-xs mt-0.5">Your bookings</div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>

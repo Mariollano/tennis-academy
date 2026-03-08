@@ -298,9 +298,11 @@ export const appRouter = router({
         return db.select({
           booking: bookings,
           user: { id: users.id, name: users.name, email: users.email, phone: users.phone },
+          program: { id: programs.id, name: programs.name, type: programs.type },
         })
           .from(bookings)
           .leftJoin(users, eq(bookings.userId, users.id))
+          .leftJoin(programs, eq(bookings.programId, programs.id))
           .where(conditions.length ? and(...conditions) : undefined)
           .orderBy(desc(bookings.createdAt))
           .limit(input.limit);

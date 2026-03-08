@@ -103,19 +103,32 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <section className="bg-primary text-primary-foreground py-12">
+      <section className="bg-primary text-primary-foreground py-10">
         <div className="container">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-2xl font-bold text-accent-foreground">
-              {user?.name?.charAt(0) || "?"}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-3xl font-extrabold text-accent-foreground shadow-xl border-4 border-white/20" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                {user?.name?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-primary" title="Online" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">{user?.name || "My Profile"}</h1>
-              <p className="text-primary-foreground/70 text-sm">{user?.email}</p>
-              <Badge className="mt-1 bg-accent/20 text-accent border-accent/30 text-xs capitalize">
-                {user?.role === "admin" ? "Coach / Admin" : "Student"}
-              </Badge>
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-3xl font-extrabold" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{user?.name || "My Profile"}</h1>
+              <p className="text-primary-foreground/60 text-sm">{user?.email}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge className="bg-accent/20 text-accent border-accent/30 text-xs capitalize">
+                  {user?.role === "admin" ? "Coach / Admin" : "Student"}
+                </Badge>
+                <Badge className="bg-white/10 text-primary-foreground/60 border-white/20 text-xs">
+                  Member
+                </Badge>
+              </div>
             </div>
+            <Link href="/programs">
+              <Button className="bg-accent text-accent-foreground hover:brightness-105 font-bold rounded-full px-6 shrink-0">
+                Book a Session
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -221,24 +234,57 @@ export default function Profile() {
                   </div>
                 ) : (
                   <>
-                  <div className="space-y-3">
-                    {bookings.map((booking) => (
-                      <div key={booking.id} className="flex items-center justify-between p-4 border border-border rounded-xl hover:bg-muted/30 transition-colors">
-                        <div>
-                          <div className="font-semibold text-foreground text-sm capitalize">
-                            {booking.programName || "Booking"}
+                  {/* Separate upcoming and past bookings */}
+                  {(() => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const upcoming = bookings.filter(b => {
+                      if (!b.sessionDate) return b.status === 'pending' || b.status === 'confirmed';
+                      return new Date(b.sessionDate + 'T12:00:00') >= today && b.status !== 'cancelled';
+                    });
+                    const past = bookings.filter(b => {
+                      if (!b.sessionDate) return b.status === 'completed' || b.status === 'cancelled';
+                      return new Date(b.sessionDate + 'T12:00:00') < today || b.status === 'cancelled';
+                    });
+
+                    const BookingRow = ({ booking }: { booking: typeof bookings[0] }) => (
+                      <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-border rounded-xl hover:bg-muted/20 transition-colors gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                            booking.status === 'confirmed' ? 'bg-green-100' :
+                            booking.status === 'pending' ? 'bg-amber-100' :
+                            booking.status === 'cancelled' ? 'bg-red-100' : 'bg-primary/10'
+                          }`}>
+                            <Calendar className={`w-5 h-5 ${
+                              booking.status === 'confirmed' ? 'text-green-600' :
+                              booking.status === 'pending' ? 'text-amber-600' :
+                              booking.status === 'cancelled' ? 'text-red-400' : 'text-primary'
+                            }`} />
                           </div>
-                          <div className="text-xs text-muted-foreground mt-0.5">
-                            {booking.sessionDate
-                              ? new Date(booking.sessionDate).toLocaleDateString()
-                              : new Date(booking.createdAt).toLocaleDateString()}
+                          <div>
+                            <div className="font-semibold text-foreground text-sm capitalize">
+                              {booking.programName || "Booking"}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {(() => {
+                                const formatDate = (d: string | Date | null | undefined) => {
+                                  if (!d) return null;
+                                  const date = typeof d === 'string' ? new Date(d.includes('T') ? d : d + 'T12:00:00') : new Date(d);
+                                  if (isNaN(date.getTime())) return null;
+                                  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+                                };
+                                return formatDate(booking.sessionDate) || formatDate(booking.createdAt) || 'Date TBD';
+                              })()}
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-primary text-sm">
-                            ${((booking.totalAmountCents || 0) / 100).toFixed(0)}
-                          </span>
-                          <Badge className={`text-xs flex items-center gap-1 ${statusColors[booking.status] || "bg-muted text-muted-foreground"}`}>
+                        <div className="flex items-center gap-2 ml-13 sm:ml-0">
+                          {(booking.totalAmountCents || 0) > 0 && (
+                            <span className="font-bold text-primary text-sm">
+                              ${((booking.totalAmountCents || 0) / 100).toFixed(0)}
+                            </span>
+                          )}
+                          <Badge className={`text-xs flex items-center gap-1 capitalize ${statusColors[booking.status] || "bg-muted text-muted-foreground"}`}>
                             {statusIcons[booking.status]}
                             {booking.status}
                           </Badge>
@@ -246,7 +292,7 @@ export default function Profile() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-2 h-7"
+                              className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2 h-7"
                               onClick={() => setCancelBookingId(booking.id)}
                             >
                               <XCircle className="w-3.5 h-3.5 mr-1" /> Cancel
@@ -254,8 +300,35 @@ export default function Profile() {
                           )}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    );
+
+                    return (
+                      <div className="space-y-6">
+                        {upcoming.length > 0 && (
+                          <div>
+                            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                              Upcoming Sessions ({upcoming.length})
+                            </h3>
+                            <div className="space-y-2">
+                              {upcoming.map(b => <BookingRow key={b.id} booking={b} />)}
+                            </div>
+                          </div>
+                        )}
+                        {past.length > 0 && (
+                          <div>
+                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-muted-foreground inline-block" />
+                              Past Sessions ({past.length})
+                            </h3>
+                            <div className="space-y-2 opacity-70">
+                              {past.map(b => <BookingRow key={b.id} booking={b} />)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Cancel confirmation dialog */}
                   <AlertDialog open={cancelBookingId !== null} onOpenChange={(open) => { if (!open) setCancelBookingId(null); }}>

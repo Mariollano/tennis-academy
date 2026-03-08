@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar as CalendarIcon, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check, Users, AlertCircle, CheckCircle2, Tag, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check, Users, AlertCircle, CheckCircle2, Tag, X, ChevronLeft, ChevronRight, User, ArrowRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -684,22 +684,32 @@ export default function BookingPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-lg w-full space-y-4">
           {/* Confirmation Card */}
-          <Card className="text-center p-8">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-foreground mb-2">Booking Confirmed!</h2>
-            <p className="text-muted-foreground mb-6">
-              {paymentStatus === "success"
-                ? <>Payment received! Your <strong>{config.title}</strong> booking is confirmed. Mario will be in touch with session details.</>
-                : <>Your <strong>{config.title}</strong> booking request has been submitted. Mario will be in touch shortly.</>
-              }
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Link href="/programs">
-                <Button variant="outline">View Programs</Button>
-              </Link>
-              <Link href="/profile">
-                <Button className="bg-primary text-primary-foreground">My Bookings</Button>
-              </Link>
+          <Card className="text-center overflow-hidden">
+            {/* Top accent bar */}
+            <div className="h-2 bg-gradient-to-r from-accent via-green-400 to-accent" />
+            <div className="p-8">
+              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5 relative">
+                <CheckCircle className="w-10 h-10 text-green-500" />
+                <div className="absolute inset-0 rounded-full border-4 border-green-200 animate-ping opacity-30" />
+              </div>
+              <h2 className="text-3xl font-extrabold text-foreground mb-2" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                {paymentStatus === "success" ? "YOU'RE BOOKED!" : "REQUEST SENT!"}
+              </h2>
+              <p className="text-muted-foreground mb-2 text-sm">
+                {paymentStatus === "success"
+                  ? <>Payment received! Your <strong className="text-foreground">{config.title}</strong> is confirmed. Check your email for details.</>
+                  : <>Your <strong className="text-foreground">{config.title}</strong> request is submitted. Mario will confirm shortly.</>
+                }
+              </p>
+              <p className="text-xs text-muted-foreground/70 mb-6">A confirmation email + SMS reminder will be sent before your session.</p>
+              <div className="flex gap-3 justify-center">
+                <Link href="/programs">
+                  <Button variant="outline" className="rounded-full">Browse Programs</Button>
+                </Link>
+                <Link href="/profile">
+                  <Button className="bg-primary text-primary-foreground rounded-full">My Bookings</Button>
+                </Link>
+              </div>
             </div>
           </Card>
 
@@ -765,18 +775,68 @@ export default function BookingPage() {
     );
   }
 
+  // Determine booking step for the wizard indicator
+  const bookingStep = !isAuthenticated ? 0 :
+    ((programType === 'clinic_105' || programType === 'private_lesson') && !sessionDate) ? 1 :
+    (programType === 'clinic_105' && (!selectedSlotId || selectedSlotId <= 0)) ? 1 :
+    (programType === 'junior_daily' && juniorSelectedDates.length === 0) ? 1 :
+    2;
+
+  const steps = [
+    { label: "Sign In", icon: User },
+    { label: "Pick Date", icon: CalendarIcon },
+    { label: "Confirm & Pay", icon: CreditCard },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <section className="bg-primary text-primary-foreground py-12">
+      <section className="bg-primary text-primary-foreground pt-8 pb-0">
         <div className="container">
           <Link href="/programs">
-            <Button variant="ghost" size="sm" className="text-primary-foreground/70 hover:text-primary-foreground mb-4">
-              <ArrowLeft className="w-4 h-4 mr-1" /> Back to Programs
+            <Button variant="ghost" size="sm" className="text-primary-foreground/70 hover:text-primary-foreground mb-4 -ml-2">
+              <ArrowLeft className="w-4 h-4 mr-1" /> All Programs
             </Button>
           </Link>
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-2">{config.title}</h1>
-          <p className="text-primary-foreground/80">{config.description}</p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-extrabold mb-1" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{config.title}</h1>
+              <p className="text-primary-foreground/70 text-sm">{config.description}</p>
+            </div>
+            {config.pricing[0].cents > 0 && (
+              <div className="shrink-0 text-right">
+                <div className="text-accent font-extrabold text-3xl" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                  ${(config.pricing[0].cents / 100).toFixed(0)}
+                </div>
+                <div className="text-primary-foreground/50 text-xs">{config.pricing[0].label.split(" — ")[0]}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Step Indicator */}
+          <div className="flex items-center gap-0 border-t border-white/10">
+            {steps.map((step, i) => {
+              const Icon = step.icon;
+              const isCompleted = i < bookingStep;
+              const isCurrent = i === bookingStep;
+              return (
+                <div key={step.label} className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all border-b-2 ${
+                  isCompleted ? 'border-accent/60 text-primary-foreground/60' :
+                  isCurrent ? 'border-accent text-accent' :
+                  'border-transparent text-primary-foreground/30'
+                }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                    isCompleted ? 'bg-accent/20 text-accent' :
+                    isCurrent ? 'bg-accent text-accent-foreground' :
+                    'bg-white/10 text-primary-foreground/30'
+                  }`}>
+                    {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Icon className="w-3 h-3" />}
+                  </div>
+                  <span className="hidden sm:inline">{step.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -810,14 +870,21 @@ export default function BookingPage() {
               </CardHeader>
               <CardContent>
                 {!isAuthenticated ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">Please sign in to book a session.</p>
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <User className="w-8 h-8 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-foreground text-xl mb-2">Sign In to Continue</h3>
+                    <p className="text-muted-foreground mb-6 max-w-xs mx-auto text-sm">Create a free account or sign in to book your session with Coach Mario.</p>
                     <Button
-                      className="bg-primary text-primary-foreground"
+                      size="lg"
+                      className="bg-accent text-accent-foreground hover:brightness-105 font-bold px-8 rounded-full"
                       onClick={() => (window.location.href = getLoginUrl())}
                     >
-                      Sign In to Book
+                      Sign In / Create Account
+                      <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
+                    <p className="text-xs text-muted-foreground mt-4">Free to create · No credit card required to sign up</p>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -1044,7 +1111,8 @@ export default function BookingPage() {
 
                       <Button
                       type="submit"
-                      className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-bold py-3 text-base"
+                      size="lg"
+                      className="w-full bg-accent text-accent-foreground hover:brightness-105 font-bold py-4 text-base rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
                       disabled={createBookingMutation.isPending || createCheckoutMutation.isPending}
                     >
                       {createBookingMutation.isPending || createCheckoutMutation.isPending ? (

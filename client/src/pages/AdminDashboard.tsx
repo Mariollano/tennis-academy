@@ -240,7 +240,7 @@ export default function AdminDashboard() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-semibold text-foreground text-sm capitalize">
-                              {item.booking.programId ? `Program #${item.booking.programId}` : "Booking"}
+                              {(item as any).program?.name || (item.booking.programId ? `Program #${item.booking.programId}` : "Booking")}
                             </span>
                             <Badge className={`text-xs ${statusColors[item.booking.status]}`}>
                               {item.booking.status}

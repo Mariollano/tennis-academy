@@ -235,3 +235,20 @@
 - [x] Wire Cancel button in Admin Schedule to new cancelNow procedure (email + SMS)
 - [x] Add Remind button to Admin Dashboard booking rows
 - [x] Add Remind button to Admin Schedule booking rows
+
+## UX Redesign (Session 4 — Overnight Overhaul)
+- [x] Research top tennis booking apps (Tennis Australia, PlayYourCourt, CourtReserve, Picktime) for UX best practices
+- [x] Redesign global CSS: premium dark navy/royal blue/tennis yellow design system, Inter + Bebas Neue fonts
+- [x] Rebuild Homepage: asymmetric hero, live stats counter, next-available-sessions widget, programs grid, testimonials, gallery CTA
+- [x] Redesign Navbar: sticky with blur backdrop, social icons, Book Now CTA button, improved mobile menu
+- [x] Redesign Footer: 4-column layout with quick links, contact info, social icons, newsletter opt-in
+- [x] Redesign Programs page: improved card layout with photos, program type badges, price callouts
+- [x] Improve BookingPage: step-indicator wizard UI (Sign In → Pick Date → Confirm & Pay), better order summary sidebar
+- [x] Improve booking confirmation screen: celebratory design with social share, next steps, and back-to-home CTA
+- [x] Add QuickBook floating widget: accessible from any page, pre-fills program selector, links to booking flow
+- [x] Add Book Now button to Navbar (desktop and mobile)
+- [x] Improve Profile page: better booking history with upcoming vs past sessions, color-coded status badges
+- [x] Fix date formatting in Profile page: gracefully handle null/invalid dates (show "Date TBD" instead of "Invalid Date")
+- [x] Improve Admin Dashboard: show program names instead of "Program #2" (join programs table in adminList query)
+- [x] Add mobile-first CSS improvements: better touch targets, smoother animations, scroll behavior
+- [x] Improve Schedule page header: premium look with live stats, quick-book CTA
