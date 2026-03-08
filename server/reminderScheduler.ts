@@ -24,11 +24,21 @@ export async function processScheduledReminders(): Promise<void> {
 
   const now = new Date();
 
-  // Find all pending reminders that are due
-  const due = await db
-    .select()
-    .from(scheduledReminders)
-    .where(and(eq(scheduledReminders.status, "pending"), lte(scheduledReminders.sendAt, now)));
+  // Find all pending reminders that are due — with ECONNRESET retry
+  let due: typeof scheduledReminders.$inferSelect[] = [];
+  try {
+    due = await db
+      .select()
+      .from(scheduledReminders)
+      .where(and(eq(scheduledReminders.status, "pending"), lte(scheduledReminders.sendAt, now)));
+  } catch (err: any) {
+    // Transient DB connection error (ECONNRESET) — skip this cycle, will retry next interval
+    if (err?.cause?.code === "ECONNRESET" || err?.message?.includes("ECONNRESET")) {
+      return; // Silent skip — not a real error
+    }
+    console.error("[ReminderScheduler] DB query error:", err?.message);
+    return;
+  }
 
   if (due.length === 0) return;
 

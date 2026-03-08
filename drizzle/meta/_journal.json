@@ -78,6 +78,13 @@
       "when": 1772829598882,
       "tag": "0010_dry_night_nurse",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1772961946124,
+      "tag": "0011_regular_leo",
+      "breakpoints": true
     }
   ]
 }

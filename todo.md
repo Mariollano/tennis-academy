@@ -272,3 +272,12 @@
 - [x] Footer "Ready to Elevate Your Game?" CTA strip
 - [x] Location section with Google Maps embed on homepage
 - [x] Bottom padding for mobile bottom bar content overlap fix
+
+## Round 3 Features (Session 6)
+
+- [x] Newsletter Manager: AI-powered compose/send, history, subscriber count, admin page at /admin/newsletter
+- [x] Player Leaderboard: most active players, top performers, social proof page at /leaderboard
+- [x] Gift a Session: purchase session as gift, Stripe checkout, gift card redemption flow at /gift-card
+- [x] Admin Dashboard Quick Actions: Newsletter + Leaderboard buttons added
+- [x] Footer: Leaderboard + Gift a Session links added
+- [x] Navbar: Leaderboard link added to nav

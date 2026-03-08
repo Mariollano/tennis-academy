@@ -14,6 +14,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/programs", label: "Programs" },
   { href: "/schedule", label: "My Schedule" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/social", label: "Media" },
   { href: "/mental-coaching", label: "Mental Coaching" },
   { href: "/services", label: "Services" },

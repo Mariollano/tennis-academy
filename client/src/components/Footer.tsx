@@ -75,6 +75,8 @@ export default function Footer() {
               {[
                 { label: "All Programs", href: "/programs" },
                 { label: "My Schedule", href: "/schedule" },
+                { label: "Leaderboard", href: "/leaderboard" },
+                { label: "Gift a Session", href: "/gift-card" },
                 { label: "Services", href: "/services" },
                 { label: "Gallery", href: "/gallery" },
                 { label: "Social Media", href: "/social" },

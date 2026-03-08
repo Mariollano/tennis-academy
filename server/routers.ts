@@ -25,6 +25,9 @@ import {
   smsBroadcasts, mentalCoachingResources, merchandise, tournamentBookings, tournamentParticipants,
   blockedTimes, sessionWaitlist, scheduledReminders
 } from "../drizzle/schema";
+import { newsletterRouter } from "./routers/newsletter";
+import { giftCardsRouter } from "./routers/giftCards";
+import { leaderboardRouter } from "./routers/leaderboard";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
 
 function buildProgramScheduleHtml(): string {
@@ -58,6 +61,9 @@ const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 export const appRouter = router({
   system: systemRouter,
+  newsletter: newsletterRouter,
+  giftCards: giftCardsRouter,
+  leaderboard: leaderboardRouter,
   promoCodes: promoCodeRouter,
 
   auth: router({

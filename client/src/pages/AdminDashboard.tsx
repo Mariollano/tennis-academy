@@ -264,6 +264,8 @@ export default function AdminDashboard() {
                   { label: "SMS Broadcast", count: stats?.smsSubscribers ? `${stats.smsSubscribers} subs` : null as string | null | undefined, color: "bg-purple-50 border-purple-200 text-purple-800", action: () => setActiveTab("sms"), href: undefined },
                   { label: "Manage Schedule", count: null as null, color: "bg-blue-50 border-blue-200 text-blue-800", href: "/admin/schedule", action: undefined },
                   { label: "Create Promo Code", count: null as null, color: "bg-green-50 border-green-200 text-green-800", action: () => setActiveTab("promos"), href: undefined },
+                  { label: "Newsletter", count: null as null, color: "bg-teal-50 border-teal-200 text-teal-800", href: "/admin/newsletter", action: undefined },
+                  { label: "Leaderboard", count: null as null, color: "bg-orange-50 border-orange-200 text-orange-800", href: "/leaderboard", action: undefined },
                 ] as Array<{ label: string; count?: string | number | null; color: string; href?: string; action?: () => void }>).map((action) => (
                   action.href ? (
                     <Link key={action.label} href={action.href}>

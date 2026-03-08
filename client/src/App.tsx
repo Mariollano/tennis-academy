@@ -23,6 +23,9 @@ import QuickBook from "./components/QuickBook";
 import MobileBottomBar from "./components/MobileBottomBar";
 import Schedule from "./pages/Schedule";
 import WelcomeModal from "./components/WelcomeModal";
+import Leaderboard from "./pages/Leaderboard";
+import GiftCard from "./pages/GiftCard";
+import AdminNewsletter from "./pages/AdminNewsletter";
 
 function Router() {
   return (
@@ -41,6 +44,10 @@ function Router() {
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/schedule" component={AdminSchedule} />
           <Route path="/schedule" component={Schedule} />
+          <Route path="/leaderboard" component={Leaderboard} />
+          <Route path="/gift-card" component={GiftCard} />
+          <Route path="/gift-card/success" component={GiftCard} />
+          <Route path="/admin/newsletter" component={AdminNewsletter} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />

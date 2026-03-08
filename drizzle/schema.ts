@@ -274,6 +274,27 @@ export const newsletters = mysqlTable("newsletters", {
 export type Newsletter = typeof newsletters.$inferSelect;
 export type InsertNewsletter = typeof newsletters.$inferInsert;
 
+// ─── Gift Cards ──────────────────────────────────────────────────────────────
+export const giftCards = mysqlTable("gift_cards", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 20 }).notNull().unique(),
+  purchasedByUserId: int("purchasedByUserId").notNull(),
+  recipientName: varchar("recipientName", { length: 200 }).notNull(),
+  recipientEmail: varchar("recipientEmail", { length: 320 }),
+  recipientMessage: text("recipientMessage"),
+  programType: varchar("programType", { length: 100 }).notNull(), // e.g. 'private_lesson'
+  programLabel: varchar("programLabel", { length: 200 }).notNull(), // e.g. '1 Private Lesson'
+  amountInCents: int("amountInCents").notNull(),
+  status: mysqlEnum("status", ["active", "redeemed", "expired"]).notNull().default("active"),
+  redeemedByUserId: int("redeemedByUserId"),
+  redeemedAt: timestamp("redeemedAt"),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 200 }),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type GiftCard = typeof giftCards.$inferSelect;
+export type InsertGiftCard = typeof giftCards.$inferInsert;
+
 // ─── Scheduled Reminders ──────────────────────────────────────────────────────
 // When admin clicks "Remind", a reminder is queued to fire 2 hours before lesson
 export const scheduledReminders = mysqlTable("scheduled_reminders", {
