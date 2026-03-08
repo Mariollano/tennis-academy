@@ -322,4 +322,4 @@
 - [x] Redesign voice button: round circle with yellow ring outline + mic icon, placed inline with CTA buttons, "Book by Voice" text below
 
 ## Voice Button Position (Session 11b)
-- [ ] Move mic button to right side of hero, below the "Download App" button
+- [x] Move mic button to right side of hero, below the "Download App" button
