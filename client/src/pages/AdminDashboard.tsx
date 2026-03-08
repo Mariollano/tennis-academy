@@ -24,6 +24,154 @@ const statusColors: Record<string, string> = {
   completed: "bg-blue-100 text-blue-800",
 };
 
+function AnalyticsTab() {
+  const { data: analytics, isLoading } = trpc.admin.getAnalytics.useQuery({ months: 6 });
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {[1, 2, 3].map(i => <div key={i} className="h-64 bg-muted rounded-2xl animate-pulse" />)}
+      </div>
+    );
+  }
+
+  const totalRevenue = (analytics?.revenueByProgram || []).reduce((sum, r) => sum + (Number(r.totalRevenueCents) || 0), 0);
+  const maxRevenue = Math.max(...(analytics?.revenueByProgram || []).map(r => Number(r.totalRevenueCents) || 0), 1);
+  const maxBookings = Math.max(...(analytics?.monthlyTrends || []).map(r => Number(r.bookingCount) || 0), 1);
+
+  return (
+    <div className="space-y-6">
+      {/* Revenue by Program */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <DollarSign className="w-4 h-4 text-green-600" /> Revenue by Program
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!analytics?.revenueByProgram?.length ? (
+              <div className="text-center py-8 text-muted-foreground text-sm">No revenue data yet.</div>
+            ) : (
+              <div className="space-y-3">
+                {analytics.revenueByProgram.map((r) => (
+                  <div key={r.programName || 'Other'}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted-foreground truncate max-w-[55%]">{r.programName || 'Other'}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">{Number(r.bookingCount)} bookings</span>
+                        <span className="font-bold text-foreground">${(Number(r.totalRevenueCents || 0) / 100).toFixed(0)}</span>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(Number(r.totalRevenueCents || 0) / maxRevenue) * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+                <div className="pt-3 border-t border-border flex justify-between text-sm">
+                  <span className="text-muted-foreground font-medium">Total Revenue</span>
+                  <span className="font-extrabold text-primary">${(totalRevenue / 100).toFixed(0)}</span>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Students */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Trophy className="w-4 h-4 text-accent" /> Top Students
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!analytics?.topStudents?.length ? (
+              <div className="text-center py-8 text-muted-foreground text-sm">No student data yet.</div>
+            ) : (
+              <div className="space-y-2">
+                {analytics.topStudents.slice(0, 8).map((s, i) => (
+                  <div key={s.userId} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-extrabold ${
+                        i === 0 ? 'bg-yellow-100 text-yellow-700' :
+                        i === 1 ? 'bg-gray-100 text-gray-600' :
+                        i === 2 ? 'bg-orange-100 text-orange-700' :
+                        'bg-muted text-muted-foreground'
+                      }`}>{i + 1}</div>
+                      <div>
+                        <div className="text-sm font-semibold text-foreground">{s.userName || 'Unknown'}</div>
+                        <div className="text-xs text-muted-foreground">{s.userEmail}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-primary">{Number(s.sessionCount)} sessions</div>
+                      <div className="text-xs text-muted-foreground">${(Number(s.totalSpentCents || 0) / 100).toFixed(0)} spent</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Monthly Booking Trends */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <BarChart3 className="w-4 h-4 text-blue-600" /> Monthly Booking Trends (Last 6 Months)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!analytics?.monthlyTrends?.length ? (
+            <div className="text-center py-8 text-muted-foreground text-sm">No trend data yet.</div>
+          ) : (
+            <div className="space-y-4">
+              {/* Bar chart */}
+              <div className="flex items-end gap-2 h-32">
+                {analytics.monthlyTrends.map((m) => (
+                  <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                    <div className="text-xs font-bold text-foreground">{Number(m.bookingCount)}</div>
+                    <div
+                      className="w-full rounded-t-lg bg-primary/80 transition-all hover:bg-primary"
+                      style={{ height: `${Math.max(4, (Number(m.bookingCount) / maxBookings) * 100)}px` }}
+                      title={`${m.month}: ${m.bookingCount} bookings, $${(Number(m.revenueCents || 0) / 100).toFixed(0)} revenue`}
+                    />
+                    <div className="text-[10px] text-muted-foreground">{m.month?.slice(5)}</div>
+                  </div>
+                ))}
+              </div>
+              {/* Summary row */}
+              <div className="grid grid-cols-3 gap-4 pt-3 border-t border-border">
+                <div className="text-center">
+                  <div className="text-xl font-extrabold text-primary" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                    {analytics.monthlyTrends.reduce((s, m) => s + Number(m.bookingCount), 0)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Total Bookings</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-extrabold text-green-600" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                    ${(analytics.monthlyTrends.reduce((s, m) => s + Number(m.revenueCents || 0), 0) / 100).toFixed(0)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Total Revenue</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                    {analytics.monthlyTrends.length > 0
+                      ? Math.round(analytics.monthlyTrends.reduce((s, m) => s + Number(m.bookingCount), 0) / analytics.monthlyTrends.length)
+                      : 0}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Avg / Month</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const { user, isAuthenticated, loading } = useAuth();
   const [bookingFilter, setBookingFilter] = useState("all");
@@ -291,6 +439,7 @@ export default function AdminDashboard() {
           <TabsList className="mb-6 flex flex-wrap gap-1 h-auto bg-muted p-1 rounded-xl">
             <TabsTrigger value="bookings" onClick={() => setActiveTab("bookings")}><Calendar className="w-4 h-4 mr-1.5" />Bookings</TabsTrigger>
             <TabsTrigger value="students" onClick={() => setActiveTab("students")}><Users className="w-4 h-4 mr-1.5" />Students</TabsTrigger>
+            <TabsTrigger value="analytics" onClick={() => setActiveTab("analytics")}><BarChart3 className="w-4 h-4 mr-1.5" />Analytics</TabsTrigger>
             <TabsTrigger value="sms" onClick={() => setActiveTab("sms")}><MessageSquare className="w-4 h-4 mr-1.5" />SMS Broadcast</TabsTrigger>
             <TabsTrigger value="promos" onClick={() => setActiveTab("promos")}><Tag className="w-4 h-4 mr-1.5" />Promo Codes</TabsTrigger>
           </TabsList>
@@ -445,6 +594,11 @@ export default function AdminDashboard() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <AnalyticsTab />
           </TabsContent>
 
           {/* SMS Broadcast Tab */}

@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Clock, Users, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 
 type ViewMode = "day" | "week" | "month";
 
@@ -515,54 +516,68 @@ export default function Schedule() {
 
       {/* Calendar Controls */}
       <div className="container py-6">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <Tabs value={view} onValueChange={(v) => setView(v as ViewMode)}>
-            <TabsList>
-              <TabsTrigger value="day">Day</TabsTrigger>
-              <TabsTrigger value="week">Week</TabsTrigger>
-              <TabsTrigger value="month">Month</TabsTrigger>
-            </TabsList>
-          </Tabs>
+        {/* Availability Overview + Controls */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Availability Calendar */}
+          <div className="lg:col-span-1">
+            <div className="mb-3">
+              <h2 className="text-lg font-extrabold text-foreground" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>AVAILABILITY OVERVIEW</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Click a green/amber day to see details</p>
+            </div>
+            <div style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1e293b 100%)' }} className="rounded-3xl">
+              <AvailabilityCalendar compact />
+            </div>
+          </div>
+          {/* Schedule View */}
+          <div className="lg:col-span-2">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <Tabs value={view} onValueChange={(v) => setView(v as ViewMode)}>
+                <TabsList>
+                  <TabsTrigger value="day">Day</TabsTrigger>
+                  <TabsTrigger value="week">Week</TabsTrigger>
+                  <TabsTrigger value="month">Month</TabsTrigger>
+                </TabsList>
+              </Tabs>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={goToToday} className="text-xs">Today</Button>
-            <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <span className="text-sm font-semibold text-foreground min-w-[180px] text-center">{periodLabel}</span>
-            <Button variant="outline" size="icon" onClick={() => navigate(1)}>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-            {/* Jump-to-date input */}
-            <input
-              type="date"
-              value={isoDate(currentDate)}
-              onChange={(e) => {
-                if (e.target.value) {
-                  // Parse as local date to avoid UTC offset shifting
-                  const [y, m, d] = e.target.value.split("-").map(Number);
-                  setCurrentDate(new Date(y, m - 1, d));
-                  if (view === "month") setView("day");
-                }
-              }}
-              className="text-xs border border-border rounded-md px-2 py-1.5 bg-background text-foreground cursor-pointer hover:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
-              title="Jump to date"
-            />
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button variant="outline" size="sm" onClick={goToToday} className="text-xs">Today</Button>
+                <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-sm font-semibold text-foreground min-w-[180px] text-center">{periodLabel}</span>
+                <Button variant="outline" size="icon" onClick={() => navigate(1)}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+                <input
+                  type="date"
+                  value={isoDate(currentDate)}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      const [y, m, d] = e.target.value.split("-").map(Number);
+                      setCurrentDate(new Date(y, m - 1, d));
+                      if (view === "month") setView("day");
+                    }
+                  }}
+                  className="text-xs border border-border rounded-md px-2 py-1.5 bg-background text-foreground cursor-pointer hover:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
+                  title="Jump to date"
+                />
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20 text-muted-foreground">
+                <Clock className="w-6 h-6 animate-spin mr-2" />
+                Loading schedule...
+              </div>
+            ) : (
+              <>
+                {view === "day" && <HourlyDayView date={currentDate} slots={allSlots} />}
+                {view === "week" && <WeekView weekStart={startOfWeek(currentDate)} slots={allSlots} onDayClick={handleDayClick} />}
+                {view === "month" && <MonthView monthStart={startOfMonth(currentDate)} slots={allSlots} onDayClick={handleDayClick} />}
+              </>
+            )}
           </div>
         </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20 text-muted-foreground">
-            <Clock className="w-6 h-6 animate-spin mr-2" />
-            Loading schedule...
-          </div>
-        ) : (
-          <>
-            {view === "day" && <HourlyDayView date={currentDate} slots={allSlots} />}
-            {view === "week" && <WeekView weekStart={startOfWeek(currentDate)} slots={allSlots} onDayClick={handleDayClick} />}
-            {view === "month" && <MonthView monthStart={startOfMonth(currentDate)} slots={allSlots} onDayClick={handleDayClick} />}
-          </>
-        )}
 
         {/* Bottom CTA */}
         <div className="mt-10 text-center border-t border-border pt-8">

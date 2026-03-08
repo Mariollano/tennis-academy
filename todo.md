@@ -291,3 +291,11 @@
 - [x] /api/voice-upload endpoint added to Express server
 - [x] voiceBooking router: transcribe + parseAndCheck procedures
 - [x] open-voice-booking custom event wired between hero button and VoiceBooking modal
+
+## Round 5 Features (Session 8)
+
+- [x] Tip of the Week widget on homepage (mental coaching tip from DB, rotating weekly)
+- [x] Coach Availability Calendar on Schedule page (color-coded dots: green=available, amber=limited, red=full)
+- [x] Student Progress Dashboard on Profile page (milestone tracker 🎾→⭐→🏆→🥇, progress bar, program breakdown, total invested)
+- [x] Admin Analytics tab: Revenue by Program (bar chart), Top Students leaderboard, Monthly Booking Trends (6-month bar chart)
+- [x] admin.getAnalytics procedure: revenue by program, monthly trends, top students by session count

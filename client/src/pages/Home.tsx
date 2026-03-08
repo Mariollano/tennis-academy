@@ -6,10 +6,12 @@ import {
   Trophy, Brain, Users, Sun, Star, ChevronRight,
   Calendar, MessageSquare, Play, Zap, Download,
   MapPin, Phone, Mail, ArrowRight, CheckCircle,
-  Clock, DollarSign, Shield, Award, TrendingUp, Mic
+  Clock, DollarSign, Shield, Award, TrendingUp, Mic,
+  Lightbulb, RefreshCw
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
 
 function useCountUp(target: number, duration = 1500, start = false) {
   const [count, setCount] = useState(0);
@@ -199,6 +201,111 @@ const faqItems = [
   { q: "Do you offer promo codes or discounts?", a: "Yes! We occasionally offer promo codes for new students and special events. Check with Coach Mario or sign up for SMS updates to receive exclusive offers." },
   { q: "Where are you located?", a: "RI Tennis Academy is based in Rhode Island. Specific court locations are confirmed upon booking. Contact Coach Mario at (401) 965-5873 for details." },
 ];
+
+const categoryColors: Record<string, string> = {
+  mindset: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+  focus: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  pressure: "bg-red-500/15 text-red-400 border-red-500/30",
+  confidence: "bg-green-500/15 text-green-400 border-green-500/30",
+  routine: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+  general: "bg-accent/15 text-accent-foreground border-accent/30",
+};
+
+function TipOfTheWeekSection() {
+  const { data: tip, isLoading, refetch } = trpc.mental.getTipOfWeek.useQuery();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
+
+  return (
+    <section className="py-20 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1e293b 50%, #0F172A 100%)' }}>
+      {/* Decorative tennis ball accent */}
+      <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, #FACC15 0%, transparent 70%)' }} />
+      <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, #2563EB 0%, transparent 70%)' }} />
+      <div className="container relative">
+        <div className="max-w-3xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #FACC15, #f59e0b)' }}>
+                <Lightbulb className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-accent mb-1">Mental Performance</p>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-white" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>TIP OF THE WEEK</h2>
+              </div>
+            </div>
+            <button
+              onClick={handleRefresh}
+              className="p-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/10 transition-all"
+              title="Get another tip"
+            >
+              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+
+          {/* Tip Card */}
+          {isLoading ? (
+            <div className="rounded-3xl border border-white/10 p-8 animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div className="h-5 bg-white/10 rounded-full w-24 mb-6" />
+              <div className="h-8 bg-white/10 rounded-full w-3/4 mb-4" />
+              <div className="space-y-2">
+                <div className="h-4 bg-white/10 rounded-full" />
+                <div className="h-4 bg-white/10 rounded-full w-5/6" />
+                <div className="h-4 bg-white/10 rounded-full w-4/6" />
+              </div>
+            </div>
+          ) : tip ? (
+            <div
+              className="rounded-3xl border border-white/10 p-8 md:p-10 transition-all hover:border-accent/30"
+              style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)' }}
+            >
+              {/* Category badge */}
+              {tip.category && (
+                <Badge className={`mb-5 text-xs font-bold uppercase tracking-wider border ${categoryColors[tip.category] || categoryColors.general}`}>
+                  {tip.category}
+                </Badge>
+              )}
+              {/* Title */}
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-5 leading-tight">{tip.title}</h3>
+              {/* Content */}
+              <p className="text-white/70 leading-relaxed text-base md:text-lg">{tip.content}</p>
+              {/* Footer */}
+              <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center">
+                    <span className="text-accent font-bold text-sm">M</span>
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-semibold">Coach Mario Llano</p>
+                    <p className="text-white/40 text-xs">Mental Performance Coach</p>
+                  </div>
+                </div>
+                <Link href="/mental-coaching">
+                  <Button size="sm" className="rounded-full text-primary font-bold" style={{ background: 'linear-gradient(135deg, #FACC15, #f59e0b)' }}>
+                    More Tips <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-white/10 p-8 text-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <Brain className="w-12 h-12 text-accent/50 mx-auto mb-4" />
+              <p className="text-white/50">Mental coaching tips coming soon.</p>
+              <Link href="/mental-coaching">
+                <Button variant="outline" className="mt-4 border-white/20 text-white hover:bg-white/10">Explore Mental Coaching</Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function FaqAccordion() {
   const [open, setOpen] = useState<number | null>(null);
@@ -805,6 +912,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          TIP OF THE WEEK
+      ═══════════════════════════════════════════════════════════════ */}
+      <TipOfTheWeekSection />
 
       {/* ═══════════════════════════════════════════════════════════════
           FAQ SECTION

@@ -1138,6 +1138,64 @@ export const appRouter = router({
           ))
           .orderBy(blockedTimes.blockedDate);
       }),
+
+    // Public: get month availability summary (for the availability calendar widget)
+    getMonthAvailability: publicProcedure
+      .input(z.object({ year: z.number(), month: z.number() })) // month: 1-12
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const firstDay = `${input.year}-${String(input.month).padStart(2, '0')}-01`;
+        const lastDayDate = new Date(input.year, input.month, 0);
+        const lastDay = `${input.year}-${String(input.month).padStart(2, '0')}-${String(lastDayDate.getDate()).padStart(2, '0')}`;
+        const slots = await db.select({
+          slotDate: scheduleSlots.slotDate,
+          maxParticipants: scheduleSlots.maxParticipants,
+          isAvailable: scheduleSlots.isAvailable,
+          activeBookings: sql<number>`(
+            SELECT COUNT(*) FROM bookings b
+            WHERE b.scheduleSlotId = ${scheduleSlots.id}
+            AND b.status IN ('pending','confirmed')
+          )`,
+        })
+          .from(scheduleSlots)
+          .where(and(
+            sql`DATE(${scheduleSlots.slotDate}) >= ${firstDay}`,
+            sql`DATE(${scheduleSlots.slotDate}) <= ${lastDay}`,
+            eq(scheduleSlots.isAvailable, true),
+          ));
+        const blocked = await db.select({ blockedDate: blockedTimes.blockedDate })
+          .from(blockedTimes)
+          .where(and(
+            sql`DATE(${blockedTimes.blockedDate}) >= ${firstDay}`,
+            sql`DATE(${blockedTimes.blockedDate}) <= ${lastDay}`,
+          ));
+        const blockedSet = new Set(blocked.map(b => {
+          const d = new Date(b.blockedDate as any);
+          return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+        }));
+        const byDate: Record<string, { totalSlots: number; availableSlots: number; totalSpots: number; spotsLeft: number }> = {};
+        for (const slot of slots) {
+          const d = new Date(slot.slotDate as any);
+          const dateKey = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+          if (!byDate[dateKey]) byDate[dateKey] = { totalSlots: 0, availableSlots: 0, totalSpots: 0, spotsLeft: 0 };
+          const realCount = Number(slot.activeBookings ?? 0);
+          const spotsLeft = Math.max(0, slot.maxParticipants - realCount);
+          byDate[dateKey].totalSlots++;
+          byDate[dateKey].totalSpots += slot.maxParticipants;
+          byDate[dateKey].spotsLeft += spotsLeft;
+          if (spotsLeft > 0) byDate[dateKey].availableSlots++;
+        }
+        return Object.entries(byDate).map(([date, info]) => ({
+          date,
+          ...info,
+          isBlocked: blockedSet.has(date),
+          status: blockedSet.has(date) ? 'blocked' as const
+            : info.spotsLeft === 0 ? 'full' as const
+            : info.spotsLeft <= 3 ? 'limited' as const
+            : 'available' as const,
+        }));
+      }),
   }),
 
   // ─── Waitlist ─────────────────────────────────────────────────────────────
@@ -1248,6 +1306,17 @@ export const appRouter = router({
         .orderBy(desc(mentalCoachingResources.createdAt));
     }),
 
+    getTipOfWeek: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return null;
+      // Use week number to deterministically pick a tip (rotates weekly)
+      const weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+      const resources = await db.select().from(mentalCoachingResources)
+        .where(eq(mentalCoachingResources.isPublished, true));
+      if (resources.length === 0) return null;
+      return resources[weekNum % resources.length];
+    }),
+
     createResource: adminProcedure
       .input(z.object({
         title: z.string(),
@@ -1355,6 +1424,52 @@ export const appRouter = router({
       if (!db) return [];
       return db.select().from(programs).where(eq(programs.isActive, true)).orderBy(programs.name);
     }),
+
+    // Admin: enhanced analytics - revenue by program, monthly trends
+    getAnalytics: adminProcedure
+      .input(z.object({ months: z.number().min(1).max(12).default(6) }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { revenueByProgram: [], monthlyTrends: [], topStudents: [] };
+        // Revenue by program type
+        const revenueByProgram = await db.select({
+          programName: programs.name,
+          programType: programs.type,
+          bookingCount: sql<number>`COUNT(${bookings.id})`,
+          totalRevenueCents: sql<number>`SUM(${bookings.totalAmountCents})`,
+        })
+          .from(bookings)
+          .leftJoin(programs, eq(bookings.programId, programs.id))
+          .where(sql`${bookings.status} IN ('confirmed','completed','pending')`)
+          .groupBy(programs.id, programs.name, programs.type)
+          .orderBy(sql`SUM(${bookings.totalAmountCents}) DESC`);
+        // Monthly booking trends (last N months)
+        const monthlyTrends = await db.select({
+          month: sql<string>`DATE_FORMAT(${bookings.createdAt}, '%Y-%m')`,
+          bookingCount: sql<number>`COUNT(${bookings.id})`,
+          revenueCents: sql<number>`SUM(CASE WHEN ${bookings.status} IN ('confirmed','completed','pending') THEN ${bookings.totalAmountCents} ELSE 0 END)`,
+          newStudents: sql<number>`COUNT(DISTINCT ${bookings.userId})`,
+        })
+          .from(bookings)
+          .where(sql`${bookings.createdAt} >= DATE_SUB(NOW(), INTERVAL ${input.months} MONTH)`)
+          .groupBy(sql`DATE_FORMAT(${bookings.createdAt}, '%Y-%m')`)
+          .orderBy(sql`DATE_FORMAT(${bookings.createdAt}, '%Y-%m') ASC`);
+        // Top students by session count
+        const topStudents = await db.select({
+          userId: bookings.userId,
+          userName: users.name,
+          userEmail: users.email,
+          sessionCount: sql<number>`COUNT(${bookings.id})`,
+          totalSpentCents: sql<number>`SUM(${bookings.totalAmountCents})`,
+        })
+          .from(bookings)
+          .leftJoin(users, eq(bookings.userId, users.id))
+          .where(sql`${bookings.status} IN ('confirmed','completed','pending')`)
+          .groupBy(bookings.userId, users.name, users.email)
+          .orderBy(sql`COUNT(${bookings.id}) DESC`)
+          .limit(10);
+        return { revenueByProgram, monthlyTrends, topStudents };
+      }),
   }),
 
   // ─── Stripe Payments ────────────────────────────────────────────────────────

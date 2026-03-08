@@ -247,6 +247,24 @@ export default function Profile() {
             {bookings && bookings.length > 0 && (() => {
               const completed = bookings.filter(b => b.status === 'completed' || b.status === 'confirmed').length;
               const upcoming = bookings.filter(b => (b.status === 'confirmed' || b.status === 'pending') && b.sessionDate && new Date(b.sessionDate + 'T12:00:00') >= new Date()).length;
+              const cancelled = bookings.filter(b => b.status === 'cancelled').length;
+              const totalSpent = bookings.filter(b => b.status !== 'cancelled').reduce((sum, b) => sum + (b.totalAmountCents || 0), 0);
+              // Program type breakdown
+              const byType: Record<string, number> = {};
+              bookings.filter(b => b.status !== 'cancelled').forEach(b => {
+                const t = b.programName || 'Other';
+                byType[t] = (byType[t] || 0) + 1;
+              });
+              const typeEntries = Object.entries(byType).sort((a, b) => b[1] - a[1]).slice(0, 3);
+              // Milestones
+              const milestones = [
+                { label: 'First Session', icon: '🎾', target: 1, achieved: completed >= 1 },
+                { label: '5 Sessions', icon: '⭐', target: 5, achieved: completed >= 5 },
+                { label: '10 Sessions', icon: '🏆', target: 10, achieved: completed >= 10 },
+                { label: '25 Sessions', icon: '🥇', target: 25, achieved: completed >= 25 },
+              ];
+              const nextMilestone = milestones.find(m => !m.achieved);
+              const progressPct = nextMilestone ? Math.min(100, Math.round((completed / nextMilestone.target) * 100)) : 100;
               return (
                 <Card className="bg-primary text-primary-foreground border-0 overflow-hidden">
                   <CardContent className="p-5">
@@ -254,24 +272,79 @@ export default function Profile() {
                       <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
                         <Trophy className="w-4 h-4 text-accent" />
                       </div>
-                      <h3 className="font-extrabold text-sm uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>My Tennis Stats</h3>
+                      <h3 className="font-extrabold text-sm uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>My Progress</h3>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-white/10 rounded-xl p-3 text-center">
-                        <div className="text-3xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{bookings.length}</div>
-                        <div className="text-xs text-primary-foreground/60 mt-0.5">Total Sessions</div>
+                    {/* Stats grid */}
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                      <div className="bg-white/10 rounded-xl p-2.5 text-center">
+                        <div className="text-2xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{bookings.length}</div>
+                        <div className="text-[10px] text-primary-foreground/60 mt-0.5">Total</div>
                       </div>
-                      <div className="bg-white/10 rounded-xl p-3 text-center">
-                        <div className="text-3xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{completed}</div>
-                        <div className="text-xs text-primary-foreground/60 mt-0.5">Completed</div>
+                      <div className="bg-white/10 rounded-xl p-2.5 text-center">
+                        <div className="text-2xl font-extrabold text-green-300" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{completed}</div>
+                        <div className="text-[10px] text-primary-foreground/60 mt-0.5">Done</div>
                       </div>
-                      <div className="bg-white/10 rounded-xl p-3 text-center col-span-2">
-                        <div className="text-3xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{upcoming}</div>
-                        <div className="text-xs text-primary-foreground/60 mt-0.5">Upcoming Sessions</div>
+                      <div className="bg-white/10 rounded-xl p-2.5 text-center">
+                        <div className="text-2xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{upcoming}</div>
+                        <div className="text-[10px] text-primary-foreground/60 mt-0.5">Upcoming</div>
                       </div>
                     </div>
+                    {/* Milestone progress */}
+                    {nextMilestone && (
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs text-primary-foreground/70">Next: {nextMilestone.icon} {nextMilestone.label}</span>
+                          <span className="text-xs font-bold text-accent">{completed}/{nextMilestone.target}</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                          <div className="h-full rounded-full bg-gradient-to-r from-accent to-yellow-300 transition-all duration-700" style={{ width: `${progressPct}%` }} />
+                        </div>
+                      </div>
+                    )}
+                    {nextMilestone === undefined && (
+                      <div className="mb-4 text-center">
+                        <span className="text-xs text-accent font-bold">🥇 All milestones achieved! Legend status!</span>
+                      </div>
+                    )}
+                    {/* Milestones row */}
+                    <div className="flex items-center justify-between mb-4">
+                      {milestones.map(m => (
+                        <div key={m.label} className={`flex flex-col items-center gap-0.5 ${m.achieved ? 'opacity-100' : 'opacity-30'}`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-base ${m.achieved ? 'bg-accent/30 ring-1 ring-accent' : 'bg-white/10'}`}>{m.icon}</div>
+                          <span className="text-[9px] text-primary-foreground/60">{m.target}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Program breakdown */}
+                    {typeEntries.length > 0 && (
+                      <div className="mb-4">
+                        <div className="text-[10px] text-primary-foreground/50 uppercase tracking-wider mb-2">Sessions by Program</div>
+                        <div className="space-y-1.5">
+                          {typeEntries.map(([name, count]) => (
+                            <div key={name} className="flex items-center gap-2">
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-0.5">
+                                  <span className="text-[10px] text-primary-foreground/70 truncate">{name}</span>
+                                  <span className="text-[10px] font-bold text-accent ml-1">{count}</span>
+                                </div>
+                                <div className="h-1 rounded-full bg-white/10 overflow-hidden">
+                                  <div className="h-full rounded-full bg-accent/60" style={{ width: `${Math.round((count / bookings.length) * 100)}%` }} />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Total spent */}
+                    {totalSpent > 0 && (
+                      <div className="bg-white/10 rounded-xl p-3 mb-4 flex items-center justify-between">
+                        <span className="text-xs text-primary-foreground/60">Total Invested</span>
+                        <span className="font-extrabold text-accent text-lg" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>${(totalSpent / 100).toFixed(0)}</span>
+                      </div>
+                    )}
                     <Link href="/programs">
-                      <button className="w-full mt-4 py-2 rounded-xl bg-accent text-accent-foreground font-bold text-xs hover:brightness-105 transition-all">
+                      <button className="w-full py-2 rounded-xl bg-accent text-accent-foreground font-bold text-xs hover:brightness-105 transition-all">
                         Book Another Session
                       </button>
                     </Link>
