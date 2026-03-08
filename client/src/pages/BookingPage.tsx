@@ -650,6 +650,11 @@ export default function BookingPage() {
       toast.error("Please select a time slot from the calendar above.");
       return;
     }
+    // Require a preferred time for private lessons
+    if (programType === "private_lesson" && !timePreference) {
+      toast.error("Please select your preferred lesson time from the time picker above.");
+      return;
+    }
     const chargeAmount = finalAmountCents;
 
     const fullNotes = timePreference && programType === "private_lesson"
@@ -660,10 +665,16 @@ export default function BookingPage() {
     // For clinic_105, use the selected slot's actual start/end time so it appears in the confirmation email
     const sessionStartTime = programType === "clinic_105" && selectedSlotTimes
       ? selectedSlotTimes.startTime
-      : (programType === "private_lesson" && timePreference) ? timePreference + ":00" : undefined;
+      : (programType === "private_lesson" && timePreference) ? (timePreference.includes(":") ? timePreference + ":00" : timePreference + ":00:00") : undefined;
     const sessionEndTime = programType === "clinic_105" && selectedSlotTimes
       ? selectedSlotTimes.endTime
-      : (programType === "private_lesson" && timePreference) ? `${String(parseInt(timePreference) + 1).padStart(2, "00")}:00:00` : undefined;
+      : (programType === "private_lesson" && timePreference) ? (() => {
+          const parts = timePreference.split(":");
+          const h = parseInt(parts[0]);
+          const m = parseInt(parts[1] || "0");
+          const endH = (h + 1) % 24;
+          return `${String(endH).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
+        })() : undefined;
     if (programType === "junior_daily" && juniorSelectedDates.length > 0) {
       // Create one booking per selected date; charge the full total on the first one
       juniorSelectedDates.forEach((date, idx) => {

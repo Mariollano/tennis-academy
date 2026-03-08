@@ -334,3 +334,6 @@
 ## Voice QuickBook Type Bug (Session 14)
 - [x] Fix: AI returns "private" instead of "private_lesson" causing NOT_FOUND error in quickBook — add alias normalization
 - [x] Change "Confirm & Book Instantly" to redirect to pre-filled booking form (with promo code support) instead of instant-booking
+
+## Email Fix (Session 15)
+- [x] Fix booking confirmation email: add "Time" row to Booking Summary (currently only shows Date, missing Time)
