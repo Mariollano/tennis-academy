@@ -400,10 +400,10 @@ export default function Home() {
               <Mic className="w-6 h-6 text-accent relative z-10 group-hover:scale-110 transition-transform" />
             </button>
             <span
-              className="text-accent font-bold text-[10px] tracking-widest uppercase text-center"
-              style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.12em' }}
+              className="text-accent font-black text-sm tracking-wider uppercase text-center leading-tight"
+              style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.1em' }}
             >
-              Book by Voice
+              BOOK BY<br />VOICE
             </span>
           </div>
         </div>
