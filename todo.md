@@ -323,3 +323,7 @@
 
 ## Voice Button Position (Session 11b)
 - [x] Move mic button to right side of hero, below the "Download App" button
+
+## Layout Bugs (Session 12)
+- [x] Remove stray green circle button appearing above "Contact Mario" button
+- [x] Fix mobile layout: Download App + mic button overlapping social icons and hero text

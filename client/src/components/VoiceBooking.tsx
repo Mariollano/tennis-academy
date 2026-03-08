@@ -176,18 +176,7 @@ export default function VoiceBooking() {
 
   return (
     <>
-      {/* Floating Microphone Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 left-6 z-40 w-14 h-14 rounded-full bg-accent text-accent-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center group md:bottom-8"
-        title="Voice Booking — tap and speak your booking request"
-        aria-label="Voice Booking Assistant"
-      >
-        <Mic className="w-6 h-6" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          Voice Book
-        </span>
-      </button>
+      {/* Floating mic button removed — voice booking is now in the homepage hero top-right */}
 
       {/* Modal Overlay */}
       {isOpen && (
