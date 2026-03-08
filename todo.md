@@ -337,3 +337,7 @@
 
 ## Email Fix (Session 15)
 - [x] Fix booking confirmation email: add "Time" row to Booking Summary (currently only shows Date, missing Time)
+
+## Label & Voice Fix (Session 16)
+- [x] Fix "RESERVE QUICKLY" label: bold white text with dark semi-transparent pill background so it's always visible on any background
+- [x] Fix voice booking button not working on published site (investigate production issue)

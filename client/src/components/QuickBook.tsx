@@ -53,7 +53,10 @@ export default function QuickBook() {
 
       {/* Label */}
       {!open && (
-        <div className="text-xs font-bold text-foreground/60 text-center leading-tight">
+        <div
+          className="text-xs font-black text-white text-center leading-tight px-2 py-1 rounded-full"
+          style={{ background: 'rgba(0,0,0,0.75)', letterSpacing: '0.05em' }}
+        >
           RESERVE<br />QUICKLY
         </div>
       )}

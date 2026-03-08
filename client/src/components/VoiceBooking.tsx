@@ -62,6 +62,16 @@ export default function VoiceBooking() {
   }, []);
 
   const startRecording = async () => {
+    // Check if browser supports getUserMedia
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error("Your browser doesn't support microphone access. Please use Chrome or Safari.");
+      return;
+    }
+    // Check if we're on HTTPS (required for mic access)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      toast.error("Microphone access requires a secure (HTTPS) connection.");
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -74,11 +84,16 @@ export default function VoiceBooking() {
       source.connect(analyser);
       analyserRef.current = analyser;
 
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-          ? "audio/webm;codecs=opus"
-          : "audio/webm",
-      });
+      // Pick best supported MIME type
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/mp4")
+        ? "audio/mp4"
+        : "";
+
+      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -89,8 +104,15 @@ export default function VoiceBooking() {
       mediaRecorder.start(100);
       setState("recording");
       animFrameRef.current = requestAnimationFrame(animateAudioLevel);
-    } catch (err) {
-      toast.error("Microphone access denied. Please allow microphone access to use voice booking.");
+    } catch (err: unknown) {
+      const error = err as { name?: string; message?: string };
+      if (error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError') {
+        toast.error("Microphone access was denied. Please tap the lock icon in your browser's address bar and allow microphone access, then try again.");
+      } else if (error?.name === 'NotFoundError') {
+        toast.error("No microphone found. Please connect a microphone and try again.");
+      } else {
+        toast.error("Could not access microphone. Please check your browser settings and try again.");
+      }
     }
   };
 
