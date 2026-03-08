@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Mic, MicOff, X, Loader2, CheckCircle, AlertCircle, Calendar, ArrowRight } from "lucide-react";
+import { Mic, MicOff, X, Loader2, CheckCircle, AlertCircle, Calendar, ArrowRight, Zap } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 type AlternativeSlot = {
   date: string;
@@ -26,11 +27,13 @@ type RecordingState = "idle" | "recording" | "processing" | "result";
 
 export default function VoiceBooking() {
   const [, navigate] = useLocation();
+  const { isAuthenticated } = useAuth();
   const [state, setState] = useState<RecordingState>("idle");
   const [transcript, setTranscript] = useState("");
   const [result, setResult] = useState<VoiceResult | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [quickBooked, setQuickBooked] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -40,6 +43,7 @@ export default function VoiceBooking() {
 
   const transcribeMutation = trpc.voiceBooking.transcribe.useMutation();
   const parseAndCheckMutation = trpc.voiceBooking.parseAndCheck.useMutation();
+  const quickBookMutation = trpc.voiceBooking.quickBook.useMutation();
 
   // Listen for the custom event from the hero button
   useEffect(() => {
@@ -307,43 +311,92 @@ export default function VoiceBooking() {
 
                   {/* Result */}
                   {result.understood && result.slotAvailable === true && result.redirectUrl ? (
-                    // ✅ Available — redirect to booking
+                    // ✅ Available — redirect to booking or quick-book
                     <div className="text-center">
-                      <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                        <CheckCircle className="w-8 h-8 text-green-600" />
-                      </div>
-                      <h3 className="font-extrabold text-foreground text-lg mb-1" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-                        GREAT NEWS! SLOT AVAILABLE
-                      </h3>
-                      <p className="text-muted-foreground text-sm mb-1">{result.message}</p>
-                      {result.programName && (
-                        <div className="flex items-center justify-center gap-2 mb-4 text-sm">
-                          <span className="font-semibold text-primary">{result.programName}</span>
-                          {result.requestedDate && (
-                            <>
-                              <span className="text-muted-foreground">·</span>
-                              <span className="text-muted-foreground">
-                                {new Date(result.requestedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                              </span>
-                            </>
+                      {quickBooked ? (
+                        <>
+                          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                            <CheckCircle className="w-8 h-8 text-green-600" />
+                          </div>
+                          <h3 className="font-extrabold text-foreground text-lg mb-1" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                            BOOKING CONFIRMED! 🎾
+                          </h3>
+                          <p className="text-muted-foreground text-sm mb-4">Your session has been booked. Check your profile for details.</p>
+                          <button
+                            onClick={() => { setIsOpen(false); navigate("/profile"); }}
+                            className="w-full py-3 rounded-xl bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                          >
+                            View My Bookings <ArrowRight className="w-4 h-4" />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                            <CheckCircle className="w-8 h-8 text-green-600" />
+                          </div>
+                          <h3 className="font-extrabold text-foreground text-lg mb-1" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                            GREAT NEWS! SLOT AVAILABLE
+                          </h3>
+                          <p className="text-muted-foreground text-sm mb-1">{result.message}</p>
+                          {result.programName && (
+                            <div className="flex items-center justify-center gap-2 mb-4 text-sm">
+                              <span className="font-semibold text-primary">{result.programName}</span>
+                              {result.requestedDate && (
+                                <>
+                                  <span className="text-muted-foreground">·</span>
+                                  <span className="text-muted-foreground">
+                                    {new Date(result.requestedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                                  </span>
+                                </>
+                              )}
+                              {result.requestedTime && (
+                                <>
+                                  <span className="text-muted-foreground">·</span>
+                                  <span className="text-muted-foreground">{result.requestedTime}</span>
+                                </>
+                              )}
+                            </div>
                           )}
-                          {result.requestedTime && (
-                            <>
-                              <span className="text-muted-foreground">·</span>
-                              <span className="text-muted-foreground">{result.requestedTime}</span>
-                            </>
+                          {/* One-tap Confirm & Book for logged-in users */}
+                          {isAuthenticated && result.requestedDate && (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  // Extract program type from redirectUrl (e.g. /book/private_lesson)
+                                  const urlParts = result.redirectUrl?.split("/") || [];
+                                  const programType = urlParts[urlParts.length - 1]?.split("?")[0] || "private_lesson";
+                                  await quickBookMutation.mutateAsync({
+                                    programType,
+                                    sessionDate: result.requestedDate!,
+                                    sessionTime: result.requestedTime || undefined,
+                                  });
+                                  setQuickBooked(true);
+                                  toast.success("Booking confirmed! Check your profile.");
+                                } catch (err: any) {
+                                  toast.error(err.message || "Could not complete quick booking.");
+                                }
+                              }}
+                              disabled={quickBookMutation.isPending}
+                              className="w-full py-3 rounded-xl bg-accent text-accent-foreground font-bold text-sm hover:brightness-105 transition-all flex items-center justify-center gap-2 mb-2 shadow-md"
+                            >
+                              {quickBookMutation.isPending ? (
+                                <><Loader2 className="w-5 h-5 animate-spin" /> Booking...</>
+                              ) : (
+                                <><Zap className="w-5 h-5" /> Confirm & Book Instantly</>
+                              )}
+                            </button>
                           )}
-                        </div>
+                          <button
+                            onClick={() => handleRedirect(result.redirectUrl!)}
+                            className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 mb-3"
+                          >
+                            <Calendar className="w-5 h-5" /> {isAuthenticated ? "Review & Book" : "Book This Session"} <ArrowRight className="w-4 h-4" />
+                          </button>
+                          <button onClick={reset} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                            Try a different request
+                          </button>
+                        </>
                       )}
-                      <button
-                        onClick={() => handleRedirect(result.redirectUrl!)}
-                        className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 mb-3"
-                      >
-                        <Calendar className="w-5 h-5" /> Book This Session <ArrowRight className="w-4 h-4" />
-                      </button>
-                      <button onClick={reset} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        Try a different request
-                      </button>
                     </div>
                   ) : result.understood && result.slotAvailable === false && result.alternatives.length > 0 ? (
                     // ❌ Not available — show alternatives

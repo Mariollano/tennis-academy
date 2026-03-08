@@ -84,13 +84,23 @@ export const appRouter = router({
         name: z.string().optional(),
         phone: z.string().optional(),
         smsOptIn: z.boolean().optional(),
+        newsletterOptIn: z.boolean().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-        await db.update(users)
-          .set({ ...input, updatedAt: new Date() })
-          .where(eq(users.id, ctx.user.id));
+        const updateData: Record<string, any> = { updatedAt: new Date() };
+        if (input.name !== undefined) updateData.name = input.name;
+        if (input.phone !== undefined) updateData.phone = input.phone;
+        if (input.smsOptIn !== undefined) {
+          updateData.smsOptIn = input.smsOptIn;
+          if (input.smsOptIn) updateData.smsOptInAt = new Date();
+        }
+        if (input.newsletterOptIn !== undefined) {
+          updateData.newsletterOptIn = input.newsletterOptIn;
+          if (input.newsletterOptIn) updateData.newsletterOptInAt = new Date();
+        }
+        await db.update(users).set(updateData).where(eq(users.id, ctx.user.id));
         return { success: true };
       }),
 
@@ -590,6 +600,42 @@ export const appRouter = router({
           cancel_url: `${input.origin}/profile?payment=cancelled`,
         });
         return { url: session.url };
+      }),
+
+    // Admin: update coach notes for a booking
+    updateCoachNotes: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        coachNotes: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.update(bookings)
+          .set({ coachNotes: input.coachNotes, updatedAt: new Date() })
+          .where(eq(bookings.id, input.id));
+        return { success: true };
+      }),
+
+    // Admin: get a single booking with coach notes
+    getById: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const rows = await db.select({
+          booking: bookings,
+          user: { id: users.id, name: users.name, email: users.email, phone: users.phone },
+          programName: programs.name,
+          programType: programs.type,
+        })
+          .from(bookings)
+          .leftJoin(users, eq(bookings.userId, users.id))
+          .leftJoin(programs, eq(bookings.programId, programs.id))
+          .where(eq(bookings.id, input.id))
+          .limit(1);
+        if (!rows.length) throw new TRPCError({ code: "NOT_FOUND" });
+        return rows[0];
       }),
   }),
 

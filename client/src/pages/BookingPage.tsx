@@ -476,6 +476,48 @@ function AvailabilityPanelInner({
   );
 }
 
+// Newsletter opt-in widget shown on booking confirmation
+function NewsletterOptIn({ userId }: { userId: number }) {
+  const [optedIn, setOptedIn] = useState(false);
+  const [done, setDone] = useState(false);
+  const updateProfile = trpc.user.updateProfile.useMutation();
+
+  if (done) {
+    return (
+      <div className="flex items-center justify-center gap-2 text-sm text-green-600 font-medium mb-4">
+        <CheckCircle className="w-4 h-4" />
+        You're subscribed to the RI Tennis Academy newsletter!
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-3 bg-accent/10 border border-accent/30 rounded-xl p-3 mb-4 text-left">
+      <Checkbox
+        id="newsletter-optin"
+        checked={optedIn}
+        onCheckedChange={async (checked) => {
+          setOptedIn(!!checked);
+          if (checked) {
+            try {
+              await updateProfile.mutateAsync({ newsletterOptIn: true });
+              setDone(true);
+              toast.success("Subscribed to the newsletter!");
+            } catch {
+              setOptedIn(false);
+            }
+          }
+        }}
+        className="mt-0.5"
+      />
+      <label htmlFor="newsletter-optin" className="text-sm cursor-pointer">
+        <span className="font-semibold text-foreground">Subscribe to our newsletter</span>
+        <span className="text-muted-foreground"> — get weekly tennis tips, Coach Mario's insights, and exclusive offers.</span>
+      </label>
+    </div>
+  );
+}
+
 export default function BookingPage() {
   const params = useParams<{ programType: string }>();
   const programType = params.programType || "private_lesson";
@@ -732,7 +774,12 @@ export default function BookingPage() {
                 }
               </p>
               <p className="text-xs text-muted-foreground/70 mb-6">A confirmation email + SMS reminder will be sent before your session.</p>
-              <div className="flex gap-3 justify-center">
+
+              {/* Newsletter opt-in */}
+              {user && <NewsletterOptIn userId={user.id} />
+              }
+
+              <div className="flex gap-3 justify-center mt-4">
                 <Link href="/programs">
                   <Button variant="outline" className="rounded-full">Browse Programs</Button>
                 </Link>

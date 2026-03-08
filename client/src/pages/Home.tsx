@@ -402,7 +402,7 @@ export default function Home() {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4 mb-12">
+            <div className="flex flex-wrap items-center gap-4 mb-10">
               <Link href="/programs">
                 <Button
                   size="lg"
@@ -412,17 +412,6 @@ export default function Home() {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <button
-                onClick={() => {
-                  // Trigger the VoiceBooking component
-                  const event = new CustomEvent('open-voice-booking');
-                  window.dispatchEvent(event);
-                }}
-                className="flex items-center gap-2 border border-white/40 text-white hover:bg-white/10 hover:border-white/70 font-semibold text-base px-8 py-6 rounded-full transition-all"
-              >
-                <Mic className="w-5 h-5 text-accent" />
-                Voice Book
-              </button>
               <Link href="/mental-coaching">
                 <Button
                   size="lg"
@@ -432,6 +421,32 @@ export default function Home() {
                   Mental Coaching
                 </Button>
               </Link>
+            </div>
+
+            {/* ── Voice Booking Hero Button ── */}
+            <div className="flex items-center gap-5 mb-12">
+              <button
+                onClick={() => {
+                  const event = new CustomEvent('open-voice-booking');
+                  window.dispatchEvent(event);
+                }}
+                className="group relative flex items-center justify-center w-20 h-20 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-accent/50"
+                style={{
+                  background: 'radial-gradient(circle at 35% 35%, #facc15, #f59e0b)',
+                  boxShadow: '0 0 0 0 rgba(250,204,21,0.5)',
+                  animation: 'voice-pulse 2.5s ease-in-out infinite',
+                }}
+                aria-label="Book by voice"
+              >
+                {/* Ripple rings */}
+                <span className="absolute inset-0 rounded-full bg-accent/30 animate-ping" style={{ animationDuration: '2s' }} />
+                <span className="absolute inset-[-8px] rounded-full border-2 border-accent/40 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }} />
+                <Mic className="w-9 h-9 text-black relative z-10 drop-shadow-sm group-hover:scale-110 transition-transform" />
+              </button>
+              <div>
+                <p className="text-white font-bold text-lg leading-tight" style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.03em' }}>BOOK BY VOICE</p>
+                <p className="text-white/60 text-sm">Say "Private lesson March 22 at 11 AM"</p>
+              </div>
             </div>
 
             {/* Trust indicators */}

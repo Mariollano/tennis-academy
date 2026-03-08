@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import { transcribeAudio, WhisperResponse } from "../_core/voiceTranscription";
 import { getDb } from "../db";
-import { scheduleSlots, blockedTimes } from "../../drizzle/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { scheduleSlots, blockedTimes, bookings, programs, users } from "../../drizzle/schema";
+import { and, eq, sql, desc } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 // Map spoken program names to booking routes
 const PROGRAM_ROUTE_MAP: Record<string, string> = {
@@ -352,5 +353,90 @@ If the request is unclear, set understood=false.`,
         requestedTime: intent.time,
         slotAvailable,
       };
+    }),
+
+  // ── Quick Book: one-tap booking for logged-in users from voice assistant ──────
+  quickBook: protectedProcedure
+    .input(z.object({
+      programType: z.string(),
+      sessionDate: z.string(), // YYYY-MM-DD
+      sessionTime: z.string().optional(), // HH:MM
+      scheduleSlotId: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+      // Validate schedule slot if provided
+      if (input.scheduleSlotId) {
+        const slotRows = await db.select().from(scheduleSlots)
+          .where(eq(scheduleSlots.id, input.scheduleSlotId)).limit(1);
+        const slot = slotRows[0];
+        if (!slot) throw new TRPCError({ code: "NOT_FOUND", message: "Session slot not found." });
+        if (!slot.isAvailable) throw new TRPCError({ code: "BAD_REQUEST", message: "This session is no longer available." });
+        if (slot.currentParticipants >= slot.maxParticipants) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Sorry, this session is now full." });
+        }
+      }
+
+      // Find or create matching program
+      const existingPrograms = await db.select().from(programs)
+        .where(and(eq(programs.type, input.programType as any), eq(programs.isActive, true)))
+        .limit(1);
+      let programId = existingPrograms[0]?.id;
+      if (!programId) {
+        const result = await db.insert(programs).values({
+          name: input.programType.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+          type: input.programType as any,
+          priceInCents: 0,
+          isActive: true,
+        });
+        programId = Number((result as any).insertId);
+      }
+
+      // Determine price from program type
+      const PRICE_MAP: Record<string, number> = {
+        private_lesson: 12000,
+        clinic_105: 3500,
+        junior_daily: 8000,
+        summer_camp_daily: 9000,
+        mental_coaching: 0,
+      };
+      const totalAmountCents = PRICE_MAP[input.programType] ?? 0;
+
+      // Build session start/end time
+      const sessionStartTime = input.sessionTime ? `${input.sessionTime}:00` : null;
+      const sessionEndTime = input.sessionTime
+        ? `${String(parseInt(input.sessionTime.split(":")[0]) + 1).padStart(2, "0")}:${input.sessionTime.split(":")[1] || "00"}:00`
+        : null;
+
+      await db.insert(bookings).values({
+        userId: ctx.user.id,
+        programId,
+        scheduleSlotId: input.scheduleSlotId || null,
+        totalAmountCents,
+        sessionDate: new Date(input.sessionDate + "T12:00:00") as any,
+        sessionStartTime: sessionStartTime || null,
+        sessionEndTime: sessionEndTime || null,
+        sharedStudentCount: 1,
+        quantity: 1,
+        notes: "Booked via Voice Assistant",
+        status: "pending",
+      });
+
+      // Increment slot participant count
+      if (input.scheduleSlotId) {
+        await db.update(scheduleSlots)
+          .set({ currentParticipants: sql`${scheduleSlots.currentParticipants} + 1`, updatedAt: new Date() })
+          .where(eq(scheduleSlots.id, input.scheduleSlotId));
+      }
+
+      // Get the new booking ID
+      const newBookingRows = await db.select({ id: bookings.id })
+        .from(bookings).where(eq(bookings.userId, ctx.user.id))
+        .orderBy(desc(bookings.createdAt)).limit(1);
+      const newBookingId = newBookingRows[0]?.id ?? 0;
+
+      return { success: true, bookingId: newBookingId };
     }),
 });

@@ -22,6 +22,8 @@ export const users = mysqlTable("users", {
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   smsOptIn: boolean("smsOptIn").default(false).notNull(),
   smsOptInAt: timestamp("smsOptInAt"),
+  newsletterOptIn: boolean("newsletterOptIn").default(false).notNull(),
+  newsletterOptInAt: timestamp("newsletterOptInAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -105,6 +107,7 @@ export const bookings = mysqlTable("bookings", {
   merchandiseSize: varchar("merchandiseSize", { length: 10 }),
   quantity: int("quantity").default(1),
   notes: text("notes"),
+  coachNotes: text("coachNotes"), // Admin-only coaching notes per booking
   totalAmountCents: int("totalAmountCents").notNull(),
   paidAt: timestamp("paidAt"),
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),

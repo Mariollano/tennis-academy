@@ -85,6 +85,13 @@
       "when": 1772961946124,
       "tag": "0011_regular_leo",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1772973204867,
+      "tag": "0012_right_warhawk",
+      "breakpoints": true
     }
   ]
 }

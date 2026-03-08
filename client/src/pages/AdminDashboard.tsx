@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Users, Calendar, DollarSign, MessageSquare, CheckCircle,
-  Clock, XCircle, Send, Trophy, BarChart3, Shield, Tag, Trash2, Plus, Percent, Mail, Bell
+  Clock, XCircle, Send, Trophy, BarChart3, Shield, Tag, Trash2, Plus, Percent, Mail, Bell, PenLine, Save, ChevronDown, ChevronUp
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -227,6 +227,14 @@ export default function AdminDashboard() {
     onSuccess: () => { toast.success("Booking status updated!"); refetchBookings(); },
     onError: () => toast.error("Failed to update status."),
   });
+
+  const updateCoachNotesMutation = trpc.booking.updateCoachNotes.useMutation({
+    onSuccess: () => { toast.success("Coach notes saved!"); refetchBookings(); },
+    onError: () => toast.error("Failed to save notes."),
+  });
+
+  const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({});
+  const [noteDrafts, setNoteDrafts] = useState<Record<number, string>>({});
 
   const sendSmsMutation = trpc.sms.sendBroadcast.useMutation({
     onSuccess: (data) => {
@@ -495,6 +503,40 @@ export default function AdminDashboard() {
                               : `Booked: ${new Date(item.booking.createdAt).toLocaleDateString()}`}
                             {item.booking.notes && <span className="ml-2 italic">— {item.booking.notes}</span>}
                           </div>
+                          {/* Coach Notes inline */}
+                          {expandedNotes[item.booking.id] ? (
+                            <div className="mt-2 flex gap-2">
+                              <Textarea
+                                className="text-xs h-16 resize-none"
+                                placeholder="Add coaching notes (visible only to you)..."
+                                value={noteDrafts[item.booking.id] ?? ((item.booking as any).coachNotes || "")}
+                                onChange={(e) => setNoteDrafts(prev => ({ ...prev, [item.booking.id]: e.target.value }))}
+                              />
+                              <div className="flex flex-col gap-1">
+                                <Button size="sm" className="h-7 px-2 text-xs bg-primary" onClick={() => {
+                                  updateCoachNotesMutation.mutate({ id: item.booking.id, coachNotes: noteDrafts[item.booking.id] ?? ((item.booking as any).coachNotes || "") });
+                                  setExpandedNotes(prev => ({ ...prev, [item.booking.id]: false }));
+                                }} disabled={updateCoachNotesMutation.isPending}>
+                                  <Save className="w-3 h-3" />
+                                </Button>
+                                <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => setExpandedNotes(prev => ({ ...prev, [item.booking.id]: false }))}>
+                                  <ChevronUp className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              className="mt-1 flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                              onClick={() => {
+                                setExpandedNotes(prev => ({ ...prev, [item.booking.id]: true }));
+                                setNoteDrafts(prev => ({ ...prev, [item.booking.id]: (item.booking as any).coachNotes || "" }));
+                              }}
+                            >
+                              <PenLine className="w-3 h-3" />
+                              {(item.booking as any).coachNotes ? "Edit coach notes" : "Add coach notes"}
+                              {(item.booking as any).coachNotes && <span className="text-primary font-medium"> • has notes</span>}
+                            </button>
+                          )}
                         </div>
                         <div className="flex items-center gap-3 shrink-0">
                           <span className="font-bold text-primary">

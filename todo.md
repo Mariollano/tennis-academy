@@ -310,3 +310,10 @@
 ## Voice Booking Fix (Session 9)
 
 - [x] Fix: Voice booking date/time not pre-filling on booking form after redirect (e.g. "March 22 at 11 AM" should auto-populate the date picker and time on the BookingPage)
+
+## Follow-up Features (Session 10)
+
+- [x] Voice Confirm & Book one-tap button (skip form for logged-in users after voice slot confirmation)
+- [x] Newsletter subscriber opt-in checkbox on booking confirmation page
+- [x] Coach Notes per booking (admin-only notes on each booking in Admin Dashboard)
+- [x] Redesign voice booking button as large, prominent, round hero button on homepage (not just floating icon)
