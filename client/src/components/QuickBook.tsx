@@ -53,8 +53,8 @@ export default function QuickBook() {
 
       {/* Label */}
       {!open && (
-        <div className="text-xs font-bold text-foreground/60 text-center">
-          Quick Book
+        <div className="text-xs font-bold text-foreground/60 text-center leading-tight">
+          RESERVE<br />QUICKLY
         </div>
       )}
     </div>
