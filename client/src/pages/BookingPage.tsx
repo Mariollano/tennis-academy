@@ -213,6 +213,7 @@ function AvailabilityPanel(props: {
   selectedSlotId: number | null;
   programId: number;
   isAuthenticated: boolean;
+  initialDate?: string; // YYYY-MM-DD from voice booking
 }) {
   if (props.programType !== "clinic_105" && props.programType !== "private_lesson") return null;
   return <AvailabilityPanelInner {...props} />;
@@ -224,12 +225,14 @@ function AvailabilityPanelInner({
   selectedSlotId,
   programId,
   isAuthenticated,
+  initialDate,
 }: {
   programType: string;
   onSelectSlot: (slotId: number, date: string, times?: { startTime: string; endTime: string }) => void;
   selectedSlotId: number | null;
   programId: number;
   isAuthenticated: boolean;
+  initialDate?: string;
 }) {
   // Use local date strings to avoid UTC offset issues
   const [fromDate] = useState(() => {
@@ -241,8 +244,22 @@ function AvailabilityPanelInner({
     d.setDate(d.getDate() + 90);
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   });
-  const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined);
+  // Pre-select the date from voice booking if provided
+  const [selectedDay, setSelectedDay] = useState<Date | undefined>(() => {
+    if (!initialDate) return undefined;
+    const [y, m, d] = initialDate.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  });
   const timeSlotsRef = useRef<HTMLDivElement>(null);
+  const didAutoSelect = useRef(false);
+
+  // Auto-trigger onSelectSlot for private lesson when initialDate is provided
+  useEffect(() => {
+    if (initialDate && programType === "private_lesson" && !didAutoSelect.current) {
+      didAutoSelect.current = true;
+      onSelectSlot(0, initialDate);
+    }
+  }, [initialDate, programType, onSelectSlot]);
 
   const { data: slots, isLoading } = trpc.schedule.listAvailable.useQuery(
     { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
@@ -465,8 +482,15 @@ export default function BookingPage() {
   const config = PROGRAM_CONFIG[programType] || PROGRAM_CONFIG["private_lesson"];
 
   const { user, isAuthenticated } = useAuth();
+
+  // Read voice-booking pre-fill params from URL (date=YYYY-MM-DD, time=HH:MM)
+  const searchStringInit = useSearch();
+  const searchParamsInit = new URLSearchParams(searchStringInit);
+  const urlDate = searchParamsInit.get("date") || "";
+  const urlTime = searchParamsInit.get("time") || "";
+
   const [selectedPricing, setSelectedPricing] = useState(config.pricing[0].value);
-  const [sessionDate, setSessionDate] = useState("");
+  const [sessionDate, setSessionDate] = useState(urlDate);
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [selectedSlotTimes, setSelectedSlotTimes] = useState<{ startTime: string; endTime: string } | null>(null);
   const [afterCamp, setAfterCamp] = useState(false);
@@ -482,7 +506,7 @@ export default function BookingPage() {
     isFree?: boolean;
   } | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
-  const [timePreference, setTimePreference] = useState("");
+  const [timePreference, setTimePreference] = useState(urlTime);
   const [juniorDays, setJuniorDays] = useState(1);
   const [juniorSelectedDates, setJuniorSelectedDates] = useState<string[]>([]);
 
@@ -888,6 +912,7 @@ export default function BookingPage() {
                 selectedSlotId={selectedSlotId}
                 programId={0}
                 isAuthenticated={isAuthenticated}
+                initialDate={urlDate || undefined}
                 onSelectSlot={(slotId, date, times) => {
                   setSelectedSlotId(slotId);
                   setSessionDate(date);
@@ -926,6 +951,19 @@ export default function BookingPage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Voice booking pre-fill banner */}
+                    {urlDate && (
+                      <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
+                        <span className="text-2xl">🎙️</span>
+                        <div>
+                          <p className="text-sm font-semibold text-green-800">Date pre-filled from your voice request</p>
+                          <p className="text-xs text-green-700">
+                            {new Date(urlDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                            {urlTime ? ` at ${(() => { const h = parseInt(urlTime.split(":")[0]); const m = urlTime.split(":")[1] || "00"; const ampm = h < 12 ? "AM" : "PM"; const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h; return `${h12}:${m} ${ampm}`; })()}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     {/* Student Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>

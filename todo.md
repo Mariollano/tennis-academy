@@ -309,4 +309,4 @@
 
 ## Voice Booking Fix (Session 9)
 
-- [ ] Fix: Voice booking date/time not pre-filling on booking form after redirect (e.g. "March 22 at 11 AM" should auto-populate the date picker and time on the BookingPage)
+- [x] Fix: Voice booking date/time not pre-filling on booking form after redirect (e.g. "March 22 at 11 AM" should auto-populate the date picker and time on the BookingPage)
