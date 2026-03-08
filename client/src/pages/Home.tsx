@@ -359,8 +359,14 @@ export default function Home() {
         <div className="container">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5">
             <div>
-              <h2 className="text-xl font-extrabold text-foreground" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>QUICK BOOK</h2>
-              <p className="text-muted-foreground text-xs mt-0.5">Select a program and book instantly</p>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-xl font-extrabold text-foreground" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>QUICK BOOK</h2>
+                <span className="flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 border border-green-200 rounded-full px-2 py-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block" />
+                  Booking Open
+                </span>
+              </div>
+              <p className="text-muted-foreground text-xs mt-0.5">Select a program and book instantly — no phone calls needed</p>
             </div>
             <Link href="/schedule">
               <Button variant="outline" size="sm" className="rounded-full text-xs gap-1.5">

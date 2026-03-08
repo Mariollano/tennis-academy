@@ -421,11 +421,17 @@ function AvailabilityPanelInner({
                                 <div className="flex items-center gap-2 shrink-0">
                                   {isFull ? (
                                     <Badge className="bg-red-100 text-red-700">Full</Badge>
+                                  ) : slot.spotsLeft <= 2 ? (
+                                    <Badge className="bg-red-50 text-red-700 border border-red-200 animate-pulse font-bold">
+                                      🔥 Only {slot.spotsLeft} left!
+                                    </Badge>
+                                  ) : slot.spotsLeft <= 4 ? (
+                                    <Badge className="bg-amber-100 text-amber-700">
+                                      ⚡ {slot.spotsLeft} spots left
+                                    </Badge>
                                   ) : (
-                                    <Badge className={`${
-                                      slot.spotsLeft <= 2 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
-                                    }`}>
-                                      {slot.spotsLeft} spot{slot.spotsLeft !== 1 ? "s" : ""} left
+                                    <Badge className="bg-green-100 text-green-700">
+                                      {slot.spotsLeft} spots open
                                     </Badge>
                                   )}
                                   {isSelected && <CheckCircle2 className="w-5 h-5 text-primary" />}

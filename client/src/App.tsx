@@ -22,6 +22,7 @@ import FloatingContact from "./components/FloatingContact";
 import QuickBook from "./components/QuickBook";
 import MobileBottomBar from "./components/MobileBottomBar";
 import Schedule from "./pages/Schedule";
+import WelcomeModal from "./components/WelcomeModal";
 
 function Router() {
   return (
@@ -51,6 +52,7 @@ function Router() {
       <QuickBook />
       <InstallPrompt />
       <MobileBottomBar />
+      <WelcomeModal />
     </div>
   );
 }

@@ -11,7 +11,7 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { User, Phone, Bell, Calendar, CheckCircle, Clock, XCircle, MessageSquare } from "lucide-react";
+import { User, Phone, Bell, Calendar, CheckCircle, Clock, XCircle, MessageSquare, Trophy } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -233,6 +233,43 @@ export default function Profile() {
               </CardContent>
             </Card>
 
+            {/* Tennis Stats Card */}
+            {bookings && bookings.length > 0 && (() => {
+              const completed = bookings.filter(b => b.status === 'completed' || b.status === 'confirmed').length;
+              const upcoming = bookings.filter(b => (b.status === 'confirmed' || b.status === 'pending') && b.sessionDate && new Date(b.sessionDate + 'T12:00:00') >= new Date()).length;
+              return (
+                <Card className="bg-primary text-primary-foreground border-0 overflow-hidden">
+                  <CardContent className="p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                        <Trophy className="w-4 h-4 text-accent" />
+                      </div>
+                      <h3 className="font-extrabold text-sm uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>My Tennis Stats</h3>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white/10 rounded-xl p-3 text-center">
+                        <div className="text-3xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{bookings.length}</div>
+                        <div className="text-xs text-primary-foreground/60 mt-0.5">Total Sessions</div>
+                      </div>
+                      <div className="bg-white/10 rounded-xl p-3 text-center">
+                        <div className="text-3xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{completed}</div>
+                        <div className="text-xs text-primary-foreground/60 mt-0.5">Completed</div>
+                      </div>
+                      <div className="bg-white/10 rounded-xl p-3 text-center col-span-2">
+                        <div className="text-3xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{upcoming}</div>
+                        <div className="text-xs text-primary-foreground/60 mt-0.5">Upcoming Sessions</div>
+                      </div>
+                    </div>
+                    <Link href="/programs">
+                      <button className="w-full mt-4 py-2 rounded-xl bg-accent text-accent-foreground font-bold text-xs hover:brightness-105 transition-all">
+                        Book Another Session
+                      </button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })()}
+
             {user?.role === "admin" && (
               <Card className="border-accent bg-accent/5">
                 <CardContent className="p-4">
@@ -262,12 +299,25 @@ export default function Profile() {
                     ))}
                   </div>
                 ) : !bookings || bookings.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-muted-foreground mb-4">No bookings yet.</p>
-                    <Link href="/programs">
-                      <Button className="bg-primary text-primary-foreground">Browse Programs</Button>
-                    </Link>
+                  <div className="text-center py-16 px-4">
+                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
+                      <Calendar className="w-10 h-10 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-extrabold text-foreground mb-2" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>NO SESSIONS YET</h3>
+                    <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">You haven't booked any sessions yet. Book your first session with Coach Mario and start your tennis journey!</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Link href="/programs">
+                        <button className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors">
+                          Browse Programs
+                        </button>
+                      </Link>
+                      <Link href="/book/clinic_105">
+                        <button className="px-6 py-2.5 rounded-full border border-border text-foreground font-semibold text-sm hover:bg-muted transition-colors">
+                          Try the 105 Clinic ($35)
+                        </button>
+                      </Link>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-4">Use code <span className="font-mono font-bold text-primary">TESTFREE</span> for a free test booking</p>
                   </div>
                 ) : (
                   <>

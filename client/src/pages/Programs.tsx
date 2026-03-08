@@ -180,7 +180,7 @@ function ProgramCard({ program }: { program: typeof programs[0] }) {
   const Icon = program.icon;
 
   return (
-    <div className={`group relative rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 bg-card border border-border ${program.popular ? "ring-2 ring-accent" : ""}`}>
+    <div className={`group relative rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 bg-card border border-border card-lift ${program.popular ? "ring-2 ring-accent" : ""}`}>
       {program.popular && (
         <div className="absolute top-4 right-4 z-20">
           <Badge className="bg-accent text-accent-foreground font-bold text-xs px-3 py-1 shadow-lg">
@@ -238,11 +238,11 @@ function ProgramCard({ program }: { program: typeof programs[0] }) {
         {/* Highlights (collapsible on mobile) */}
         <div>
           <button
-            className="flex items-center gap-1 text-xs font-semibold text-foreground/60 hover:text-foreground mb-2 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 mb-2 transition-colors"
             onClick={() => setExpanded(!expanded)}
           >
-            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            {expanded ? "Hide details" : "Show details"}
+            {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            {expanded ? "Hide what's included" : "What's included"}
           </button>
 
           {expanded && (

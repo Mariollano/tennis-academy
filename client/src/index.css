@@ -340,4 +340,63 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Page transition — fade in on route change */
+  @keyframes pageEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  main > * {
+    animation: pageEnter 0.3s ease-out;
+  }
+
+  /* Card lift on hover */
+  .card-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px oklch(0.09 0.015 260 / 0.12);
+  }
+
+  /* Gradient border on focus/hover for inputs */
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: oklch(0.22 0.06 260 / 0.6);
+    box-shadow: 0 0 0 3px oklch(0.22 0.06 260 / 0.08);
+  }
+
+  /* Smooth number counter animation */
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .count-up {
+    animation: countUp 0.4s ease-out forwards;
+  }
+
+  /* Ribbon badge */
+  .ribbon {
+    position: absolute;
+    top: 12px;
+    right: -4px;
+    background: oklch(0.80 0.20 100);
+    color: oklch(0.09 0.015 260);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 10px 3px 8px;
+    border-radius: 3px 0 0 3px;
+    box-shadow: 2px 2px 6px oklch(0 0 0 / 0.15);
+  }
+  .ribbon::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 0;
+    border-left: 6px solid oklch(0.65 0.18 100);
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+  }
 }
