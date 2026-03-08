@@ -14,7 +14,7 @@ export default function QuickBook() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-24 right-20 z-40 flex flex-col items-end gap-2">
+    <div className="fixed bottom-24 right-20 z-40 flex flex-col items-center gap-2">
       {/* Program options */}
       {open && (
         <div className="flex flex-col gap-2 mb-1">
