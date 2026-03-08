@@ -6,7 +6,7 @@ import {
   Trophy, Brain, Users, Sun, Star, ChevronRight,
   Calendar, MessageSquare, Play, Zap, Download,
   MapPin, Phone, Mail, ArrowRight, CheckCircle,
-  Clock, DollarSign, Shield, Award, TrendingUp
+  Clock, DollarSign, Shield, Award, TrendingUp, Mic
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -305,6 +305,17 @@ export default function Home() {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
+              <button
+                onClick={() => {
+                  // Trigger the VoiceBooking component
+                  const event = new CustomEvent('open-voice-booking');
+                  window.dispatchEvent(event);
+                }}
+                className="flex items-center gap-2 border border-white/40 text-white hover:bg-white/10 hover:border-white/70 font-semibold text-base px-8 py-6 rounded-full transition-all"
+              >
+                <Mic className="w-5 h-5 text-accent" />
+                Voice Book
+              </button>
               <Link href="/mental-coaching">
                 <Button
                   size="lg"

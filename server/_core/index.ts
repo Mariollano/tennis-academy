@@ -8,11 +8,13 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import Stripe from "stripe";
+import multer from "multer";
 import { getDb } from "../db";
 import { bookings, payments, programs, users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { notifyOwner } from "./notification";
 import { startReminderScheduler } from "../reminderScheduler";
+import { storagePut } from "../storage";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -101,6 +103,36 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // ─── Voice Audio Upload Endpoint ─────────────────────────────────────────
+  const audioUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 16 * 1024 * 1024 }, // 16MB max
+    fileFilter: (_req, file, cb) => {
+      const allowed = ["audio/webm", "audio/ogg", "audio/mp4", "audio/wav", "audio/mpeg", "audio/mp3"];
+      if (allowed.includes(file.mimetype) || file.mimetype.startsWith("audio/")) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only audio files are allowed"));
+      }
+    },
+  });
+
+  app.post("/api/voice-upload", audioUpload.single("audio"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No audio file provided" });
+      }
+      const suffix = Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+      const key = `voice-bookings/${suffix}.webm`;
+      const { url } = await storagePut(key, req.file.buffer, req.file.mimetype || "audio/webm");
+      return res.json({ url });
+    } catch (err) {
+      console.error("[VoiceUpload] Error:", err);
+      return res.status(500).json({ error: "Failed to upload audio" });
+    }
+  });
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // tRPC API

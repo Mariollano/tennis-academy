@@ -11,12 +11,22 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { User, Phone, Bell, Calendar, CheckCircle, Clock, XCircle, MessageSquare, Trophy } from "lucide-react";
+import { User, Phone, Bell, Calendar, CheckCircle, Clock, XCircle, MessageSquare, Trophy, RefreshCw } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
+
+// Map program names to booking routes
+const programRoutes: Record<string, string> = {
+  "Private Lesson": "/book/private",
+  "105 Game Clinic": "/book/clinic_105",
+  "Junior Program": "/book/junior",
+  "Summer Camp": "/book/summer_camp",
+  "Mental Coaching": "/book/mental_coaching",
+  "Tournament Attendance": "/book/tournament",
+};
 
 const statusColors: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",

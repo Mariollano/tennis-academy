@@ -26,6 +26,7 @@ import WelcomeModal from "./components/WelcomeModal";
 import Leaderboard from "./pages/Leaderboard";
 import GiftCard from "./pages/GiftCard";
 import AdminNewsletter from "./pages/AdminNewsletter";
+import VoiceBooking from "./components/VoiceBooking";
 
 function Router() {
   return (
@@ -60,6 +61,7 @@ function Router() {
       <InstallPrompt />
       <MobileBottomBar />
       <WelcomeModal />
+      <VoiceBooking />
     </div>
   );
 }

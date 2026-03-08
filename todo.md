@@ -281,3 +281,13 @@
 - [x] Admin Dashboard Quick Actions: Newsletter + Leaderboard buttons added
 - [x] Footer: Leaderboard + Gift a Session links added
 - [x] Navbar: Leaderboard link added to nav
+
+## Round 4 Features (Session 7)
+
+- [x] Voice Booking Assistant: floating mic button + hero "Voice Book" button, records audio, Whisper transcription, AI intent parsing, availability check, redirect or alternatives popup
+- [x] Book Again shortcut on Profile page past bookings
+- [x] ECONNRESET retry handling for reminder scheduler
+- [x] multer installed for audio file uploads
+- [x] /api/voice-upload endpoint added to Express server
+- [x] voiceBooking router: transcribe + parseAndCheck procedures
+- [x] open-voice-booking custom event wired between hero button and VoiceBooking modal
