@@ -401,8 +401,9 @@ export default function Home() {
               Private lessons, group clinics, junior programs, and mental coaching — all designed to take your game to the next level.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 mb-10">
+            {/* CTA Buttons row — Book a Session | Voice Button | Mental Coaching */}
+            <div className="flex flex-wrap items-end gap-5 mb-12">
+              {/* Book a Session */}
               <Link href="/programs">
                 <Button
                   size="lg"
@@ -412,6 +413,37 @@ export default function Home() {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
+
+              {/* ── Voice Booking Round Button ── */}
+              <div className="flex flex-col items-center gap-1.5">
+                <button
+                  onClick={() => {
+                    const event = new CustomEvent('open-voice-booking');
+                    window.dispatchEvent(event);
+                  }}
+                  className="group relative flex items-center justify-center w-16 h-16 rounded-full bg-transparent transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none"
+                  style={{
+                    border: '3px solid #facc15',
+                    boxShadow: '0 0 18px 4px rgba(250,204,21,0.35), inset 0 0 0 0 transparent',
+                  }}
+                  aria-label="Book by voice"
+                >
+                  {/* Pulsing ring */}
+                  <span
+                    className="absolute inset-[-5px] rounded-full border-2 border-accent/50 animate-ping"
+                    style={{ animationDuration: '2s' }}
+                  />
+                  <Mic className="w-7 h-7 text-accent relative z-10 group-hover:scale-110 transition-transform drop-shadow" />
+                </button>
+                <span
+                  className="text-accent font-bold text-xs tracking-widest uppercase"
+                  style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.15em' }}
+                >
+                  Book by Voice
+                </span>
+              </div>
+
+              {/* Mental Coaching */}
               <Link href="/mental-coaching">
                 <Button
                   size="lg"
@@ -421,32 +453,6 @@ export default function Home() {
                   Mental Coaching
                 </Button>
               </Link>
-            </div>
-
-            {/* ── Voice Booking Hero Button ── */}
-            <div className="flex items-center gap-5 mb-12">
-              <button
-                onClick={() => {
-                  const event = new CustomEvent('open-voice-booking');
-                  window.dispatchEvent(event);
-                }}
-                className="group relative flex items-center justify-center w-20 h-20 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-accent/50"
-                style={{
-                  background: 'radial-gradient(circle at 35% 35%, #facc15, #f59e0b)',
-                  boxShadow: '0 0 0 0 rgba(250,204,21,0.5)',
-                  animation: 'voice-pulse 2.5s ease-in-out infinite',
-                }}
-                aria-label="Book by voice"
-              >
-                {/* Ripple rings */}
-                <span className="absolute inset-0 rounded-full bg-accent/30 animate-ping" style={{ animationDuration: '2s' }} />
-                <span className="absolute inset-[-8px] rounded-full border-2 border-accent/40 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }} />
-                <Mic className="w-9 h-9 text-black relative z-10 drop-shadow-sm group-hover:scale-110 transition-transform" />
-              </button>
-              <div>
-                <p className="text-white font-bold text-lg leading-tight" style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.03em' }}>BOOK BY VOICE</p>
-                <p className="text-white/60 text-sm">Say "Private lesson March 22 at 11 AM"</p>
-              </div>
             </div>
 
             {/* Trust indicators */}

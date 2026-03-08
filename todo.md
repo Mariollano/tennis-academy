@@ -317,3 +317,9 @@
 - [x] Newsletter subscriber opt-in checkbox on booking confirmation page
 - [x] Coach Notes per booking (admin-only notes on each booking in Admin Dashboard)
 - [x] Redesign voice booking button as large, prominent, round hero button on homepage (not just floating icon)
+
+## Voice Button Redesign (Session 11)
+- [x] Redesign voice button: round circle with yellow ring outline + mic icon, placed inline with CTA buttons, "Book by Voice" text below
+
+## Voice Button Position (Session 11b)
+- [ ] Move mic button to right side of hero, below the "Download App" button
