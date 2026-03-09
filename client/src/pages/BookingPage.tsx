@@ -708,7 +708,7 @@ export default function BookingPage() {
 
   // Social sharing helpers
   const shareText = `🎾 Just booked a ${config.title} at RI Tennis Academy with Coach Mario Llano! Ready to elevate my game and master my mind. #RITennisAcademy #DeleteFear #Tennis`;
-  const shareUrl = typeof window !== "undefined" ? window.location.origin : "https://ritennisacademy.com";
+  const shareUrl = "https://tennispromario.com";
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = () => {

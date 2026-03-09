@@ -346,3 +346,6 @@
 - [x] Fix navbar: tighten line-height on multi-word items (My Schedule, Mental Coaching), bold font, uppercase, whitespace-nowrap
 - [x] Fix voice booking email: include lesson time when booked via microphone (added email+SMS sending to quickBook procedure)
 - [x] Navbar: shift nav items to the left (justify-start ml-4)
+- [ ] Integrate Resend as email provider (replace Gmail/SMTP with Resend API)
+- [x] Fix Facebook share URL to use tennispromario.com instead of dev URL
+- [x] Add Open Graph meta tags to index.html for proper social media preview cards (og:url, og:site_name, twitter:title, twitter:description, twitter:image)
