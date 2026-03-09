@@ -6,6 +6,8 @@ import { getDb } from "../db";
 import { scheduleSlots, blockedTimes, bookings, programs, users } from "../../drizzle/schema";
 import { and, eq, sql, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { sendBookingConfirmation, isEmailConfigured } from "../email";
+import { sendSms, isTwilioConfigured } from "../sms";
 
 // Map spoken program names to booking routes
 const PROGRAM_ROUTE_MAP: Record<string, string> = {
@@ -499,6 +501,41 @@ If the request is unclear, set understood=false.`,
         .from(bookings).where(eq(bookings.userId, ctx.user.id))
         .orderBy(desc(bookings.createdAt)).limit(1);
       const newBookingId = newBookingRows[0]?.id ?? 0;
+
+      // Build human-readable date/time strings for the confirmation email
+      const programLabel = PROGRAM_DISPLAY_NAMES[programType] || programType.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+      const dateStr = new Date(input.sessionDate + "T12:00:00").toLocaleDateString("en-US", {
+        weekday: "long", month: "long", day: "numeric", year: "numeric",
+      });
+      let timeStr: string | undefined;
+      if (sessionStartTime && sessionEndTime) {
+        timeStr = `${formatTime12h(sessionStartTime)} \u2013 ${formatTime12h(sessionEndTime)}`;
+      } else if (sessionStartTime) {
+        timeStr = formatTime12h(sessionStartTime);
+      } else if (input.sessionTime) {
+        timeStr = formatTime12h(input.sessionTime.includes(":") ? input.sessionTime + ":00" : input.sessionTime + ":00:00");
+      }
+
+      // Send confirmation email
+      if (isEmailConfigured() && ctx.user.email) {
+        sendBookingConfirmation({
+          toEmail: ctx.user.email,
+          toName: ctx.user.name || "there",
+          programLabel,
+          sessionDate: dateStr,
+          sessionTime: timeStr,
+          bookingId: newBookingId,
+        }).catch(() => {});
+      }
+
+      // Send SMS confirmation
+      if (isTwilioConfigured() && ctx.user.phone) {
+        const smsDateStr = new Date(input.sessionDate + "T12:00:00").toLocaleDateString("en-US", {
+          weekday: "short", month: "short", day: "numeric",
+        });
+        const smsMsg = `RI Tennis Academy: Your ${programLabel} booking request for ${smsDateStr}${timeStr ? ` at ${timeStr}` : ""} is pending confirmation. Booking #${newBookingId}. Questions? Call 401-965-5873.`;
+        sendSms(ctx.user.phone, smsMsg).catch(() => {});
+      }
 
       return { success: true, bookingId: newBookingId };
     }),
