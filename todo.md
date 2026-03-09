@@ -349,3 +349,5 @@
 - [ ] Integrate Resend as email provider (replace Gmail/SMTP with Resend API)
 - [x] Fix Facebook share URL to use tennispromario.com instead of dev URL
 - [x] Add Open Graph meta tags to index.html for proper social media preview cards (og:url, og:site_name, twitter:title, twitter:description, twitter:image)
+- [x] Create custom 1200x630 Open Graph preview image for social sharing (tennispromario.com)
+- [x] Improve share section after booking confirmation (fixed referral URL, updated motivational copy)

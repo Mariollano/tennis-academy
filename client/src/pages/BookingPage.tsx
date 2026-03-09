@@ -815,11 +815,11 @@ export default function BookingPage() {
             <CardContent>
               <div className="flex items-center gap-2 bg-background rounded-lg border border-border p-3">
                 <span className="text-sm text-muted-foreground flex-1 truncate">
-                  {window.location.origin}/programs?ref={user?.id ?? 'you'}
+                  https://tennispromario.com/programs?ref={user?.id ?? 'you'}
                 </span>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/programs?ref=${user?.id ?? 'you'}`);
+                    navigator.clipboard.writeText(`https://tennispromario.com/programs?ref=${user?.id ?? 'you'}`);
                     toast.success('Referral link copied! Share it with friends.');
                   }}
                   className="shrink-0 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
@@ -838,10 +838,10 @@ export default function BookingPage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Share2 className="w-4 h-4 text-accent" />
-                Share Your Upcoming Lesson
+                Tell Your Friends You're Training! 🎾
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Let your friends know you're leveling up your game!
+                You just took a step toward elevating your game. Share it — inspire someone else to do the same!
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
