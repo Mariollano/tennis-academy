@@ -9,20 +9,24 @@ import { eq, and, isNull, not, inArray, sql } from "drizzle-orm";
 import { sendEmail } from "./email";
 import { sendSms } from "./sms";
 
-export type AnnouncementType = "info" | "cancellation" | "schedule_change" | "urgent";
+export type AnnouncementType = "info" | "cancellation" | "rain_cancellation" | "schedule_change" | "urgent" | "event";
 
 const TYPE_LABELS: Record<AnnouncementType, string> = {
   info: "📢 Info",
   cancellation: "🚫 Cancellation",
+  rain_cancellation: "🌧️ Rain Cancellation",
   schedule_change: "📅 Schedule Change",
   urgent: "🚨 Urgent",
+  event: "🎾 Event",
 };
 
 const TYPE_COLORS: Record<AnnouncementType, string> = {
   info: "#2563eb",
   cancellation: "#dc2626",
+  rain_cancellation: "#0369a1",
   schedule_change: "#d97706",
   urgent: "#dc2626",
+  event: "#16a34a",
 };
 
 /**

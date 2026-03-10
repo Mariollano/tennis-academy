@@ -376,3 +376,16 @@
 - [x] Student in-app notification inbox (unread badge, mark as read, Bell icon in navbar)
 - [x] Broadcast email + SMS to all students when announcement is posted
 - [x] Post Announcement quick action button added to Admin Dashboard
+
+## Session 21 — WordPress Fixes
+- [ ] Move "Get the App" section back below the hero on WordPress homepage (tennis girl photo should be first)
+- [ ] Fix yellow-green link contrast in WordPress install steps section (hard to read on white background)
+
+## Session 22 — SMS Hide + Categories + WordPress
+- [x] Hide SMS features from UI (keep code, disable from user-facing elements)
+- [x] Add announcement categories (Rain Cancellation, Schedule Change, General Update, Event, Urgent, Rain Cancellation)
+- [x] Enhance announcements UI: mark all as read button, count badges on filters, priority indicators, improved visual hierarchy
+- [x] Add My Promo Codes section to Profile page (shows earned referral reward codes with expiry dates)
+- [x] Add native share buttons to referral card (WhatsApp, Text/SMS, native Web Share API)
+- [ ] Update WordPress install links from tennispro-kzzfscru.manus.space to tennispromario.com
+- [ ] Add "Book a Lesson" button to WordPress homepage linking to app booking page

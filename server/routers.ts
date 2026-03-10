@@ -96,7 +96,7 @@ export const appRouter = router({
       .input(z.object({
         title: z.string().min(1).max(200),
         body: z.string().min(1),
-        type: z.enum(["info", "cancellation", "schedule_change", "urgent"]),
+        type: z.enum(["info", "cancellation", "rain_cancellation", "schedule_change", "urgent", "event"]),
         sendEmail: z.boolean().default(true),
         sendSms: z.boolean().default(false),
         targetProgram: z.string().optional(),

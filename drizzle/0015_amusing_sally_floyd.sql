@@ -1,0 +1,1 @@
+ALTER TABLE `announcements` MODIFY COLUMN `type` enum('info','cancellation','rain_cancellation','schedule_change','urgent','event') NOT NULL DEFAULT 'info';

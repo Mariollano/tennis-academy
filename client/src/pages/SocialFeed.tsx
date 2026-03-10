@@ -379,22 +379,23 @@ export default function SocialFeed() {
         </div>
       </section>
 
-      {/* SMS Opt-in CTA */}
+      {/* Join CTA */}
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="container text-center max-w-2xl">
           <div className="w-14 h-14 rounded-2xl bg-accent/20 border border-accent/30 flex items-center justify-center mx-auto mb-4">
             <Users className="w-7 h-7 text-accent" />
           </div>
-          <h2 className="text-3xl font-extrabold mb-3">Get Daily Updates via Text</h2>
+          <h2 className="text-3xl font-extrabold mb-3">Join the Academy</h2>
           <p className="text-primary-foreground/70 mb-6">
-            Sign up for RI Tennis Academy and opt in to receive Mario's daily updates, schedule changes, and motivational messages directly to your phone.
+            Book a session with Coach Mario and start your journey to elevating your game. Private lessons, clinics, and mental coaching available.
           </p>
-          <Button
-            onClick={handleSmsSignUp}
-            className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold px-8 py-3 text-base rounded-full"
-          >
-            Sign Up & Opt In to SMS
-          </Button>
+          <a href="/book">
+            <Button
+              className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold px-8 py-3 text-base rounded-full"
+            >
+              Book a Session
+            </Button>
+          </a>
         </div>
       </section>
     </div>

@@ -340,7 +340,7 @@ export const announcements = mysqlTable("announcements", {
   id: int("id").autoincrement().primaryKey(),
   title: varchar("title", { length: 200 }).notNull(),
   body: text("body").notNull(),
-  type: mysqlEnum("type", ["info", "cancellation", "schedule_change", "urgent"]).notNull().default("info"),
+  type: mysqlEnum("type", ["info", "cancellation", "rain_cancellation", "schedule_change", "urgent", "event"]).notNull().default("info"),
   sendEmail: boolean("sendEmail").notNull().default(true),
   sendSms: boolean("sendSms").notNull().default(false),
   // Targeting: null = all students, otherwise a specific program type

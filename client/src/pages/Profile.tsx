@@ -11,7 +11,7 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { User, Phone, Bell, Calendar, CheckCircle, Clock, XCircle, MessageSquare, Trophy, RefreshCw, Users, Copy } from "lucide-react";
+import { User, Phone, Bell, Calendar, CheckCircle, Clock, XCircle, MessageSquare, Trophy, RefreshCw, Users, Copy, Tag, Share2, MessageCircle } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -41,6 +41,200 @@ const statusIcons: Record<string, React.ReactNode> = {
   cancelled: <XCircle className="w-3.5 h-3.5" />,
   completed: <CheckCircle className="w-3.5 h-3.5" />,
 };
+
+// Referral card with share buttons
+function ReferralCard() {
+  const { data: referralInfo } = trpc.user.getReferralInfo.useQuery(undefined, { enabled: true });
+  if (!referralInfo) return null;
+
+  const shareText = `🎾 Join me at RI Tennis Academy with Coach Mario Llano! Use my referral link to get started: ${referralInfo.referralLink} #DeleteFear`;
+
+  const shareViaWhatsApp = () => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+  };
+
+  const shareViaSMS = () => {
+    window.open(`sms:?body=${encodeURIComponent(shareText)}`, "_blank");
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(referralInfo.referralLink);
+    toast.success("Referral link copied!");
+  };
+
+  const shareNative = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join RI Tennis Academy",
+          text: shareText,
+          url: referralInfo.referralLink,
+        });
+      } catch {
+        // User cancelled or not supported
+      }
+    } else {
+      copyLink();
+    }
+  };
+
+  return (
+    <Card className="border-2 border-green-400/50 bg-gradient-to-br from-green-50/50 to-emerald-50/30 dark:from-green-950/30 dark:to-emerald-950/20">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+            <Users className="w-4 h-4 text-green-500" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm text-foreground">Refer a Friend</h3>
+            <p className="text-xs text-muted-foreground">Earn 20% off when they book</p>
+          </div>
+          {referralInfo.rewardedReferrals > 0 && (
+            <span className="ml-auto text-xs text-green-600 font-semibold">🎉 {referralInfo.rewardedReferrals} reward{referralInfo.rewardedReferrals !== 1 ? "s" : ""} earned!</span>
+          )}
+        </div>
+
+        {/* Referral link display */}
+        <div className="flex items-center gap-2 bg-background rounded-lg border border-border p-2.5 mb-3">
+          <span className="text-xs text-muted-foreground flex-1 truncate font-mono">
+            {referralInfo.referralLink}
+          </span>
+          <button
+            onClick={copyLink}
+            className="shrink-0 flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-2.5 py-1.5 rounded-md transition-colors"
+          >
+            <Copy className="w-3 h-3" /> Copy
+          </button>
+        </div>
+
+        {/* Share buttons row */}
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={shareViaWhatsApp}
+            className="flex flex-col items-center gap-1 p-2 rounded-lg bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 transition-colors"
+          >
+            <svg className="w-4 h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            <span className="text-xs font-medium text-[#25D366]">WhatsApp</span>
+          </button>
+
+          <button
+            onClick={shareViaSMS}
+            className="flex flex-col items-center gap-1 p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 transition-colors"
+          >
+            <MessageCircle className="w-4 h-4 text-blue-500" />
+            <span className="text-xs font-medium text-blue-500">Text</span>
+          </button>
+
+          <button
+            onClick={shareNative}
+            className="flex flex-col items-center gap-1 p-2 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 transition-colors"
+          >
+            <Share2 className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium text-primary">Share</span>
+          </button>
+        </div>
+
+        <div className="mt-2 text-center">
+          <span className="text-xs text-muted-foreground">Your code: <span className="font-mono font-bold text-green-600">{referralInfo.referralCode}</span></span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// My Promo Codes card
+function MyPromoCodesCard() {
+  const { data: myCodes, isLoading } = trpc.promoCodes.getMyPromoCodes.useQuery();
+
+  if (isLoading) return null;
+  if (!myCodes || myCodes.length === 0) return null;
+
+  const activeCodes = myCodes.filter(c => !c.isExpired && !c.isUsedUp && c.isActive);
+  const usedOrExpiredCodes = myCodes.filter(c => c.isExpired || c.isUsedUp || !c.isActive);
+
+  return (
+    <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Tag className="w-4 h-4 text-primary" />
+          My Promo Codes
+          {activeCodes.length > 0 && (
+            <Badge className="bg-primary text-primary-foreground text-xs ml-auto">
+              {activeCodes.length} active
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {activeCodes.length === 0 && usedOrExpiredCodes.length > 0 && (
+          <p className="text-xs text-muted-foreground text-center py-2">All your promo codes have been used or expired. Keep referring friends to earn more!</p>
+        )}
+
+        {activeCodes.map(code => (
+          <div key={code.id} className="flex items-center justify-between p-3 bg-background rounded-xl border border-border">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-primary text-sm">{code.code}</span>
+                <Badge className="bg-green-100 text-green-700 text-xs">Active</Badge>
+              </div>
+              <div className="text-xs text-muted-foreground mt-0.5">
+                {code.discountType === "percent" ? `${code.discountValue}% off` :
+                 code.discountType === "fixed" ? `$${(code.discountValue / 100).toFixed(2)} off` : "Free"}
+                {code.maxUses && ` · ${code.maxUses - code.usedCount} use${code.maxUses - code.usedCount !== 1 ? "s" : ""} remaining`}
+                {code.expiresAt && ` · Expires ${new Date(code.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
+              </div>
+              {code.description && (
+                <div className="text-xs text-muted-foreground/70 mt-0.5 truncate">{code.description}</div>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(code.code);
+                toast.success(`Code ${code.code} copied!`);
+              }}
+              className="ml-2 shrink-0 p-1.5 rounded-md hover:bg-primary/10 transition-colors"
+              title="Copy code"
+            >
+              <Copy className="w-3.5 h-3.5 text-primary" />
+            </button>
+          </div>
+        ))}
+
+        {usedOrExpiredCodes.length > 0 && (
+          <details className="mt-1">
+            <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors py-1">
+              {usedOrExpiredCodes.length} used/expired code{usedOrExpiredCodes.length !== 1 ? "s" : ""}
+            </summary>
+            <div className="space-y-1.5 mt-1.5">
+              {usedOrExpiredCodes.map(code => (
+                <div key={code.id} className="flex items-center justify-between p-2.5 bg-muted/30 rounded-lg border border-border/50 opacity-60">
+                  <div>
+                    <span className="font-mono font-semibold text-muted-foreground text-sm line-through">{code.code}</span>
+                    <div className="text-xs text-muted-foreground/70 mt-0.5">
+                      {code.isUsedUp ? "Used" : "Expired"}
+                      {code.expiresAt && ` · ${new Date(code.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
+                    </div>
+                  </div>
+                  <Badge className="bg-muted text-muted-foreground text-xs">{code.isUsedUp ? "Used" : "Expired"}</Badge>
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+
+        <div className="pt-1">
+          <Link href="/programs">
+            <button className="w-full py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-xs transition-colors border border-primary/20">
+              Use a Code → Book a Session
+            </button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function Profile() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -200,38 +394,10 @@ export default function Profile() {
                     <Phone className="w-3.5 h-3.5" /> Phone Number
                   </Label>
                   <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 (401) 555-0000" type="tel" />
-                  <p className="text-xs text-muted-foreground mt-1">Required for SMS updates</p>
+                  <p className="text-xs text-muted-foreground mt-1">Used for booking confirmations</p>
                 </div>
 
                 <Separator />
-
-                {/* SMS Opt-In */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="flex items-center gap-1.5 font-semibold">
-                        <MessageSquare className="w-4 h-4 text-primary" /> SMS Updates
-                      </Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Daily updates, schedule changes & motivational messages from Coach Mario
-                      </p>
-                    </div>
-                    <Switch
-                      checked={smsOptIn}
-                      onCheckedChange={setSmsOptIn}
-                      disabled={!phone}
-                    />
-                  </div>
-                  {smsOptIn && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800 flex items-start gap-2">
-                      <Bell className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                      You'll receive SMS updates from Coach Mario. You can opt out anytime.
-                    </div>
-                  )}
-                  {!phone && (
-                    <p className="text-xs text-amber-600">Add a phone number to enable SMS updates.</p>
-                  )}
-                </div>
 
                 <Button
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
@@ -258,82 +424,55 @@ export default function Profile() {
               const typeEntries = Object.entries(byType).sort((a, b) => b[1] - a[1]).slice(0, 3);
               // Milestones
               const milestones = [
-                { label: 'First Session', icon: '🎾', target: 1, achieved: completed >= 1 },
-                { label: '5 Sessions', icon: '⭐', target: 5, achieved: completed >= 5 },
-                { label: '10 Sessions', icon: '🏆', target: 10, achieved: completed >= 10 },
-                { label: '25 Sessions', icon: '🥇', target: 25, achieved: completed >= 25 },
+                { label: "First Session", achieved: completed >= 1, icon: "🎾" },
+                { label: "5 Sessions", achieved: completed >= 5, icon: "⭐" },
+                { label: "10 Sessions", achieved: completed >= 10, icon: "🏆" },
+                { label: "25 Sessions", achieved: completed >= 25, icon: "👑" },
               ];
-              const nextMilestone = milestones.find(m => !m.achieved);
-              const progressPct = nextMilestone ? Math.min(100, Math.round((completed / nextMilestone.target) * 100)) : 100;
               return (
-                <Card className="bg-primary text-primary-foreground border-0 overflow-hidden">
-                  <CardContent className="p-5">
+                <Card className="bg-primary text-primary-foreground overflow-hidden">
+                  <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                        <Trophy className="w-4 h-4 text-accent" />
-                      </div>
-                      <h3 className="font-extrabold text-sm uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>My Progress</h3>
+                      <Trophy className="w-5 h-5 text-accent" />
+                      <h3 className="font-bold text-sm">My Tennis Stats</h3>
                     </div>
-                    {/* Stats grid */}
                     <div className="grid grid-cols-3 gap-2 mb-4">
                       <div className="bg-white/10 rounded-xl p-2.5 text-center">
-                        <div className="text-2xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{bookings.length}</div>
-                        <div className="text-[10px] text-primary-foreground/60 mt-0.5">Total</div>
-                      </div>
-                      <div className="bg-white/10 rounded-xl p-2.5 text-center">
-                        <div className="text-2xl font-extrabold text-green-300" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{completed}</div>
-                        <div className="text-[10px] text-primary-foreground/60 mt-0.5">Done</div>
+                        <div className="text-2xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{completed}</div>
+                        <div className="text-xs text-primary-foreground/60">Sessions</div>
                       </div>
                       <div className="bg-white/10 rounded-xl p-2.5 text-center">
                         <div className="text-2xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{upcoming}</div>
-                        <div className="text-[10px] text-primary-foreground/60 mt-0.5">Upcoming</div>
+                        <div className="text-xs text-primary-foreground/60">Upcoming</div>
+                      </div>
+                      <div className="bg-white/10 rounded-xl p-2.5 text-center">
+                        <div className="text-2xl font-extrabold text-accent" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>{cancelled}</div>
+                        <div className="text-xs text-primary-foreground/60">Cancelled</div>
                       </div>
                     </div>
-                    {/* Milestone progress */}
-                    {nextMilestone && (
-                      <div className="mb-4">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs text-primary-foreground/70">Next: {nextMilestone.icon} {nextMilestone.label}</span>
-                          <span className="text-xs font-bold text-accent">{completed}/{nextMilestone.target}</span>
-                        </div>
-                        <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                          <div className="h-full rounded-full bg-gradient-to-r from-accent to-yellow-300 transition-all duration-700" style={{ width: `${progressPct}%` }} />
-                        </div>
-                      </div>
-                    )}
-                    {nextMilestone === undefined && (
-                      <div className="mb-4 text-center">
-                        <span className="text-xs text-accent font-bold">🥇 All milestones achieved! Legend status!</span>
-                      </div>
-                    )}
-                    {/* Milestones row */}
-                    <div className="flex items-center justify-between mb-4">
+                    {/* Milestones */}
+                    <div className="flex gap-1.5 mb-4 flex-wrap">
                       {milestones.map(m => (
-                        <div key={m.label} className={`flex flex-col items-center gap-0.5 ${m.achieved ? 'opacity-100' : 'opacity-30'}`}>
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-base ${m.achieved ? 'bg-accent/30 ring-1 ring-accent' : 'bg-white/10'}`}>{m.icon}</div>
-                          <span className="text-[9px] text-primary-foreground/60">{m.target}</span>
+                        <div key={m.label} className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${m.achieved ? 'bg-accent/20 text-accent' : 'bg-white/5 text-primary-foreground/30'}`}>
+                          <span>{m.icon}</span>
+                          <span>{m.label}</span>
                         </div>
                       ))}
                     </div>
                     {/* Program breakdown */}
                     {typeEntries.length > 0 && (
-                      <div className="mb-4">
-                        <div className="text-[10px] text-primary-foreground/50 uppercase tracking-wider mb-2">Sessions by Program</div>
-                        <div className="space-y-1.5">
-                          {typeEntries.map(([name, count]) => (
-                            <div key={name} className="flex items-center gap-2">
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-0.5">
-                                  <span className="text-[10px] text-primary-foreground/70 truncate">{name}</span>
-                                  <span className="text-[10px] font-bold text-accent ml-1">{count}</span>
-                                </div>
-                                <div className="h-1 rounded-full bg-white/10 overflow-hidden">
-                                  <div className="h-full rounded-full bg-accent/60" style={{ width: `${Math.round((count / bookings.length) * 100)}%` }} />
-                                </div>
-                              </div>
+                      <div className="space-y-2 mb-4">
+                        {typeEntries.map(([name, count]) => (
+                          <div key={name}>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-primary-foreground/70 truncate">{name}</span>
+                              <span className="text-accent font-bold ml-2">{count}x</span>
                             </div>
-                          ))}
-                        </div>
+                            <div className="h-1 rounded-full bg-white/10 overflow-hidden">
+                              <div className="h-full rounded-full bg-accent/60" style={{ width: `${Math.round((count / bookings.length) * 100)}%` }} />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                     {/* Total spent */}
@@ -353,46 +492,12 @@ export default function Profile() {
               );
             })()}
 
+            {/* My Promo Codes */}
+            <MyPromoCodesCard />
+
             {/* Referral Card */}
-            {(() => {
-              const { data: referralInfo } = trpc.user.getReferralInfo.useQuery(undefined, { enabled: true });
-              if (!referralInfo) return null;
-              return (
-                <Card className="border-2 border-green-400/50 bg-gradient-to-br from-green-50/50 to-emerald-50/30 dark:from-green-950/30 dark:to-emerald-950/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
-                        <Users className="w-4 h-4 text-green-500" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm text-foreground">Refer a Friend</h3>
-                        <p className="text-xs text-muted-foreground">Earn 20% off when they book</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 bg-background rounded-lg border border-border p-2.5 mb-2">
-                      <span className="text-xs text-muted-foreground flex-1 truncate font-mono">
-                        {referralInfo.referralLink}
-                      </span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(referralInfo.referralLink);
-                          toast.success('Referral link copied!');
-                        }}
-                        className="shrink-0 flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-2.5 py-1.5 rounded-md transition-colors"
-                      >
-                        <Copy className="w-3 h-3" /> Copy
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">Code: <span className="font-mono font-bold text-green-600">{referralInfo.referralCode}</span></span>
-                      {referralInfo.rewardedReferrals > 0 && (
-                        <span className="text-xs text-green-600 font-semibold">🎉 {referralInfo.rewardedReferrals} reward{referralInfo.rewardedReferrals !== 1 ? 's' : ''} earned!</span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })()}
+            <ReferralCard />
+
             {user?.role === "admin" && (
               <Card className="border-accent bg-accent/5">
                 <CardContent className="p-4">

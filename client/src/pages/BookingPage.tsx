@@ -782,16 +782,8 @@ export default function BookingPage() {
       ),
       url: null, // Instagram doesn't support direct URL sharing; copy text instead
     },
-    {
-      name: "Text a Friend",
-      color: "bg-[#34C759] hover:bg-[#2DB34E]",
-      icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
-        </svg>
-      ),
-      url: `sms:?body=${encodeURIComponent(shareText + " " + shareUrl)}`,
-    },
+    // SMS share hidden until Twilio is fully configured
+    // { name: "Text a Friend", url: `sms:?body=...` },
   ];
 
   if (submitted) {
@@ -817,7 +809,7 @@ export default function BookingPage() {
                   : <>Your <strong className="text-foreground">{config.title}</strong> request is submitted. Mario will confirm shortly.</>
                 }
               </p>
-              <p className="text-xs text-muted-foreground/70 mb-6">A confirmation email + SMS reminder will be sent before your session.</p>
+              <p className="text-xs text-muted-foreground/70 mb-6">A confirmation email reminder will be sent before your session.</p>
 
               {/* Newsletter opt-in */}
               {user && <NewsletterOptIn userId={user.id} />

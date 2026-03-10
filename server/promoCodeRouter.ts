@@ -141,6 +141,40 @@ export const promoCodeRouter = router({
       };
     }),
 
+  // User: get all promo codes earned by the current user (via referrals)
+  getMyPromoCodes: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return [];
+    const { referrals } = await import("../drizzle/schema");
+    const { eq, inArray } = await import("drizzle-orm");
+
+    // Get all rewarded referrals for this user
+    const myReferrals = await db
+      .select({
+        rewardPromoCodeId: referrals.rewardPromoCodeId,
+        rewardedAt: referrals.rewardedAt,
+      })
+      .from(referrals)
+      .where(eq(referrals.referrerId, ctx.user.id));
+
+    const promoIds = myReferrals
+      .map(r => r.rewardPromoCodeId)
+      .filter((id): id is number => id !== null);
+
+    if (promoIds.length === 0) return [];
+
+    const codes = await db
+      .select()
+      .from(promoCodes)
+      .where(inArray(promoCodes.id, promoIds));
+
+    return codes.map(c => ({
+      ...c,
+      isExpired: c.expiresAt ? new Date(c.expiresAt) < new Date() : false,
+      isUsedUp: c.maxUses !== null && c.usedCount >= c.maxUses,
+    }));
+  }),
+
   // Internal: mark a promo code as used (called after successful booking)
   markUsed: protectedProcedure
     .input(z.object({ code: z.string() }))
