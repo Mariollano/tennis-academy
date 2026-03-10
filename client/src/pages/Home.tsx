@@ -12,6 +12,8 @@ import {
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { useLocation } from "wouter";
+import { toast } from "sonner";
 
 function useCountUp(target: number, duration = 1500, start = false) {
   const [count, setCount] = useState(0);
@@ -333,6 +335,24 @@ function FaqAccordion() {
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
+  const [_location] = useLocation();
+
+  // Show a toast if login failed and clear the error param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const loginError = params.get("login_error");
+    if (loginError) {
+      if (loginError === "missing_code") {
+        toast.error("Sign-in failed: the login link expired or was used in a different browser tab. Please try again.", { duration: 8000 });
+      } else {
+        toast.error("Sign-in failed. Please try again.", { duration: 6000 });
+      }
+      // Remove the error param from the URL without reloading
+      params.delete("login_error");
+      const newUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "");
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen">

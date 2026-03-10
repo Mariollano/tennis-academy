@@ -389,3 +389,7 @@
 - [x] Add native share buttons to referral card (WhatsApp, Text/SMS, native Web Share API)
 - [ ] Update WordPress install links from tennispro-kzzfscru.manus.space to tennispromario.com
 - [ ] Add "Book a Lesson" button to WordPress homepage linking to app booking page
+
+## Session 23 — Login Fix
+- [x] Fix OAuth login 404: add www → no-www canonical redirect so login URL is always consistent
+- [x] Add error handling in OAuth callback to show a user-friendly error page instead of 404

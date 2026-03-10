@@ -19,8 +19,9 @@ export function registerOAuthRoutes(app: Express) {
     const state = getQueryParam(req, "state");
 
     if (!code || !state) {
-      res.status(400).json({ error: "code and state are required" });
-      return;
+      console.error("[OAuth] Callback missing code or state. code:", !!code, "state:", !!state, "query:", req.query);
+      // Redirect to home with error message instead of raw JSON 404
+      return res.redirect(302, "/?login_error=missing_code");
     }
 
     try {
@@ -84,7 +85,8 @@ export function registerOAuthRoutes(app: Express) {
       res.redirect(302, redirectTo);
     } catch (error) {
       console.error("[OAuth] Callback failed", error);
-      res.status(500).json({ error: "OAuth callback failed" });
+      // Redirect to home with error param instead of showing raw JSON
+      return res.redirect(302, "/?login_error=oauth_failed");
     }
   });
 }

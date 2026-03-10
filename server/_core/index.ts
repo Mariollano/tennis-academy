@@ -41,6 +41,18 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // ─── www → no-www canonical redirect ─────────────────────────────────────
+  // Ensures login URLs are always consistent (no-www) regardless of how user arrives
+  app.use((req, res, next) => {
+    const host = req.headers.host || "";
+    if (host.startsWith("www.")) {
+      const newHost = host.slice(4);
+      const proto = req.headers["x-forwarded-proto"] || "https";
+      return res.redirect(301, `${proto}://${newHost}${req.url}`);
+    }
+    next();
+  });
+
   // ─── Stripe Webhook (MUST be before body parser) ─────────────────────────
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2026-02-25.clover" });
   app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
