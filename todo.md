@@ -354,3 +354,10 @@
 - [x] Regenerate OG image with Coach Mario's actual photo instead of silhouette
 - [x] Add Facebook Page link in footer and navbar social icons (facebook.com/RITennisAcademy) — already present
 - [x] Add post-booking SMS share "Text a Friend" button in BookingPage confirmation (sms: protocol)
+
+## Overnight Improvements (Mar 9-10, 2026)
+- [x] Fix voice booking email: permanently fix time not showing when booked via microphone
+- [x] Add Google Review button on booking confirmation page (links to ri tennis academy Google Maps place)
+- [x] Build Share to Stories feature with 9:16 story card for Instagram/Facebook (canvas-based, download + Web Share API)
+- [x] Fix JSX syntax error in BookingPage.tsx (StoryCard modal outside Fragment)
+- [ ] Additional UX improvements across the site
