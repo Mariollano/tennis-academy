@@ -24,6 +24,7 @@ export function registerOAuthRoutes(app: Express) {
     }
 
     try {
+      // Exchange code for token — SDK decodes state as btoa(redirectUri)
       const tokenResponse = await sdk.exchangeCodeForToken(code, state);
       const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
 
@@ -32,28 +33,10 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      // Extract referral code from state if present
-      // State can be: plain base64(redirectUri) OR base64(JSON{redirectUri,ref,returnPath})
-      let refCode: string | undefined;
-      let returnPath: string | undefined;
-      try {
-        // Try standard base64 first (btoa from browser), then base64url
-        let decoded: string;
-        try {
-          decoded = Buffer.from(state, "base64").toString("utf-8");
-        } catch {
-          decoded = Buffer.from(state, "base64url").toString("utf-8");
-        }
-        if (decoded.startsWith("{")) {
-          const stateObj = JSON.parse(decoded);
-          if (stateObj?.ref && typeof stateObj.ref === "string" && stateObj.ref.length > 3) {
-            refCode = stateObj.ref;
-          }
-          if (stateObj?.returnPath && typeof stateObj.returnPath === "string") {
-            returnPath = stateObj.returnPath;
-          }
-        }
-      } catch { /* ignore parse errors */ }
+      // Referral code comes from ?ref= query param (stored in localStorage, passed via URL)
+      // returnPath comes from ?returnPath= query param for post-login redirect
+      const refCode = getQueryParam(req, "ref");
+      const returnPath = getQueryParam(req, "returnPath");
 
       await db.upsertUser({
         openId: userInfo.openId,
@@ -77,7 +60,7 @@ export function registerOAuthRoutes(app: Express) {
             // Generate their own referral code if they don't have one yet
             await ensureReferralCode(newUser.id, userInfo.name || null);
             // Store referredBy only on first signup (not on subsequent logins)
-            if (refCode && !newUser.referredBy) {
+            if (refCode && refCode.length > 3 && !newUser.referredBy) {
               await dbConn.update(users).set({ referredBy: refCode }).where(eq(users.id, newUser.id));
               console.log(`[Referral] User #${newUser.id} signed up via referral code: ${refCode}`);
             }
@@ -94,8 +77,9 @@ export function registerOAuthRoutes(app: Express) {
       });
 
       const cookieOptions = getSessionCookieOptions(req);
-       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-      // Redirect to returnPath if provided, otherwise home
+      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+      // Redirect to returnPath if provided and valid, otherwise home
       const redirectTo = returnPath && returnPath.startsWith("/") ? returnPath : "/";
       res.redirect(302, redirectTo);
     } catch (error) {

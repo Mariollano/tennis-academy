@@ -369,3 +369,10 @@
 - [x] Student SMS on Stripe payment confirmed webhook
 - [x] Real referral link with unique code shown on booking confirmation screen
 - [x] Additional UX polish pass (referral card on Profile page, ?ref= URL capture in localStorage, OAuth returnPath redirect, state format updated to JSON)
+
+## Session 20 — Login Fix + Announcements
+- [x] Fix OAuth login 404 bug (new JSON state format breaking OAuth SDK callback) — reverted to simple btoa(redirectUri) state
+- [x] Build Announcements broadcast system (admin posts rain cancellations, schedule changes)
+- [x] Student in-app notification inbox (unread badge, mark as read, Bell icon in navbar)
+- [x] Broadcast email + SMS to all students when announcement is posted
+- [x] Post Announcement quick action button added to Admin Dashboard

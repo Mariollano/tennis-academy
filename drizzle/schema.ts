@@ -332,3 +332,33 @@ export const referrals = mysqlTable("referrals", {
 });
 export type Referral = typeof referrals.$inferSelect;
 export type InsertReferral = typeof referrals.$inferInsert;
+
+// ─── Announcements ────────────────────────────────────────────────────────────
+// Admin posts announcements (rain cancellations, schedule changes, etc.)
+// All registered students are notified via in-app, email, and/or SMS.
+export const announcements = mysqlTable("announcements", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  body: text("body").notNull(),
+  type: mysqlEnum("type", ["info", "cancellation", "schedule_change", "urgent"]).notNull().default("info"),
+  sendEmail: boolean("sendEmail").notNull().default(true),
+  sendSms: boolean("sendSms").notNull().default(false),
+  // Targeting: null = all students, otherwise a specific program type
+  targetProgram: varchar("targetProgram", { length: 100 }),
+  createdBy: int("createdBy").notNull(), // admin user id
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  // Delivery stats (updated after broadcast)
+  emailsSent: int("emailsSent").notNull().default(0),
+  smsSent: int("smsSent").notNull().default(0),
+});
+export type Announcement = typeof announcements.$inferSelect;
+export type InsertAnnouncement = typeof announcements.$inferInsert;
+
+// Tracks which users have read each announcement (for unread badge)
+export const announcementReads = mysqlTable("announcement_reads", {
+  id: int("id").autoincrement().primaryKey(),
+  announcementId: int("announcementId").notNull(),
+  userId: int("userId").notNull(),
+  readAt: timestamp("readAt").defaultNow().notNull(),
+});
+export type AnnouncementRead = typeof announcementReads.$inferSelect;

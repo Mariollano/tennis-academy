@@ -10,6 +10,7 @@ import { invokeLLM } from "./_core/llm";
 import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
 import { sendBookingConfirmation, sendBookingConfirmed, sendBookingCancelled, sendBookingReminder, isEmailConfigured } from "./email";
 import { maybeRewardReferrer } from "./referral";
+import { postAnnouncement, getAnnouncements, markAnnouncementRead, getUnreadCount, deleteAnnouncement } from "./announcements";
 
 // Convert "HH:MM:SS" or "HH:MM" to "9:00 AM" style
 function formatTime12h(t: string): string {
@@ -68,6 +69,55 @@ export const appRouter = router({
   leaderboard: leaderboardRouter,
   voiceBooking: voiceBookingRouter,
   promoCodes: promoCodeRouter,
+
+  // ─── Announcements ──────────────────────────────────────────────────────────
+  announcements: router({
+    // Public: get all announcements (with read status if logged in)
+    list: publicProcedure.query(async ({ ctx }) => {
+      return getAnnouncements(ctx.user?.id);
+    }),
+
+    // Protected: get unread count for badge
+    unreadCount: protectedProcedure.query(async ({ ctx }) => {
+      const count = await getUnreadCount(ctx.user.id);
+      return { count };
+    }),
+
+    // Protected: mark an announcement as read
+    markRead: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await markAnnouncementRead(input.id, ctx.user.id);
+        return { success: true };
+      }),
+
+    // Admin: post a new announcement and broadcast it
+    post: adminProcedure
+      .input(z.object({
+        title: z.string().min(1).max(200),
+        body: z.string().min(1),
+        type: z.enum(["info", "cancellation", "schedule_change", "urgent"]),
+        sendEmail: z.boolean().default(true),
+        sendSms: z.boolean().default(false),
+        targetProgram: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await postAnnouncement({
+          ...input,
+          targetProgram: input.targetProgram || null,
+          createdBy: ctx.user.id,
+        });
+        return result;
+      }),
+
+    // Admin: delete an announcement
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteAnnouncement(input.id);
+        return { success: true };
+      }),
+  }),
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

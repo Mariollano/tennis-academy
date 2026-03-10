@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Menu, X, User, LogOut, Youtube, Instagram, Facebook, Download, ChevronRight } from "lucide-react";
+import { Menu, X, User, LogOut, Youtube, Instagram, Facebook, Download, ChevronRight, Bell } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -51,6 +51,29 @@ function InstallAppButton() {
       <Download className="w-3 h-3" />
       <span className="hidden sm:inline">Install</span>
     </button>
+  );
+}
+
+function AnnouncementsBell() {
+  const { data } = trpc.announcements.unreadCount.useQuery(undefined, {
+    refetchInterval: 60000, // poll every 60s
+  });
+  const count = data?.count ?? 0;
+
+  return (
+    <Link href="/announcements">
+      <button
+        className="relative p-1.5 rounded-md text-primary-foreground/60 hover:text-accent hover:bg-white/8 transition-colors"
+        title="Announcements"
+      >
+        <Bell className="w-4 h-4" />
+        {count > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center leading-none">
+            {count > 9 ? "9+" : count}
+          </span>
+        )}
+      </button>
+    </Link>
   );
 }
 
@@ -133,7 +156,7 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Right side: social + install + auth */}
+        {/* Right side: social + install + bell + auth */}
         <div className="hidden md:flex items-center gap-2">
           {/* Social icons */}
           <div className="flex items-center gap-0.5 mr-1">
@@ -153,7 +176,9 @@ export default function Navbar() {
 
           <InstallAppButton />
 
-          {/* Auth */}
+          {/* Announcements Bell — only when logged in */}
+          {isAuthenticated && <AnnouncementsBell />}
+
           {/* Book Now CTA */}
           <Link href="/programs">
             <Button
@@ -193,110 +218,129 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/10">
-              <Menu className="w-5 h-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-72 p-0 border-l border-white/10" style={{ background: 'oklch(0.14 0.04 260)' }}>
-            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-            <SheetDescription className="sr-only">Main navigation links for RI Tennis Academy</SheetDescription>
-
-            {/* Mobile header */}
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
-              <div className="flex items-center gap-2.5">
-                <img src={LOGO_URL} alt="RI Tennis Academy" className="w-9 h-9 rounded-full object-cover border border-accent/40" />
-                <div>
-                  <div className="font-extrabold text-accent text-sm" style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.08em' }}>RI TENNIS</div>
-                  <div className="text-white/40 text-[10px] tracking-widest uppercase">Academy</div>
-                </div>
-              </div>
-              <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/10" onClick={() => setOpen(false)}>
-                <X className="w-4 h-4" />
+        {/* Mobile: Bell + Menu */}
+        <div className="flex items-center gap-1 md:hidden">
+          {isAuthenticated && <AnnouncementsBell />}
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/10">
+                <Menu className="w-5 h-5" />
               </Button>
-            </div>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72 p-0 border-l border-white/10" style={{ background: 'oklch(0.14 0.04 260)' }}>
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetDescription className="sr-only">Main navigation links for RI Tennis Academy</SheetDescription>
 
-            {/* Nav links */}
-            <nav className="flex flex-col p-4 gap-1">
-              {navLinks.map((link) => (
-                <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>
+              {/* Mobile header */}
+              <div className="flex items-center justify-between p-5 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <img src={LOGO_URL} alt="RI Tennis Academy" className="w-9 h-9 rounded-full object-cover border border-accent/40" />
+                  <div>
+                    <div className="font-extrabold text-accent text-sm" style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.08em' }}>RI TENNIS</div>
+                    <div className="text-white/40 text-[10px] tracking-widest uppercase">Academy</div>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/10" onClick={() => setOpen(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* Nav links */}
+              <nav className="flex flex-col p-4 gap-1">
+                {navLinks.map((link) => (
+                  <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>
+                    <span
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                        isActive(link.href)
+                          ? "bg-accent/20 text-accent"
+                          : "text-white/70 hover:text-white hover:bg-white/8"
+                      }`}
+                    >
+                      {link.label}
+                      {isActive(link.href) && <ChevronRight className="w-4 h-4 opacity-60" />}
+                    </span>
+                  </Link>
+                ))}
+                {/* Announcements link in mobile nav */}
+                <Link href="/announcements" onClick={() => setOpen(false)}>
                   <span
                     className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer ${
-                      isActive(link.href)
+                      isActive("/announcements")
                         ? "bg-accent/20 text-accent"
                         : "text-white/70 hover:text-white hover:bg-white/8"
                     }`}
                   >
-                    {link.label}
-                    {isActive(link.href) && <ChevronRight className="w-4 h-4 opacity-60" />}
+                    <span className="flex items-center gap-2">
+                      <Bell className="w-4 h-4" />
+                      Announcements
+                    </span>
+                    {isActive("/announcements") && <ChevronRight className="w-4 h-4 opacity-60" />}
                   </span>
                 </Link>
-              ))}
-              {user?.role === "admin" && (
-                <Link href="/admin" onClick={() => setOpen(false)}>
-                  <span className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/70 hover:text-white hover:bg-white/8 cursor-pointer">
-                    Admin Dashboard
-                    <ChevronRight className="w-4 h-4 opacity-40" />
-                  </span>
-                </Link>
-              )}
-            </nav>
-
-            {/* Social + Auth in mobile */}
-            <div className="px-4 pb-4 mt-2 border-t border-white/10 pt-4">
-              <p className="text-xs text-white/30 px-4 mb-3 uppercase tracking-wider">Follow Coach Mario</p>
-              <div className="flex gap-2 px-4 mb-5">
-                {[
-                  { href: "https://www.youtube.com/@MarioRITennis", label: "YouTube", Icon: Youtube },
-                  { href: "https://instagram.com/deletefearwithmario", label: "Instagram", Icon: Instagram },
-                  { href: "https://facebook.com/RITennisAcademy", label: "Facebook", Icon: Facebook },
-                ].map(({ href, label, Icon }) => (
-                  <a key={href} href={href} target="_blank" rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-accent hover:bg-white/15 transition-all"
-                    title={label}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </a>
-                ))}
-              </div>
-
-              {/* Book Now CTA - always visible in mobile */}
-              <Link href="/programs" onClick={() => setOpen(false)}>
-                <Button className="w-full bg-accent text-accent-foreground hover:brightness-105 font-bold rounded-xl mb-3">
-                  Book a Session
-                </Button>
-              </Link>
-
-              {isAuthenticated ? (
-                <div className="space-y-1">
-                  <Link href="/profile" onClick={() => setOpen(false)}>
-                    <span className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/8 cursor-pointer">
-                      <User className="w-4 h-4" />
-                      My Profile
+                {user?.role === "admin" && (
+                  <Link href="/admin" onClick={() => setOpen(false)}>
+                    <span className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-white/70 hover:text-white hover:bg-white/8 cursor-pointer">
+                      Admin Dashboard
+                      <ChevronRight className="w-4 h-4 opacity-40" />
                     </span>
                   </Link>
-                  <button
-                    className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm text-white/50 hover:text-white hover:bg-white/8"
-                    onClick={() => logoutMutation.mutate()}
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                  </button>
+                )}
+              </nav>
+
+              {/* Social + Auth in mobile */}
+              <div className="px-4 pb-4 mt-2 border-t border-white/10 pt-4">
+                <p className="text-xs text-white/30 px-4 mb-3 uppercase tracking-wider">Follow Coach Mario</p>
+                <div className="flex gap-2 px-4 mb-5">
+                  {[
+                    { href: "https://www.youtube.com/@MarioRITennis", label: "YouTube", Icon: Youtube },
+                    { href: "https://instagram.com/deletefearwithmario", label: "Instagram", Icon: Instagram },
+                    { href: "https://facebook.com/RITennisAcademy", label: "Facebook", Icon: Facebook },
+                  ].map(({ href, label, Icon }) => (
+                    <a key={href} href={href} target="_blank" rel="noopener noreferrer"
+                      className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-accent hover:bg-white/15 transition-all"
+                      title={label}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </a>
+                  ))}
                 </div>
-              ) : (
-                <Button
-                  variant="outline"
-                  className="w-full border-white/20 text-white/70 hover:text-white hover:bg-white/10 rounded-xl"
-                  onClick={() => (window.location.href = getLoginUrl())}
-                >
-                  Sign In
-                </Button>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+
+                {/* Book Now CTA - always visible in mobile */}
+                <Link href="/programs" onClick={() => setOpen(false)}>
+                  <Button className="w-full bg-accent text-accent-foreground hover:brightness-105 font-bold rounded-xl mb-3">
+                    Book a Session
+                  </Button>
+                </Link>
+
+                {isAuthenticated ? (
+                  <div className="space-y-1">
+                    <Link href="/profile" onClick={() => setOpen(false)}>
+                      <span className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/8 cursor-pointer">
+                        <User className="w-4 h-4" />
+                        My Profile
+                      </span>
+                    </Link>
+                    <button
+                      className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm text-white/50 hover:text-white hover:bg-white/8"
+                      onClick={() => logoutMutation.mutate()}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full border-white/20 text-white/70 hover:text-white hover:bg-white/10 rounded-xl"
+                    onClick={() => (window.location.href = getLoginUrl())}
+                  >
+                    Sign In
+                  </Button>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );

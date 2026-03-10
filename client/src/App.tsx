@@ -28,6 +28,7 @@ import Leaderboard from "./pages/Leaderboard";
 import GiftCard from "./pages/GiftCard";
 import AdminNewsletter from "./pages/AdminNewsletter";
 import VoiceBooking from "./components/VoiceBooking";
+import Announcements from "./pages/Announcements";
 
 // Captures ?ref=CODE from URL and stores in localStorage before login
 function ReferralCapture() {
@@ -63,6 +64,7 @@ function Router() {
           <Route path="/gift-card" component={GiftCard} />
           <Route path="/gift-card/success" component={GiftCard} />
           <Route path="/admin/newsletter" component={AdminNewsletter} />
+          <Route path="/announcements" component={Announcements} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
