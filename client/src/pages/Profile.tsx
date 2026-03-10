@@ -11,7 +11,7 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { User, Phone, Bell, Calendar, CheckCircle, Clock, XCircle, MessageSquare, Trophy, RefreshCw } from "lucide-react";
+import { User, Phone, Bell, Calendar, CheckCircle, Clock, XCircle, MessageSquare, Trophy, RefreshCw, Users, Copy } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -353,6 +353,46 @@ export default function Profile() {
               );
             })()}
 
+            {/* Referral Card */}
+            {(() => {
+              const { data: referralInfo } = trpc.user.getReferralInfo.useQuery(undefined, { enabled: true });
+              if (!referralInfo) return null;
+              return (
+                <Card className="border-2 border-green-400/50 bg-gradient-to-br from-green-50/50 to-emerald-50/30 dark:from-green-950/30 dark:to-emerald-950/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                        <Users className="w-4 h-4 text-green-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-foreground">Refer a Friend</h3>
+                        <p className="text-xs text-muted-foreground">Earn 20% off when they book</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-background rounded-lg border border-border p-2.5 mb-2">
+                      <span className="text-xs text-muted-foreground flex-1 truncate font-mono">
+                        {referralInfo.referralLink}
+                      </span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(referralInfo.referralLink);
+                          toast.success('Referral link copied!');
+                        }}
+                        className="shrink-0 flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-2.5 py-1.5 rounded-md transition-colors"
+                      >
+                        <Copy className="w-3 h-3" /> Copy
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">Code: <span className="font-mono font-bold text-green-600">{referralInfo.referralCode}</span></span>
+                      {referralInfo.rewardedReferrals > 0 && (
+                        <span className="text-xs text-green-600 font-semibold">🎉 {referralInfo.rewardedReferrals} reward{referralInfo.rewardedReferrals !== 1 ? 's' : ''} earned!</span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
             {user?.role === "admin" && (
               <Card className="border-accent bg-accent/5">
                 <CardContent className="p-4">

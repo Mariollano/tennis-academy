@@ -24,6 +24,8 @@ export const users = mysqlTable("users", {
   smsOptInAt: timestamp("smsOptInAt"),
   newsletterOptIn: boolean("newsletterOptIn").default(false).notNull(),
   newsletterOptInAt: timestamp("newsletterOptInAt"),
+  referralCode: varchar("referralCode", { length: 20 }).unique(), // auto-generated unique code per user
+  referredBy: varchar("referredBy", { length: 20 }),              // referral code used at signup
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -314,3 +316,19 @@ export const scheduledReminders = mysqlTable("scheduled_reminders", {
 });
 export type ScheduledReminder = typeof scheduledReminders.$inferSelect;
 export type InsertScheduledReminder = typeof scheduledReminders.$inferInsert;
+
+// ─── Referrals ────────────────────────────────────────────────────────────────
+// Each user gets a unique referral code. When a referred friend books their
+// first session, the referrer automatically receives a discount promo code.
+export const referrals = mysqlTable("referrals", {
+  id: int("id").autoincrement().primaryKey(),
+  referrerId: int("referrerId").notNull(),       // user who shared the link
+  referredUserId: int("referredUserId").notNull(), // new user who signed up via referral
+  referralCode: varchar("referralCode", { length: 20 }).notNull(), // code that was used
+  rewardPromoCodeId: int("rewardPromoCodeId"),   // promo code given to referrer as reward
+  status: mysqlEnum("status", ["pending", "rewarded"]).notNull().default("pending"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  rewardedAt: timestamp("rewardedAt"),
+});
+export type Referral = typeof referrals.$inferSelect;
+export type InsertReferral = typeof referrals.$inferInsert;

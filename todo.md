@@ -346,7 +346,7 @@
 - [x] Fix navbar: tighten line-height on multi-word items (My Schedule, Mental Coaching), bold font, uppercase, whitespace-nowrap
 - [x] Fix voice booking email: include lesson time when booked via microphone (added email+SMS sending to quickBook procedure)
 - [x] Navbar: shift nav items to the left (justify-start ml-4)
-- [ ] Integrate Resend as email provider (replace Gmail/SMTP with Resend API)
+- [x] Integrate Resend as email provider (replace Gmail/SMTP with Resend API)
 - [x] Fix Facebook share URL to use tennispromario.com instead of dev URL
 - [x] Add Open Graph meta tags to index.html for proper social media preview cards (og:url, og:site_name, twitter:title, twitter:description, twitter:image)
 - [x] Create custom 1200x630 Open Graph preview image for social sharing (tennispromario.com)
@@ -361,3 +361,11 @@
 - [x] Build Share to Stories feature with 9:16 story card for Instagram/Facebook (canvas-based, download + Web Share API)
 - [x] Fix JSX syntax error in BookingPage.tsx (StoryCard modal outside Fragment)
 - [ ] Additional UX improvements across the site
+
+## Continuous Build (Session 19 — No Stopping)
+- [x] Post-booking SMS confirmation to student (date, time, program, "Reply STOP to unsubscribe")
+- [x] Resend email integration (replace Gmail/SMTP, better deliverability + tracking, using getroger.biz domain)
+- [x] Referral discount promo code: auto-generate unique code for referrer when referred friend books (20% discount, email+SMS reward)
+- [x] Student SMS on Stripe payment confirmed webhook
+- [x] Real referral link with unique code shown on booking confirmation screen
+- [x] Additional UX polish pass (referral card on Profile page, ?ref= URL capture in localStorage, OAuth returnPath redirect, state format updated to JSON)

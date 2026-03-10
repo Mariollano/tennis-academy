@@ -547,6 +547,9 @@ export default function BookingPage() {
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [showStoryCard, setShowStoryCard] = useState(false);
+  const { data: referralInfo } = trpc.user.getReferralInfo.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
   const [promoCode, setPromoCode] = useState("");
   const [promoInput, setPromoInput] = useState("");
   const [promoResult, setPromoResult] = useState<{
@@ -844,12 +847,13 @@ export default function BookingPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2 bg-background rounded-lg border border-border p-3">
-                <span className="text-sm text-muted-foreground flex-1 truncate">
-                  https://tennispromario.com/programs?ref={user?.id ?? 'you'}
+                <span className="text-sm text-muted-foreground flex-1 truncate font-mono text-xs">
+                  {referralInfo?.referralLink ?? `https://tennispromario.com?ref=...`}
                 </span>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(`https://tennispromario.com/programs?ref=${user?.id ?? 'you'}`);
+                    const link = referralInfo?.referralLink ?? `https://tennispromario.com?ref=${user?.id ?? ''}`;
+                    navigator.clipboard.writeText(link);
                     toast.success('Referral link copied! Share it with friends.');
                   }}
                   className="shrink-0 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
@@ -857,8 +861,20 @@ export default function BookingPage() {
                   <Copy className="w-3 h-3" /> Copy Link
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                Contact Coach Mario to redeem your referral discount.
+              {referralInfo && (
+                <div className="flex items-center justify-between mt-2 px-1">
+                  <p className="text-xs text-muted-foreground">
+                    Your code: <span className="font-mono font-bold text-green-600">{referralInfo.referralCode}</span>
+                  </p>
+                  {referralInfo.rewardedReferrals > 0 && (
+                    <p className="text-xs text-green-600 font-semibold">
+                      🎉 {referralInfo.rewardedReferrals} reward{referralInfo.rewardedReferrals !== 1 ? 's' : ''} earned!
+                    </p>
+                  )}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1 text-center">
+                When a friend books their first session, you automatically get a <strong>20% discount code</strong> by email &amp; SMS.
               </p>
             </CardContent>
           </Card>

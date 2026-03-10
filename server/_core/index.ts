@@ -15,6 +15,8 @@ import { eq } from "drizzle-orm";
 import { notifyOwner } from "./notification";
 import { startReminderScheduler } from "../reminderScheduler";
 import { storagePut } from "../storage";
+import { sendSms, isTwilioConfigured } from "../sms";
+import { sendBookingConfirmation, sendBookingConfirmed, isEmailConfigured } from "../email";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -86,10 +88,30 @@ async function startServer() {
             if (b) {
               const amountDollars = ((b.totalAmountCents || 0) / 100).toFixed(2);
               const dateStr = b.sessionDate ? new Date(b.sessionDate as any).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }) : "TBD";
+              const shortDateStr = b.sessionDate ? new Date(b.sessionDate as any).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : "";
+
+              // Notify Mario
               await notifyOwner({
-                title: `New Booking: ${b.programName || b.programType || "Program"}`,
+                title: `💳 Payment Confirmed: ${b.programName || b.programType || "Program"}`,
                 content: `Student: ${b.studentName || "Unknown"}\nEmail: ${b.studentEmail || "N/A"}\nPhone: ${b.studentPhone || "N/A"}\nProgram: ${b.programName || b.programType || "N/A"}\nDate: ${dateStr}\nAmount Paid: $${amountDollars}`,
               });
+
+              // Send confirmed email to student
+              if (isEmailConfigured() && b.studentEmail) {
+                sendBookingConfirmed({
+                  toEmail: b.studentEmail,
+                  toName: b.studentName || "there",
+                  programLabel: b.programName || b.programType || "Session",
+                  sessionDate: dateStr !== "TBD" ? dateStr : undefined,
+                  bookingId,
+                }).catch(() => {});
+              }
+
+              // Send confirmed SMS to student
+              if (isTwilioConfigured() && b.studentPhone) {
+                const smsMsg = `Hi ${b.studentName || "there"}! 🎾 Payment confirmed! Your ${b.programName || "session"}${shortDateStr ? " on " + shortDateStr : ""} is CONFIRMED. See you on the court! Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`;
+                sendSms(b.studentPhone, smsMsg).catch(() => {});
+              }
             }
           } catch (notifyErr) {
             console.warn("[Webhook] Failed to send owner notification:", notifyErr);

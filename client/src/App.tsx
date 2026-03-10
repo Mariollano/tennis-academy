@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch, Redirect } from "wouter";
+import { Route, Switch, Redirect, useSearch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -27,6 +28,19 @@ import Leaderboard from "./pages/Leaderboard";
 import GiftCard from "./pages/GiftCard";
 import AdminNewsletter from "./pages/AdminNewsletter";
 import VoiceBooking from "./components/VoiceBooking";
+
+// Captures ?ref=CODE from URL and stores in localStorage before login
+function ReferralCapture() {
+  const search = useSearch();
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const ref = params.get("ref");
+    if (ref && ref.length > 3) {
+      localStorage.setItem("referralCode", ref);
+    }
+  }, [search]);
+  return null;
+}
 
 function Router() {
   return (
@@ -62,6 +76,7 @@ function Router() {
       <MobileBottomBar />
       <WelcomeModal />
       <VoiceBooking />
+      <ReferralCapture />
     </div>
   );
 }

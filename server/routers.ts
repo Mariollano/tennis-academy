@@ -9,6 +9,7 @@ import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "./_core/llm";
 import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
 import { sendBookingConfirmation, sendBookingConfirmed, sendBookingCancelled, sendBookingReminder, isEmailConfigured } from "./email";
+import { maybeRewardReferrer } from "./referral";
 
 // Convert "HH:MM:SS" or "HH:MM" to "9:00 AM" style
 function formatTime12h(t: string): string {
@@ -145,6 +146,26 @@ export const appRouter = router({
         }
         return { success: true };
       }),
+
+    // Get the user's referral code and stats
+    getReferralInfo: protectedProcedure.query(async ({ ctx }) => {
+      const { ensureReferralCode } = await import("./referral");
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      // Ensure they have a code
+      const code = await ensureReferralCode(ctx.user.id, ctx.user.name || null);
+      // Count how many referrals they've made
+      const { referrals } = await import("../drizzle/schema");
+      const allReferrals = await db.select().from(referrals).where(eq(referrals.referrerId, ctx.user.id));
+      const totalReferrals = allReferrals.length;
+      const rewardedReferrals = allReferrals.filter(r => r.status === "rewarded").length;
+      return {
+        referralCode: code,
+        referralLink: `https://tennispromario.com?ref=${code}`,
+        totalReferrals,
+        rewardedReferrals,
+      };
+    }),
   }),
 
   // ─── Programs ───────────────────────────────────────────────────────────────
@@ -310,9 +331,13 @@ export const appRouter = router({
           const smsDateStr = input.sessionDate
             ? new Date(input.sessionDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
             : "";
-          const msg = `Hi ${ctx.user.name || "there"}! Your booking for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""} has been received. Mario will confirm your spot shortly. - RI Tennis Academy`;
+          const smsTimePart = timeStr ? ` at ${timeStr}` : "";
+          const msg = `Hi ${ctx.user.name || "there"}! ✅ Booking received for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""}${smsTimePart}. Mario will confirm your spot shortly. Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`;
           await sendSms(ctx.user.phone, msg).catch(() => {}); // non-blocking
         }
+
+        // Check if this is the user's first booking and reward the referrer if applicable
+        maybeRewardReferrer(ctx.user.id).catch(() => {});
 
         return { success: true };
       }),
