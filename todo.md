@@ -351,3 +351,6 @@
 - [x] Add Open Graph meta tags to index.html for proper social media preview cards (og:url, og:site_name, twitter:title, twitter:description, twitter:image)
 - [x] Create custom 1200x630 Open Graph preview image for social sharing (tennispromario.com)
 - [x] Improve share section after booking confirmation (fixed referral URL, updated motivational copy)
+- [x] Regenerate OG image with Coach Mario's actual photo instead of silhouette
+- [x] Add Facebook Page link in footer and navbar social icons (facebook.com/RITennisAcademy) — already present
+- [x] Add post-booking SMS share "Text a Friend" button in BookingPage confirmation (sms: protocol)
