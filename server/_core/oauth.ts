@@ -8,12 +8,32 @@ import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 
+// The custom domain where users should end up after login
+const CUSTOM_DOMAIN = "https://tennispromario.com";
+
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
   return typeof value === "string" ? value : undefined;
 }
 
 export function registerOAuthRoutes(app: Express) {
+  // Route to receive session token from cross-domain OAuth redirect and set cookie
+  app.get("/api/oauth/set-session", (req: Request, res: Response) => {
+    const token = getQueryParam(req, "token");
+    const returnPath = getQueryParam(req, "returnPath");
+
+    if (!token) {
+      return res.redirect(302, "/?login_error=missing_token");
+    }
+
+    const cookieOptions = getSessionCookieOptions(req);
+    res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+    const redirectPath = returnPath && returnPath.startsWith("/") ? returnPath : "/";
+    console.log(`[OAuth] Cross-domain session set, redirecting to: ${redirectPath}`);
+    res.redirect(302, redirectPath);
+  });
+
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
@@ -77,12 +97,31 @@ export function registerOAuthRoutes(app: Express) {
         expiresInMs: ONE_YEAR_MS,
       });
 
+      // Determine if the request came in via the manus.space domain.
+      // If so, we need to redirect to the custom domain and pass the session token
+      // via URL so it can be set as a cookie on the correct domain.
+      const requestHost = req.headers.host || "";
+      const isManusDomain = requestHost.includes("manus.space") || requestHost.includes("manus.computer");
+
+      if (isManusDomain) {
+        // Cross-domain redirect: pass token via URL to the custom domain's set-session endpoint
+        const redirectPath = returnPath && returnPath.startsWith("/") ? returnPath : "/";
+        const setSessionUrl = new URL(`${CUSTOM_DOMAIN}/api/oauth/set-session`);
+        setSessionUrl.searchParams.set("token", sessionToken);
+        if (redirectPath !== "/") {
+          setSessionUrl.searchParams.set("returnPath", redirectPath);
+        }
+        console.log(`[OAuth] Cross-domain login success for openId: ${userInfo.openId}, redirecting to custom domain`);
+        return res.redirect(302, setSessionUrl.toString());
+      }
+
+      // Same-domain: set cookie directly
       const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
-      // Redirect to returnPath if provided and valid, otherwise home
-      const redirectTo = returnPath && returnPath.startsWith("/") ? returnPath : "/";
-      res.redirect(302, redirectTo);
+      const redirectPath = returnPath && returnPath.startsWith("/") ? returnPath : "/";
+      console.log(`[OAuth] Login success for openId: ${userInfo.openId}, redirecting to: ${redirectPath}`);
+      res.redirect(302, redirectPath);
     } catch (error) {
       console.error("[OAuth] Callback failed", error);
       // Redirect to home with error param instead of showing raw JSON
