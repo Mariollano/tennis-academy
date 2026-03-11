@@ -401,3 +401,6 @@
 
 ## Session 25 — Scroll Fix
 - [x] Fix Programs page: clicking Programs link should land at top of page, not bottom (added global ScrollToTop component in App.tsx)
+
+## Session 26 — OAuth Redirect Fix
+- [x] Fix OAuth: after login on manus.space, redirect user back to tennispromario.com correctly (use x-forwarded-host to detect domain, always cross-domain redirect unless explicitly on tennispromario.com)
