@@ -398,3 +398,6 @@
 ## Session 24 — Mic Hide + Email Fix
 - [x] Hide voice booking microphone button from UI (keep code, just hide the button)
 - [x] Fix booking confirmation email to always include session date and time for voice bookings (timePreference now passed for all program types, not just private_lesson)
+
+## Session 25 — Scroll Fix
+- [x] Fix Programs page: clicking Programs link should land at top of page, not bottom (added global ScrollToTop component in App.tsx)
