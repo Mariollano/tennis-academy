@@ -396,36 +396,10 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Download app button + Voice button — top right stack (desktop only) */}
+        {/* Download app button — top right (desktop only) */}
         <div className="absolute top-4 right-4 z-20 hidden md:flex flex-col items-center gap-3">
           <InstallAppButton />
-          {/* Voice Booking Round Button */}
-          <div className="flex flex-col items-center gap-1">
-            <button
-              onClick={() => {
-                const event = new CustomEvent('open-voice-booking');
-                window.dispatchEvent(event);
-              }}
-              className="group relative flex items-center justify-center w-14 h-14 rounded-full bg-black/30 backdrop-blur-sm transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none"
-              style={{
-                border: '3px solid #facc15',
-                boxShadow: '0 0 18px 4px rgba(250,204,21,0.4)',
-              }}
-              aria-label="Book by voice"
-            >
-              <span
-                className="absolute inset-[-5px] rounded-full border-2 border-accent/50 animate-ping"
-                style={{ animationDuration: '2s' }}
-              />
-              <Mic className="w-6 h-6 text-accent relative z-10 group-hover:scale-110 transition-transform" />
-            </button>
-            <span
-              className="text-accent font-black text-sm tracking-wider uppercase text-center leading-tight"
-              style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.1em' }}
-            >
-              BOOK BY<br />VOICE
-            </span>
-          </div>
+          {/* Voice Booking button hidden — coming soon */}
         </div>
 
         {/* Mobile-only: Download App button top right */}
@@ -477,33 +451,7 @@ export default function Home() {
                 </Button>
               </Link>
 
-              {/* Voice Button — mobile only (inline with CTA buttons) */}
-              <div className="flex md:hidden flex-col items-center gap-1 relative z-20">
-                <button
-                  onClick={() => {
-                    const event = new CustomEvent('open-voice-booking');
-                    window.dispatchEvent(event);
-                  }}
-                  className="group relative flex items-center justify-center w-14 h-14 rounded-full bg-black/30 backdrop-blur-sm transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none"
-                  style={{
-                    border: '3px solid #facc15',
-                    boxShadow: '0 0 18px 4px rgba(250,204,21,0.4)',
-                  }}
-                  aria-label="Book by voice"
-                >
-                  <span
-                    className="absolute inset-[-5px] rounded-full border-2 border-accent/50 animate-ping"
-                    style={{ animationDuration: '2s' }}
-                  />
-                  <Mic className="w-6 h-6 text-accent relative z-10 group-hover:scale-110 transition-transform" />
-                </button>
-                <span
-                  className="text-accent font-black text-sm tracking-wider uppercase text-center leading-tight"
-                  style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: '0.1em' }}
-                >
-                  BOOK BY<br />VOICE
-                </span>
-              </div>
+              {/* Voice Button hidden — coming soon */}
             </div>
 
             {/* Trust indicators */}

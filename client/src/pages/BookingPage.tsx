@@ -685,12 +685,13 @@ export default function BookingPage() {
 
     // For private lessons, store the preferred start time so it shows as "Booked" for future students
     // For clinic_105, use the selected slot's actual start/end time so it appears in the confirmation email
+    // For all other types (including voice-booking redirects), use timePreference if available
     const sessionStartTime = programType === "clinic_105" && selectedSlotTimes
       ? selectedSlotTimes.startTime
-      : (programType === "private_lesson" && timePreference) ? (timePreference.includes(":") ? timePreference + ":00" : timePreference + ":00:00") : undefined;
+      : timePreference ? (timePreference.includes(":") ? timePreference + ":00" : timePreference + ":00:00") : undefined;
     const sessionEndTime = programType === "clinic_105" && selectedSlotTimes
       ? selectedSlotTimes.endTime
-      : (programType === "private_lesson" && timePreference) ? (() => {
+      : timePreference ? (() => {
           const parts = timePreference.split(":");
           const h = parseInt(parts[0]);
           const m = parseInt(parts[1] || "0");

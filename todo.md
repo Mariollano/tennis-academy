@@ -394,3 +394,7 @@
 - [x] Fix OAuth login 404: add www → no-www canonical redirect so login URL is always consistent
 - [x] Add error handling in OAuth callback to show a user-friendly error page instead of 404
 - [x] Fix cross-domain OAuth: use manus.space as OAuth redirect URI, pass session token to tennispromario.com via /api/oauth/set-session endpoint
+
+## Session 24 — Mic Hide + Email Fix
+- [x] Hide voice booking microphone button from UI (keep code, just hide the button)
+- [x] Fix booking confirmation email to always include session date and time for voice bookings (timePreference now passed for all program types, not just private_lesson)
