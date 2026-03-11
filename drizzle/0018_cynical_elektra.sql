@@ -1,0 +1,1 @@
+ALTER TABLE `bookings` ADD `paymentMethod` enum('card','cash','check') DEFAULT 'card';

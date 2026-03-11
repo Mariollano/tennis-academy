@@ -413,3 +413,4 @@
 - [x] Add Newsletter link to Navbar
 - [x] Seed Spring 2026 newsletter from uploaded HTML file
 - [x] Add newsletter management (publish/unpublish, view, copy link) to Admin Newsletter page
+- [x] Add "Pay Cash / Pay by Check at lesson time" payment option to booking flow

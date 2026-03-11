@@ -573,6 +573,7 @@ export default function BookingPage() {
   }, [urlTime, urlDate]);
   const [juniorDays, setJuniorDays] = useState(1);
   const [juniorSelectedDates, setJuniorSelectedDates] = useState<string[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash" | "check">("card");
 
   // Fetch booked + blocked hours for the selected date (private lesson only)
   const { data: unavailableHours } = trpc.schedule.getUnavailableHours.useQuery(
@@ -609,7 +610,15 @@ export default function BookingPage() {
   });
 
   const createBookingMutation = trpc.booking.create.useMutation({
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables) => {
+      const isCashOrCheck = data.paymentMethod === "cash" || data.paymentMethod === "check";
+      // Cash/check: spot is reserved immediately, no Stripe needed
+      if (isCashOrCheck) {
+        setSubmitted(true);
+        const payLabel = data.paymentMethod === "check" ? "check" : "cash";
+        toast.success(`Your spot is reserved! Please bring ${payLabel} to the lesson.`);
+        return;
+      }
       // After booking is created, immediately launch Stripe checkout
       if (variables.totalAmountCents > 0) {
         createCheckoutMutation.mutate({
@@ -707,6 +716,7 @@ export default function BookingPage() {
           pricingOption: selectedPricing,
           notes: fullNotes,
           totalAmountCents: idx === 0 ? chargeAmount : 0,
+          paymentMethod,
         });
       });
     } else {
@@ -720,6 +730,7 @@ export default function BookingPage() {
         afterCampAddon: afterCamp,
         notes: fullNotes,
         totalAmountCents: chargeAmount,
+        paymentMethod,
       });
     }
 
@@ -802,15 +813,23 @@ export default function BookingPage() {
                 <div className="absolute inset-0 rounded-full border-4 border-green-200 animate-ping opacity-30" />
               </div>
               <h2 className="text-3xl font-extrabold text-foreground mb-2" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-                {paymentStatus === "success" ? "YOU'RE BOOKED!" : "REQUEST SENT!"}
+                {paymentStatus === "success" ? "YOU'RE BOOKED!" : (paymentMethod === "cash" || paymentMethod === "check") ? "SPOT RESERVED!" : "REQUEST SENT!"}
               </h2>
               <p className="text-muted-foreground mb-2 text-sm">
                 {paymentStatus === "success"
                   ? <>Payment received! Your <strong className="text-foreground">{config.title}</strong> is confirmed. Check your email for details.</>
+                  : (paymentMethod === "cash" || paymentMethod === "check")
+                  ? <>Your spot for <strong className="text-foreground">{config.title}</strong> is reserved! Please bring <strong>{paymentMethod === "check" ? "a check" : "cash"}</strong> to the lesson. A confirmation email has been sent.</>
                   : <>Your <strong className="text-foreground">{config.title}</strong> request is submitted. Mario will confirm shortly.</>
                 }
               </p>
-              <p className="text-xs text-muted-foreground/70 mb-6">A confirmation email reminder will be sent before your session.</p>
+              {(paymentMethod === "cash" || paymentMethod === "check") && (
+                <div className="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-800 font-semibold">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                  Payment due at lesson: {paymentMethod === "check" ? "Check payable to RI Tennis Academy" : "Cash"}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground/70 mb-6">A confirmation email has been sent to your inbox.</p>
 
               {/* Newsletter opt-in */}
               {user && <NewsletterOptIn userId={user.id} />
@@ -1349,6 +1368,92 @@ export default function BookingPage() {
                       </div>
                     )}
 
+                    {/* Payment Method Selector — only show when there is a charge */}
+                    {finalAmountCents > 0 && (
+                      <div>
+                        <Label className="text-sm font-semibold mb-2 block">Payment Method</Label>
+                        <div className="grid grid-cols-1 gap-2">
+                          {/* Pay Online */}
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("card")}
+                            className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                              paymentMethod === "card"
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/40"
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                              paymentMethod === "card" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                            }`}>
+                              <CreditCard className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-sm text-foreground">Pay Online (Credit / Debit Card)</div>
+                              <div className="text-xs text-muted-foreground">Secure checkout via Stripe — pay now to confirm your spot</div>
+                            </div>
+                            {paymentMethod === "card" && <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />}
+                          </button>
+
+                          {/* Pay Cash */}
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("cash")}
+                            className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                              paymentMethod === "cash"
+                                ? "border-green-600 bg-green-50"
+                                : "border-border hover:border-green-400"
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                              paymentMethod === "cash" ? "bg-green-600 text-white" : "bg-muted text-muted-foreground"
+                            }`}>
+                              <span className="text-sm font-bold">$</span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-sm text-foreground">Pay Cash at Lesson</div>
+                              <div className="text-xs text-muted-foreground">Reserve your spot now — bring cash to the lesson</div>
+                            </div>
+                            {paymentMethod === "cash" && <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />}
+                          </button>
+
+                          {/* Pay by Check */}
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("check")}
+                            className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                              paymentMethod === "check"
+                                ? "border-blue-600 bg-blue-50"
+                                : "border-border hover:border-blue-400"
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                              paymentMethod === "check" ? "bg-blue-600 text-white" : "bg-muted text-muted-foreground"
+                            }`}>
+                              <span className="text-xs font-bold">CHK</span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-sm text-foreground">Pay by Check at Lesson</div>
+                              <div className="text-xs text-muted-foreground">Reserve your spot now — bring a check made out to RI Tennis Academy</div>
+                            </div>
+                            {paymentMethod === "check" && <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />}
+                          </button>
+                        </div>
+
+                        {/* Cash/Check reminder banner */}
+                        {(paymentMethod === "cash" || paymentMethod === "check") && (
+                          <div className="mt-2 flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
+                            <span>
+                              Your spot will be <strong>reserved immediately</strong>. Please bring{" "}
+                              {paymentMethod === "check" ? "a check made out to RI Tennis Academy" : "cash"}{" "}
+                              for <strong>${(finalAmountCents / 100).toFixed(0)}</strong> to the lesson.
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                       <Button
                       type="submit"
                       size="lg"
@@ -1359,8 +1464,12 @@ export default function BookingPage() {
                         <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
                       ) : finalAmountCents === 0 && totalCents > 0 ? (
                         <><CheckCircle2 className="w-4 h-4 mr-2" /> Book for FREE (Promo Applied)</>
-                      ) : finalAmountCents > 0 ? (
+                      ) : finalAmountCents > 0 && paymentMethod === "card" ? (
                         <><CreditCard className="w-4 h-4 mr-2" /> Book & Pay ${(finalAmountCents / 100).toFixed(0)}</>
+                      ) : finalAmountCents > 0 && paymentMethod === "cash" ? (
+                        <><CheckCircle2 className="w-4 h-4 mr-2" /> Reserve Spot — Pay Cash at Lesson</>
+                      ) : finalAmountCents > 0 && paymentMethod === "check" ? (
+                        <><CheckCircle2 className="w-4 h-4 mr-2" /> Reserve Spot — Pay by Check at Lesson</>
                       ) : (
                         "Submit Booking Request"
                       )}
@@ -1420,10 +1529,20 @@ export default function BookingPage() {
                     </div>
                   )}
                 </div>
-                <div className="bg-accent/10 border border-accent/30 rounded-lg p-3 text-xs text-foreground">
-                  <CreditCard className="w-3.5 h-3.5 inline mr-1 text-accent" />
-                  <strong>Secure payment via Stripe.</strong> You'll be redirected to complete payment after submitting.
-                </div>
+                {paymentMethod === "card" ? (
+                  <div className="bg-accent/10 border border-accent/30 rounded-lg p-3 text-xs text-foreground">
+                    <CreditCard className="w-3.5 h-3.5 inline mr-1 text-accent" />
+                    <strong>Secure payment via Stripe.</strong> You'll be redirected to complete payment after submitting.
+                  </div>
+                ) : paymentMethod === "cash" ? (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800">
+                    <span className="font-bold">💵 Pay Cash at Lesson.</span> Your spot is reserved — bring cash when you arrive.
+                  </div>
+                ) : (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+                    <span className="font-bold">📝 Pay by Check at Lesson.</span> Make check payable to <em>RI Tennis Academy</em>.
+                  </div>
+                )}
               </CardContent>
             </Card>
 

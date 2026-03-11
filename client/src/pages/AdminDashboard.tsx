@@ -493,6 +493,16 @@ export default function AdminDashboard() {
                             <Badge className={`text-xs ${statusColors[item.booking.status]}`}>
                               {item.booking.status}
                             </Badge>
+                            {(item.booking as any).paymentMethod === "cash" && (
+                              <Badge className="text-xs bg-green-100 text-green-800 border border-green-300">
+                                💵 Cash at Lesson
+                              </Badge>
+                            )}
+                            {(item.booking as any).paymentMethod === "check" && (
+                              <Badge className="text-xs bg-blue-100 text-blue-800 border border-blue-300">
+                                📝 Check at Lesson
+                              </Badge>
+                            )}
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
                             <span className="font-medium">{item.user?.name || "Unknown"}</span>

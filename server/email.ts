@@ -255,6 +255,57 @@ export async function sendBookingReminder(data: BookingConfirmationData): Promis
   }
 }
 
+// ─── Booking RESERVED (cash or check at lesson) ─────────────────────────────
+export async function sendBookingReservedCash(data: BookingConfirmationData & { paymentMethod: "cash" | "check" }): Promise<{ success: boolean; error?: string }> {
+  try {
+    const payLabel = data.paymentMethod === "check" ? "check" : "cash";
+    const summaryTable = buildSummaryTable(data, `<span style="color:#16a34a;font-weight:bold;">✅ Spot Reserved</span>`);
+    const bodyHtml = `
+      <h2 style="margin:0 0 8px;color:#1a3a8f;font-size:20px;">Your Spot is Reserved! 🎾</h2>
+      <p style="margin:0 0 24px;color:#444;font-size:15px;">
+        Hi ${data.toName || "there"},<br><br>
+        Your spot has been <strong>reserved</strong> with RI Tennis Academy. Please bring <strong>${payLabel}</strong> to the lesson to complete your payment.
+      </p>
+      ${summaryTable}
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:6px;padding:14px 18px;margin-bottom:20px;">
+        <p style="margin:0;font-size:14px;color:#92400e;">
+          <strong>💰 Payment Due at Lesson:</strong> Please bring ${payLabel} for the full amount when you arrive. Your spot is held for you.
+        </p>
+      </div>
+      <p style="margin:0 0 16px;color:#444;font-size:14px;">
+        Please arrive 5–10 minutes early and bring your racquet and water. If you need to cancel or reschedule,
+        please contact Coach Mario at least 24 hours in advance.
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr>
+          <td align="center">
+            <a href="https://tennispromario.com/profile"
+               style="display:inline-block;background:#1a3a8f;color:#ffffff;font-weight:bold;font-size:14px;padding:12px 28px;border-radius:6px;text-decoration:none;">
+              View My Bookings →
+            </a>
+          </td>
+        </tr>
+      </table>
+      ${contactBlock}`;
+
+    const text = `Hi ${data.toName || "there"},\n\nYour spot has been reserved with RI Tennis Academy!\n\nProgram: ${data.programLabel}\n${data.sessionDate ? `Date: ${data.sessionDate}\n` : ""}${data.sessionTime ? `Time: ${data.sessionTime}\n` : ""}Booking #: ${data.bookingId}\nStatus: Spot Reserved\nPayment: ${payLabel} due at lesson\n\nPlease arrive 5–10 minutes early. To cancel or reschedule, contact Coach Mario at least 24 hours in advance.\nQuestions? Email ritennismario@gmail.com or call 401-965-5873.\n\n— RI Tennis Academy`;
+
+    await sendEmail({
+      to: data.toEmail,
+      toName: data.toName,
+      subject: `✅ Spot Reserved – ${data.programLabel} | RI Tennis Academy`,
+      html: buildEmailShell(bodyHtml),
+      text,
+    });
+
+    console.log(`[Email] Cash/check reservation email sent to ${data.toEmail} for booking #${data.bookingId}`);
+    return { success: true };
+  } catch (err: any) {
+    console.error(`[Email] Failed to send cash reservation email to ${data.toEmail}:`, err?.message || err);
+    return { success: false, error: err?.message || "Unknown error" };
+  }
+}
+
 // ─── Booking CONFIRMED (admin approved or Stripe paid) ────────────────────
 export async function sendBookingConfirmed(data: BookingConfirmationData): Promise<{ success: boolean; error?: string }> {
   try {

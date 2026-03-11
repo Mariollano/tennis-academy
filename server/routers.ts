@@ -8,7 +8,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "./_core/llm";
 import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
-import { sendBookingConfirmation, sendBookingConfirmed, sendBookingCancelled, sendBookingReminder, isEmailConfigured } from "./email";
+import { sendBookingConfirmation, sendBookingConfirmed, sendBookingCancelled, sendBookingReminder, sendBookingReservedCash, isEmailConfigured } from "./email";
 import { maybeRewardReferrer } from "./referral";
 import { postAnnouncement, getAnnouncements, markAnnouncementRead, getUnreadCount, deleteAnnouncement } from "./announcements";
 
@@ -278,6 +278,7 @@ export const appRouter = router({
         stringProvidedBy: z.enum(["academy","customer"]).optional(),
         merchandiseSize: z.string().optional(),
         quantity: z.number().optional(),
+        paymentMethod: z.enum(["card", "cash", "check"]).default("card"),
       }))
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
@@ -326,7 +327,9 @@ export const appRouter = router({
           merchandiseSize: input.merchandiseSize,
           quantity: input.quantity || 1,
           notes: input.notes,
-          status: "pending",
+          paymentMethod: input.paymentMethod,
+          // Cash/check bookings are immediately confirmed (spot reserved); card bookings stay pending until payment
+          status: (input.paymentMethod === "cash" || input.paymentMethod === "check") ? "confirmed" : "pending",
         });
 
         // Increment participant count on the slot
@@ -363,18 +366,33 @@ export const appRouter = router({
           }
         }
 
+        const isCashOrCheck = input.paymentMethod === "cash" || input.paymentMethod === "check";
+        const paymentLabel = input.paymentMethod === "check" ? "check" : "cash";
+
         // Send email confirmation to the student
         if (isEmailConfigured() && ctx.user.email) {
-          sendBookingConfirmation({
-            toEmail: ctx.user.email,
-            toName: ctx.user.name || "there",
-            programLabel,
-            sessionDate: dateStr,
-            sessionTime: timeStr,
-            bookingId: newBookingId,
-          }).catch(() => {}); // non-blocking
+          if (isCashOrCheck) {
+            // Cash/check: spot is reserved — send the "reserved" email with payment-at-lesson note
+            sendBookingReservedCash({
+              toEmail: ctx.user.email,
+              toName: ctx.user.name || "there",
+              programLabel,
+              sessionDate: dateStr,
+              sessionTime: timeStr,
+              bookingId: newBookingId,
+              paymentMethod: input.paymentMethod as "cash" | "check",
+            }).catch(() => {});
+          } else {
+            sendBookingConfirmation({
+              toEmail: ctx.user.email,
+              toName: ctx.user.name || "there",
+              programLabel,
+              sessionDate: dateStr,
+              sessionTime: timeStr,
+              bookingId: newBookingId,
+            }).catch(() => {}); // non-blocking
+          }
         }
-
 
         // Send SMS confirmation to the student
         if (isTwilioConfigured() && ctx.user.phone) {
@@ -382,14 +400,16 @@ export const appRouter = router({
             ? new Date(input.sessionDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
             : "";
           const smsTimePart = timeStr ? ` at ${timeStr}` : "";
-          const msg = `Hi ${ctx.user.name || "there"}! ✅ Booking received for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""}${smsTimePart}. Mario will confirm your spot shortly. Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`;
+          const msg = isCashOrCheck
+            ? `Hi ${ctx.user.name || "there"}! ✅ Your spot for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""}${smsTimePart} is RESERVED. Please bring ${paymentLabel} to the lesson. Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`
+            : `Hi ${ctx.user.name || "there"}! ✅ Booking received for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""}${smsTimePart}. Mario will confirm your spot shortly. Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`;
           await sendSms(ctx.user.phone, msg).catch(() => {}); // non-blocking
         }
 
         // Check if this is the user's first booking and reward the referrer if applicable
         maybeRewardReferrer(ctx.user.id).catch(() => {});
 
-        return { success: true };
+        return { success: true, paymentMethod: input.paymentMethod, bookingId: newBookingId };
       }),
 
     // Admin: list all bookings

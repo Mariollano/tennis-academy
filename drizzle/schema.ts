@@ -112,6 +112,7 @@ export const bookings = mysqlTable("bookings", {
   notes: text("notes"),
   coachNotes: text("coachNotes"), // Admin-only coaching notes per booking
   totalAmountCents: int("totalAmountCents").notNull(),
+  paymentMethod: mysqlEnum("paymentMethod", ["card", "cash", "check"]).default("card"),
   paidAt: timestamp("paidAt"),
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

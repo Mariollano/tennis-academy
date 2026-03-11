@@ -127,6 +127,13 @@
       "when": 1773241821123,
       "tag": "0017_conscious_jazinda",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1773243768581,
+      "tag": "0018_cynical_elektra",
+      "breakpoints": true
     }
   ]
 }
