@@ -29,6 +29,8 @@ import GiftCard from "./pages/GiftCard";
 import AdminNewsletter from "./pages/AdminNewsletter";
 import VoiceBooking from "./components/VoiceBooking";
 import Announcements from "./pages/Announcements";
+import NewsletterArchive from "./pages/NewsletterArchive";
+import NewsletterView from "./pages/NewsletterView";
 
 // Scroll to top on every route change
 function ScrollToTop() {
@@ -74,6 +76,8 @@ function Router() {
           <Route path="/gift-card/success" component={GiftCard} />
           <Route path="/admin/newsletter" component={AdminNewsletter} />
           <Route path="/announcements" component={Announcements} />
+          <Route path="/newsletter" component={NewsletterArchive} />
+          <Route path="/newsletter/:slug" component={NewsletterView} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />

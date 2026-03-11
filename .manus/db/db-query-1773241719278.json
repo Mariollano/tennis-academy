@@ -1,0 +1,9 @@
+{
+  "query": "SELECT id, slug, subject, status, publishedAt, LENGTH(htmlContent) as htmlLen FROM newsletters;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, slug, subject, status, publishedAt, LENGTH(htmlContent) as htmlLen FROM newsletters;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 118
+}

@@ -8,9 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { Link } from "wouter";
 import {
   Mail, Users, Send, Sparkles, RefreshCw, Trash2,
-  CheckCircle, Clock, AlertCircle, TrendingUp, Eye, Save, ArrowRight
+  CheckCircle, Clock, AlertCircle, TrendingUp, Eye, Save, ArrowRight,
+  Globe, ExternalLink, Upload
 } from "lucide-react";
 
 export default function AdminNewsletter() {
@@ -206,6 +208,15 @@ export default function AdminNewsletter() {
 
   const sentNewsletters = newsletters.filter((n: any) => n.status === "sent");
   const draftNewsletters = newsletters.filter((n: any) => n.status === "draft");
+  const publishedNewsletters = newsletters.filter((n: any) => n.status === "published");
+
+  const setPublishedMutation = trpc.newsletter.setPublished.useMutation({
+    onSuccess: (_, vars) => {
+      toast.success(vars.published ? "✅ Newsletter published! Share the link with students." : "Newsletter unpublished.");
+      refetchList();
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
   const isSaving = createMutation.isPending || updateMutation.isPending;
   const isSending = sendMutation.isPending;
   const isGenerating = aiGenerateMutation.isPending;
@@ -244,10 +255,14 @@ export default function AdminNewsletter() {
               <Send className="h-4 w-4" />
               Compose
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              History ({newsletters.length})
-            </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            History ({newsletters.length})
+          </TabsTrigger>
+          <TabsTrigger value="published" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Published ({publishedNewsletters.length})
+          </TabsTrigger>
           </TabsList>
 
           {/* ── Compose Tab ─────────────────────────────────────────────────── */}
@@ -523,6 +538,115 @@ export default function AdminNewsletter() {
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          {/* ── Published Tab ────────────────────────────────────────────────────────────────── */}
+          <TabsContent value="published">
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl p-5">
+              <div className="flex items-start gap-3">
+                <Globe className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+                <div>
+                  <h3 className="font-bold text-blue-900">Publish Newsletters to the Web</h3>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Published newsletters get a shareable URL like{" "}
+                    <code className="bg-blue-100 px-1 rounded text-xs">tennispromario.com/newsletter/spring-2026</code>.
+                    You can text this link to students, post it on social media, or add it to your WordPress site.
+                  </p>
+                  <Link href="/newsletter">
+                    <Button variant="outline" size="sm" className="mt-3 border-blue-300 text-blue-700 hover:bg-blue-100 gap-2">
+                      <ExternalLink className="h-4 w-4" />
+                      View Public Archive
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Publish from existing drafts */}
+            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+              <div className="p-5 border-b border-border">
+                <h3 className="font-bold flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  All Newsletters — Publish to Web
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">Toggle "Published" to make a newsletter publicly accessible via its URL.</p>
+              </div>
+              {newsletters.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Globe className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                  <p>No newsletters yet. Compose one first.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {newsletters.map((item: any) => (
+                    <div key={item.id} className="px-5 py-4">
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-sm truncate">{item.subject}</div>
+                          {item.season && (
+                            <div className="text-xs text-[#ccff00] font-bold">{item.season}</div>
+                          )}
+                          {item.slug && (
+                            <div className="text-xs text-muted-foreground font-mono mt-0.5 truncate">
+                              /newsletter/{item.slug}
+                            </div>
+                          )}
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {item.status === "published"
+                              ? `Published ${new Date(item.publishedAt || item.createdAt).toLocaleDateString()}`
+                              : item.status === "sent"
+                              ? `Sent ${new Date(item.sentAt).toLocaleDateString()} · ${item.recipientCount ?? 0} recipients`
+                              : `Draft · ${new Date(item.createdAt).toLocaleDateString()}`}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                          <Badge
+                            variant={item.status === "published" ? "default" : "secondary"}
+                            className={item.status === "published" ? "bg-green-600" : ""}
+                          >
+                            {item.status === "published" ? (
+                              <><Globe className="h-3 w-3 mr-1" />Published</>
+                            ) : item.status === "sent" ? (
+                              <><CheckCircle className="h-3 w-3 mr-1" />Sent</>
+                            ) : (
+                              <><Clock className="h-3 w-3 mr-1" />Draft</>
+                            )}
+                          </Badge>
+                          {item.slug && item.status === "published" && (
+                            <Link href={`/newsletter/${item.slug}`}>
+                              <Button variant="outline" size="sm" className="text-xs h-7 px-2 gap-1">
+                                <ExternalLink className="h-3 w-3" />
+                                View
+                              </Button>
+                            </Link>
+                          )}
+                          {item.status !== "published" ? (
+                            <Button
+                              size="sm"
+                              className="text-xs h-7 px-3 bg-green-600 hover:bg-green-700 text-white gap-1"
+                              onClick={() => setPublishedMutation.mutate({ id: item.id, published: true })}
+                              disabled={setPublishedMutation.isPending}
+                            >
+                              <Globe className="h-3 w-3" />
+                              Publish
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs h-7 px-2 text-muted-foreground"
+                              onClick={() => setPublishedMutation.mutate({ id: item.id, published: false })}
+                              disabled={setPublishedMutation.isPending}
+                            >
+                              Unpublish
+                            </Button>
                           )}
                         </div>
                       </div>

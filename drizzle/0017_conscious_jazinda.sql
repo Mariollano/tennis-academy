@@ -1,0 +1,1 @@
+ALTER TABLE `newsletters` MODIFY COLUMN `htmlContent` mediumtext;

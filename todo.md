@@ -404,3 +404,12 @@
 
 ## Session 26 — OAuth Redirect Fix
 - [x] Fix OAuth: after login on manus.space, redirect user back to tennispromario.com correctly (use x-forwarded-host to detect domain, always cross-domain redirect unless explicitly on tennispromario.com)
+
+## Session 27 — Newsletter Archive
+- [x] Add newsletter database table with slug, htmlContent (mediumtext), season, publishedAt fields
+- [x] Add public listPublished and getBySlug tRPC procedures
+- [x] Build public Newsletter Archive page (/newsletter)
+- [x] Build individual Newsletter View page (/newsletter/:slug) with shareable URL
+- [x] Add Newsletter link to Navbar
+- [x] Seed Spring 2026 newsletter from uploaded HTML file
+- [x] Add newsletter management (publish/unpublish, view, copy link) to Admin Newsletter page

@@ -5,6 +5,7 @@ import {
   mysqlEnum,
   mysqlTable,
   text,
+  mediumtext,
   timestamp,
   varchar,
   date,
@@ -260,21 +261,27 @@ export type PromoCode = typeof promoCodes.$inferSelect;
 export type InsertPromoCode = typeof promoCodes.$inferInsert;
 
 // ─── Newsletter ───────────────────────────────────────────────────────────────
-
+// Newsletters can be published as HTML pages with shareable URLs.
+// Admin uploads HTML content; each newsletter gets a unique slug for public access.
 export const newsletters = mysqlTable("newsletters", {
   id: int("id").autoincrement().primaryKey(),
-  subject: varchar("subject", { length: 500 }).notNull(),
+  slug: varchar("slug", { length: 200 }).notNull().unique(), // URL-friendly identifier e.g. "spring-2026"
+  subject: varchar("subject", { length: 500 }).notNull(),   // display title
+  season: varchar("season", { length: 100 }),               // e.g. "Spring 2026"
+  htmlContent: mediumtext("htmlContent"),                   // full HTML of the newsletter (up to 16MB)
+  // Legacy text-based fields (kept for backward compat)
   headline: varchar("headline", { length: 500 }),
   body: text("body"),
   tennisTip: text("tennisTip"),
   mentalTip: text("mentalTip"),
   winnerSpotlight: text("winnerSpotlight"),
   includeSchedule: boolean("includeSchedule").notNull().default(false),
-  status: mysqlEnum("status", ["draft", "sent"]).notNull().default("draft"),
+  status: mysqlEnum("status", ["draft", "published", "sent"]).notNull().default("draft"),
+  publishedAt: timestamp("publishedAt"),
   sentAt: timestamp("sentAt"),
   recipientCount: int("recipientCount").default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type Newsletter = typeof newsletters.$inferSelect;
 export type InsertNewsletter = typeof newsletters.$inferInsert;

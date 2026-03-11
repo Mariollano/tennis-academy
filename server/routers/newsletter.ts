@@ -139,6 +139,82 @@ function buildNewsletterHtml(nl: {
 }
 
 export const newsletterRouter = router({
+  // ── Public: list published newsletters (archive page) ────────────────────────────────────────
+  listPublished: publicProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return [];
+    return db
+      .select({
+        id: newsletters.id,
+        slug: newsletters.slug,
+        subject: newsletters.subject,
+        season: newsletters.season,
+        status: newsletters.status,
+        publishedAt: newsletters.publishedAt,
+        createdAt: newsletters.createdAt,
+      })
+      .from(newsletters)
+      .where(eq(newsletters.status, "published"))
+      .orderBy(desc(newsletters.publishedAt));
+  }),
+
+  // ── Public: get newsletter by slug (shareable URL) ─────────────────────────────────────────
+  getBySlug: publicProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      const rows = await db
+        .select()
+        .from(newsletters)
+        .where(eq(newsletters.slug, input.slug))
+        .limit(1);
+      if (!rows.length) throw new TRPCError({ code: "NOT_FOUND", message: "Newsletter not found" });
+      return rows[0];
+    }),
+
+  // ── Admin: create newsletter with HTML content (for uploaded HTML newsletters) ─────────────────────────────────────────
+  createWithHtml: adminProcedure
+    .input(z.object({
+      slug: z.string().min(1).max(200),
+      subject: z.string().min(1).max(500),
+      season: z.string().optional(),
+      htmlContent: z.string().optional(),
+      status: z.enum(["draft", "published"]).default("draft"),
+    }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      const now = new Date();
+      await db.insert(newsletters).values({
+        slug: input.slug,
+        subject: input.subject,
+        season: input.season || null,
+        htmlContent: input.htmlContent || null,
+        status: input.status,
+        publishedAt: input.status === "published" ? now : null,
+        includeSchedule: false,
+        createdAt: now,
+        updatedAt: now,
+      });
+      const rows = await db.select().from(newsletters).where(eq(newsletters.slug, input.slug)).limit(1);
+      return rows[0];
+    }),
+
+  // ── Admin: publish/unpublish a newsletter ─────────────────────────────────────────
+  setPublished: adminProcedure
+    .input(z.object({ id: z.number(), published: z.boolean() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      await db.update(newsletters).set({
+        status: input.published ? "published" : "draft",
+        publishedAt: input.published ? new Date() : null,
+        updatedAt: new Date(),
+      }).where(eq(newsletters.id, input.id));
+      return { ok: true };
+    }),
+
   // ── Get subscriber count (admin) ─────────────────────────────────────────
   getSubscriberCount: adminProcedure.query(async () => {
     const db = await getDb();
@@ -180,7 +256,15 @@ export const newsletterRouter = router({
     .mutation(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      // Generate a slug from subject + timestamp
+      const slugBase = input.subject
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 80);
+      const slug = `${slugBase}-${Date.now()}`;
       const result = await db.insert(newsletters).values({
+        slug,
         subject: input.subject,
         headline: input.headline || null,
         body: input.body || null,
@@ -190,7 +274,7 @@ export const newsletterRouter = router({
         includeSchedule: input.includeSchedule,
         status: "draft",
       });
-      return { id: Number((result as any).insertId) };
+      return { id: Number((result as any).insertId), slug };
     }),
 
   // ── Update newsletter draft (admin) ─────────────────────────────────────
