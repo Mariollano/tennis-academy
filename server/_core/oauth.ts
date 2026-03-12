@@ -54,8 +54,10 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      // returnPath comes from ?returnPath= query param embedded in the redirectUri
+      // customDomainReturn is the full URL (custom domain + path) to redirect to after login.
+      // returnPath is the legacy fallback for same-domain callbacks.
       const refCode = getQueryParam(req, "ref");
+      const customDomainReturn = getQueryParam(req, "customDomainReturn");
       const returnPath = getQueryParam(req, "returnPath");
 
       await db.upsertUser({
@@ -119,8 +121,34 @@ export function registerOAuthRoutes(app: Express) {
         return res.redirect(302, redirectPath);
       }
 
-      // Callback fired on manus.space — redirect to custom domain's set-session endpoint
-      // to set the cookie on the correct domain (tennispromario.com).
+      // Callback fired on manus.space.
+      // If customDomainReturn is set, redirect there directly (full URL to custom domain).
+      // The cookie will be set on manus.space — the custom domain uses its own session via set-session.
+      if (customDomainReturn) {
+        // Validate it points to our custom domain for security
+        const isAllowedDomain =
+          customDomainReturn.startsWith("https://www.tennispromario.com") ||
+          customDomainReturn.startsWith("https://tennispromario.com");
+
+        if (isAllowedDomain) {
+          const setSessionUrl = new URL(`${CUSTOM_DOMAIN}/api/oauth/set-session`);
+          setSessionUrl.searchParams.set("token", sessionToken);
+          // Extract just the path+query from customDomainReturn for the returnPath
+          try {
+            const returnUrl = new URL(customDomainReturn);
+            const pathAndQuery = returnUrl.pathname + returnUrl.search;
+            if (pathAndQuery && pathAndQuery !== "/") {
+              setSessionUrl.searchParams.set("returnPath", pathAndQuery);
+            }
+          } catch {
+            // ignore malformed URL
+          }
+          console.log(`[OAuth] Login success (manus.space) for openId: ${userInfo.openId}, redirecting to custom domain: ${setSessionUrl.toString()}`);
+          return res.redirect(302, setSessionUrl.toString());
+        }
+      }
+
+      // Fallback: redirect to custom domain home via set-session
       const setSessionUrl = new URL(`${CUSTOM_DOMAIN}/api/oauth/set-session`);
       setSessionUrl.searchParams.set("token", sessionToken);
       if (redirectPath !== "/") {
