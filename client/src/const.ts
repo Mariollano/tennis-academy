@@ -2,7 +2,7 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
 // Using the custom domain as the canonical OAuth origin so the callback
 // fires directly on tennispromario.com instead of the old manus.space URL.
-const CANONICAL_OAUTH_ORIGIN = "https://tennispromario.com";
+const CANONICAL_OAUTH_ORIGIN = "https://www.tennispromario.com";
 
 // Generate login URL at runtime so redirect URI reflects the canonical origin.
 // IMPORTANT: state must be btoa(redirectUri) — the OAuth SDK decodes it with atob()
