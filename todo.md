@@ -414,7 +414,16 @@
 - [x] Seed Spring 2026 newsletter from uploaded HTML file
 - [x] Add newsletter management (publish/unpublish, view, copy link) to Admin Newsletter page
 - [x] Add "Pay Cash / Pay by Check at lesson time" payment option to booking flow
+<<<<<<< Updated upstream
 - [x] Fix OAuth login URL to use canonical domain tennispromario.com (fix1-const.ts)
 - [x] Fix Stripe checkout to pass actual bookingId from server (fix2-BookingPage.tsx)
 - [x] Fix Stripe checkout redirect to return to booking page confirmation screen (fix3-stripeRouter.ts)
 - [x] Update CANONICAL_OAUTH_ORIGIN to https://www.tennispromario.com (with www)
+=======
+- [x] Fix #5a: Wrong private lesson price in email template ($75 → $120/hr)
+- [x] Fix #5b: Wrong mental coaching price in email template ($75/hr → Contact for pricing)
+- [x] Fix #5c: AI chat FAQ missing private lesson price
+- [x] Fix #6: Booking ID race condition — use insertId instead of re-querying
+- [x] Fix #7: getUnavailableHours date comparison fails silently in MySQL
+- [x] Fix #8: Admin sendPaymentLink redirects to /profile with no confirmation
+>>>>>>> Stashed changes

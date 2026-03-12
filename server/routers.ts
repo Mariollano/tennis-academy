@@ -44,14 +44,14 @@ function buildProgramScheduleHtml(): string {
         </tr>
       </thead>
       <tbody>
-        <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Private Lesson (1-on-1)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">By appointment</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$75 / hr</td></tr>
+        <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Private Lesson (1-on-1)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">By appointment</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$120 / hr</td></tr>
         <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">105 Game Adult Clinic</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">See schedule</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$35 / 1.5 hr</td></tr>
         <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Junior Program – Daily</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$80 / day</td></tr>
         <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">Junior Program – Weekly</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$350 / week</td></tr>
         <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Summer Camp – Daily</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 9 AM–2 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$90 / day</td></tr>
         <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">Summer Camp – Weekly</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 9 AM–2 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$420 / week</td></tr>
         <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">After Camp</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">2–5 PM (add-on)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">+$20/day or $50 afternoon</td></tr>
-        <tr><td style="padding:8px 12px;">Mental Coaching</td><td style="padding:8px 12px;">By appointment</td><td style="padding:8px 12px;text-align:right;">$75 / hr</td></tr>
+        <tr><td style="padding:8px 12px;">Mental Coaching</td><td style="padding:8px 12px;">By appointment</td><td style="padding:8px 12px;text-align:right;">Contact for pricing</td></tr>
       </tbody>
     </table>`;
 }
@@ -312,7 +312,8 @@ export const appRouter = router({
           programId = Number((result as any).insertId);
         }
 
-        await db.insert(bookings).values({
+        // ✅ FIX #6: capture insertId directly to avoid race condition
+        const bookingInsertResult = await db.insert(bookings).values({
           userId: ctx.user.id,
           programId,
           scheduleSlotId: input.scheduleSlotId || null,
@@ -331,6 +332,7 @@ export const appRouter = router({
           // Cash/check bookings are immediately confirmed (spot reserved); card bookings stay pending until payment
           status: (input.paymentMethod === "cash" || input.paymentMethod === "check") ? "confirmed" : "pending",
         });
+        const newBookingId = Number((bookingInsertResult as any).insertId) || 0;
 
         // Increment participant count on the slot
         if (input.scheduleSlotId) {
@@ -338,14 +340,6 @@ export const appRouter = router({
             .set({ currentParticipants: sql`${scheduleSlots.currentParticipants} + 1`, updatedAt: new Date() })
             .where(eq(scheduleSlots.id, input.scheduleSlotId));
         }
-
-        // Fetch the new booking ID for the confirmation
-        const newBookingRows = await db.select({ id: bookings.id })
-          .from(bookings)
-          .where(eq(bookings.userId, ctx.user.id))
-          .orderBy(desc(bookings.createdAt))
-          .limit(1);
-        const newBookingId = newBookingRows[0]?.id ?? 0;
 
         const programLabel = input.programType.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
         const dateStr = input.sessionDate
@@ -702,7 +696,7 @@ export const appRouter = router({
             customer_email: user?.email || "",
             customer_name: user?.name || "",
           },
-          success_url: `${input.origin}/profile?payment=success`,
+          success_url: `${input.origin}/profile?payment=success&booking=${booking.id}`,
           cancel_url: `${input.origin}/profile?payment=cancelled`,
         });
         return { url: session.url };
@@ -1233,16 +1227,14 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) return { bookedHours: [], blockedHours: [], allDayBlocked: false };
 
-        const dateStart = new Date(input.date + 'T00:00:00');
-        const dateEnd = new Date(input.date + 'T23:59:59');
-
+        // ✅ FIX #7: use DATE() SQL comparison to reliably match date column in MySQL
         // Get confirmed/pending private lesson bookings for this date
         const existingBookings = await db.select({
           sessionStartTime: bookings.sessionStartTime,
         })
           .from(bookings)
           .where(and(
-            eq(bookings.sessionDate, dateStart as any),
+            sql`DATE(${bookings.sessionDate}) = ${input.date}`,
             sql`${bookings.status} IN ('pending', 'confirmed')`,
           ));
 
@@ -1257,7 +1249,7 @@ export const appRouter = router({
         // Get admin-blocked times for this date that affect private lessons
         const blocks = await db.select().from(blockedTimes)
           .where(and(
-            eq(blockedTimes.blockedDate, dateStart as any),
+            sql`DATE(${blockedTimes.blockedDate}) = ${input.date}`,
             eq(blockedTimes.affectsPrivateLessons, true),
           ));
 
@@ -1641,7 +1633,7 @@ export const appRouter = router({
         const systemPrompt = input.mode === "mental_coaching"
           ? `You are Mario Llano, head coach and mental performance specialist at RI Tennis Academy in Rhode Island. You have deep expertise in the psychological aspects of tennis — fear elimination, confidence building, focus under pressure, pre-match routines, and mental resilience. You speak with warmth, authority, and genuine passion for helping players unlock their mental potential. Your signature philosophy is "Delete Fear" — helping players remove self-doubt and play freely. Provide thoughtful, practical mental coaching advice. Keep responses concise but impactful.`
           : `You are the AI assistant for RI Tennis Academy, coached by Mario Llano in Rhode Island. You help answer questions about:
-- Programs: Private lessons, 105 Game adult clinic ($35/1.5hr), Junior programs (daily $80, weekly $350, 3:30-6:30 PM), Summer camp (daily $90, weekly $420, 9AM-2PM, after camp +$20 or $50 afternoon-only), Mental coaching
+- Programs: Private lessons ($120/hr, 1-on-1 with Coach Mario), 105 Game adult clinic ($35/1.5hr), Junior programs (daily $80, weekly $350, 3:30-6:30 PM), Summer camp (daily $90, weekly $420, 9AM-2PM, after camp +$20 or $50 afternoon-only), Mental coaching
 - Services: Tournament attendance ($50/hr + $25/hr travel, shareable), Racquet stringing ($35 Mario's string / $25 customer's string), Merchandise (sweatshirts $50, t-shirts $25)
 - Booking: Students can book online through the app and pay securely
 - SMS: Students can opt in to receive daily updates and motivational messages from Mario
