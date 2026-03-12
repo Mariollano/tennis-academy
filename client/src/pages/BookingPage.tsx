@@ -622,7 +622,7 @@ export default function BookingPage() {
       // After booking is created, immediately launch Stripe checkout
       if (variables.totalAmountCents > 0) {
         createCheckoutMutation.mutate({
-          bookingId: 0, // will be updated by webhook
+          bookingId: data.bookingId,  // ✅ FIX: use the actual booking ID so the webhook can confirm it
           programName: config.title,
           amountCents: variables.totalAmountCents,
           origin: window.location.origin,

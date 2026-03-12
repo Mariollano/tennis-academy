@@ -415,3 +415,4 @@
 - [x] Add newsletter management (publish/unpublish, view, copy link) to Admin Newsletter page
 - [x] Add "Pay Cash / Pay by Check at lesson time" payment option to booking flow
 - [x] Fix OAuth login URL to use canonical domain tennispromario.com (fix1-const.ts)
+- [x] Fix Stripe checkout to pass actual bookingId from server (fix2-BookingPage.tsx)
