@@ -1,19 +1,20 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
-// Generate login URL at runtime using the current window origin.
-// This ensures the OAuth callback URL matches the registered manus.space URL
-// (https://tennispro-kzzfscru.manus.space/api/oauth/callback) which is the
-// only redirect URI registered in the Manus OAuth system.
-// Custom domain users (www.tennispromario.com) are redirected back to their
-// origin AFTER the OAuth handshake completes on manus.space.
+// The manus.space URL is the only registered OAuth redirect URI.
+// All sign-in flows must use this as the callback origin regardless of which
+// domain the user is currently visiting. After the OAuth handshake completes,
+// the server redirects to tennispromario.com/api/oauth/set-session to set the
+// session cookie on the custom domain.
+const CANONICAL_OAUTH_ORIGIN = "https://tennispro-kzzfscru.manus.space";
+
 export const getLoginUrl = (returnPath?: string) => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
   const appId = import.meta.env.VITE_APP_ID;
 
-  // Use window.location.origin so the callback URL is always the deployed
-  // manus.space origin (the registered OAuth redirect URI).
-  const origin = window.location.origin;
-  const callbackUrl = new URL(`${origin}/api/oauth/callback`);
+  // Always use the registered manus.space callback URL.
+  // Embed returnPath as a query param so the server can redirect the user
+  // back to the correct page after login.
+  const callbackUrl = new URL(`${CANONICAL_OAUTH_ORIGIN}/api/oauth/callback`);
   if (returnPath && returnPath.startsWith("/")) {
     callbackUrl.searchParams.set("returnPath", returnPath);
   }

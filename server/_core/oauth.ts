@@ -9,7 +9,7 @@ import { users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 // The custom domain where users should always end up after login
-const CUSTOM_DOMAIN = "https://tennispromario.com";
+const CUSTOM_DOMAIN = "https://www.tennispromario.com";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];

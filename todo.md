@@ -427,3 +427,4 @@
 - [x] Fix #7: getUnavailableHours date comparison fails silently in MySQL
 - [x] Fix #8: Admin sendPaymentLink redirects to /profile with no confirmation
 - [x] Revert OAuth const.ts to use manus.space callback URL (www.tennispromario.com not registered)
+- [x] Revert CANONICAL_OAUTH_ORIGIN to https://tennispro-kzzfscru.manus.space and verify cross-domain redirect
