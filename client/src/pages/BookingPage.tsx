@@ -626,6 +626,7 @@ export default function BookingPage() {
           programName: config.title,
           amountCents: variables.totalAmountCents,
           origin: window.location.origin,
+          successPath: `/book/${programType}`, // ✅ FIX: redirect back to booking page so confirmation screen shows
         });
       } else {
         // Free / contact-for-pricing: just show confirmation

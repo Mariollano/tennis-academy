@@ -15,6 +15,7 @@ export const stripeRouter = router({
       programName: z.string(),
       amountCents: z.number().min(50),
       origin: z.string(),
+      successPath: z.string().optional(), // ✅ FIX: allow caller to specify where Stripe redirects on success
     }))
     .mutation(async ({ ctx, input }) => {
       const session = await stripe.checkout.sessions.create({
@@ -42,8 +43,10 @@ export const stripeRouter = router({
           customer_email: ctx.user.email || "",
           customer_name: ctx.user.name || "",
         },
-        success_url: `${input.origin}/profile?payment=success`,
-        cancel_url: `${input.origin}/profile?payment=cancelled`,
+        // ✅ FIX: redirect back to the booking page so the confirmation screen shows,
+        // falling back to /profile if no successPath is provided
+        success_url: `${input.origin}${input.successPath || "/profile"}?payment=success`,
+        cancel_url: `${input.origin}${input.successPath || "/profile"}?payment=cancelled`,
       });
 
       return { url: session.url };
