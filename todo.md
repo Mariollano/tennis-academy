@@ -431,3 +431,4 @@
 - [x] OAuth workaround: always route Sign In through manus.space, redirect back to www.tennispromario.com
 - [x] Fix #9: Move set-session to /oauth/set-session (outside /api/) to bypass CDN interception
 - [x] Fix #10: Guest booking — allow booking without login (name + email only)
+- [x] Fix guest booking email: switch from Resend/getroger.biz to Gmail for better deliverability

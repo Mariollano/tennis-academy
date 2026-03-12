@@ -41,11 +41,22 @@ export async function sendEmail(opts: {
   html: string;
   text: string;
 }): Promise<void> {
-  if (isResendConfigured()) {
+  // Prefer Gmail (ritennismario@gmail.com) over Resend because the Resend account
+  // is verified on getroger.biz, not tennispromario.com — emails from getroger.biz
+  // are more likely to land in spam for external recipients.
+  // Switch back to Resend once tennispromario.com is verified in the Resend dashboard.
+  if (gmailUser && gmailPass) {
+    const transporter = getGmailTransporter();
+    await transporter.sendMail({
+      from: `"RI Tennis Academy" <${gmailUser}>`,
+      to: `"${opts.toName}" <${opts.to}>`,
+      subject: opts.subject,
+      text: opts.text,
+      html: opts.html,
+    });
+    console.log(`[Email/Gmail] Sent "${opts.subject}" to ${opts.to}`);
+  } else if (isResendConfigured()) {
     const resend = new Resend(resendApiKey!);
-    // tennispromario.com not yet verified in Resend (free plan = 1 domain).
-    // Using verified getroger.biz domain. Switch to noreply@tennispromario.com
-    // once tennispromario.com is added to Resend (requires plan upgrade or removing getroger.biz).
     const fromAddress = "RI Tennis Academy <noreply@getroger.biz>";
     await resend.emails.send({
       from: fromAddress,
@@ -56,15 +67,7 @@ export async function sendEmail(opts: {
     });
     console.log(`[Email/Resend] Sent "${opts.subject}" to ${opts.to}`);
   } else {
-    const transporter = getGmailTransporter();
-    await transporter.sendMail({
-      from: `"RI Tennis Academy" <${gmailUser}>`,
-      to: `"${opts.toName}" <${opts.to}>`,
-      subject: opts.subject,
-      text: opts.text,
-      html: opts.html,
-    });
-    console.log(`[Email/Gmail] Sent "${opts.subject}" to ${opts.to}`);
+    console.warn(`[Email] No email provider configured — skipping send to ${opts.to}`);
   }
 }
 
