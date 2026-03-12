@@ -4,15 +4,10 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 // domain where /api/* routes are correctly proxied to the Express server.
 // Custom domain (www.tennispromario.com) has /api/* intercepted by the CDN.
 //
-// Workaround: always use manus.space as the OAuth callback origin.
-// After the handshake completes on manus.space, the server sets the session
-// cookie and redirects the user back to www.tennispromario.com via
-// /api/oauth/set-session on the manus.space domain.
+// FIX #9: After the handshake completes on manus.space, the server redirects
+// to www.tennispromario.com/oauth/set-session (outside /api/) which Express
+// handles directly without CDN interception.
 const CANONICAL_OAUTH_ORIGIN = "https://tennispro-kzzfscru.manus.space";
-
-// The custom domain where users should land after login.
-// Passed as a query param so the manus.space callback can redirect there.
-const CUSTOM_DOMAIN = "https://www.tennispromario.com";
 
 export const getLoginUrl = (returnPath?: string) => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
@@ -21,12 +16,10 @@ export const getLoginUrl = (returnPath?: string) => {
   // Always use the registered manus.space callback URL.
   const callbackUrl = new URL(`${CANONICAL_OAUTH_ORIGIN}/api/oauth/callback`);
 
-  // Embed the custom domain + returnPath so the server knows where to send
-  // the user after the OAuth handshake completes.
-  const finalReturnUrl = returnPath && returnPath.startsWith("/")
-    ? `${CUSTOM_DOMAIN}${returnPath}`
-    : CUSTOM_DOMAIN;
-  callbackUrl.searchParams.set("customDomainReturn", finalReturnUrl);
+  // Pass returnPath so the server redirects the user back to the right page.
+  if (returnPath && returnPath.startsWith("/")) {
+    callbackUrl.searchParams.set("returnPath", returnPath);
+  }
 
   const redirectUri = callbackUrl.toString();
   const state = btoa(redirectUri);

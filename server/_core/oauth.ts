@@ -17,8 +17,10 @@ function getQueryParam(req: Request, key: string): string | undefined {
 }
 
 export function registerOAuthRoutes(app: Express) {
-  // Route to receive session token from cross-domain OAuth redirect and set cookie
-  app.get("/api/oauth/set-session", (req: Request, res: Response) => {
+  // ✅ FIX #9: Route moved from /api/oauth/set-session to /oauth/set-session
+  // The /api/* path was being intercepted by the static file server on the custom domain,
+  // causing a 404 flash. Moving it outside /api/ ensures Express handles it directly.
+  app.get("/oauth/set-session", (req: Request, res: Response) => {
     const token = getQueryParam(req, "token");
     const returnPath = getQueryParam(req, "returnPath");
 
@@ -34,18 +36,22 @@ export function registerOAuthRoutes(app: Express) {
     res.redirect(302, redirectPath);
   });
 
+  // Keep the old route as a fallback redirect in case any cached links still use it
+  app.get("/api/oauth/set-session", (req: Request, res: Response) => {
+    const qs = new URLSearchParams(req.query as Record<string, string>).toString();
+    return res.redirect(302, `/oauth/set-session${qs ? "?" + qs : ""}`);
+  });
+
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
 
     if (!code || !state) {
       console.error("[OAuth] Callback missing code or state. code:", !!code, "state:", !!state, "query:", req.query);
-      // Redirect to custom domain home with error message
       return res.redirect(302, `${CUSTOM_DOMAIN}/?login_error=missing_code`);
     }
 
     try {
-      // Exchange code for token — SDK decodes state as btoa(redirectUri)
       const tokenResponse = await sdk.exchangeCodeForToken(code, state);
       const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
 
@@ -54,10 +60,7 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      // customDomainReturn is the full URL (custom domain + path) to redirect to after login.
-      // returnPath is the legacy fallback for same-domain callbacks.
       const refCode = getQueryParam(req, "ref");
-      const customDomainReturn = getQueryParam(req, "customDomainReturn");
       const returnPath = getQueryParam(req, "returnPath");
 
       await db.upsertUser({
@@ -68,7 +71,6 @@ export function registerOAuthRoutes(app: Express) {
         lastSignedIn: new Date(),
       });
 
-      // Ensure the user has a personal referral code; also store referredBy on first signup
       try {
         const dbConn = await getDb();
         if (dbConn) {
@@ -79,9 +81,7 @@ export function registerOAuthRoutes(app: Express) {
             .limit(1);
 
           if (newUser) {
-            // Generate their own referral code if they don't have one yet
             await ensureReferralCode(newUser.id, userInfo.name || null);
-            // Store referredBy only on first signup (not on subsequent logins)
             if (refCode && refCode.length > 3 && !newUser.referredBy) {
               await dbConn.update(users).set({ referredBy: refCode }).where(eq(users.id, newUser.id));
               console.log(`[Referral] User #${newUser.id} signed up via referral code: ${refCode}`);
@@ -89,7 +89,6 @@ export function registerOAuthRoutes(app: Express) {
           }
         }
       } catch (refErr) {
-        // Non-fatal — don't block login if referral code generation fails
         console.warn("[Referral] Failed to ensure referral code:", refErr);
       }
 
@@ -98,9 +97,6 @@ export function registerOAuthRoutes(app: Express) {
         expiresInMs: ONE_YEAR_MS,
       });
 
-      // Determine the current request host to decide whether we need a cross-domain redirect.
-      // The callback may fire on manus.space (our canonical OAuth redirect URI) or on tennispromario.com.
-      // We check multiple headers since the Manus proxy may forward the original host differently.
       const requestHost =
         (req.headers["x-forwarded-host"] as string) ||
         (req.headers["x-original-host"] as string) ||
@@ -114,42 +110,14 @@ export function registerOAuthRoutes(app: Express) {
       const redirectPath = returnPath && returnPath.startsWith("/") ? returnPath : "/";
 
       if (isCustomDomain) {
-        // Already on the custom domain — set cookie directly and redirect
         const cookieOptions = getSessionCookieOptions(req);
         res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
         console.log(`[OAuth] Login success (custom domain) for openId: ${userInfo.openId}, redirecting to: ${redirectPath}`);
         return res.redirect(302, redirectPath);
       }
 
-      // Callback fired on manus.space.
-      // If customDomainReturn is set, redirect there directly (full URL to custom domain).
-      // The cookie will be set on manus.space — the custom domain uses its own session via set-session.
-      if (customDomainReturn) {
-        // Validate it points to our custom domain for security
-        const isAllowedDomain =
-          customDomainReturn.startsWith("https://www.tennispromario.com") ||
-          customDomainReturn.startsWith("https://tennispromario.com");
-
-        if (isAllowedDomain) {
-          const setSessionUrl = new URL(`${CUSTOM_DOMAIN}/api/oauth/set-session`);
-          setSessionUrl.searchParams.set("token", sessionToken);
-          // Extract just the path+query from customDomainReturn for the returnPath
-          try {
-            const returnUrl = new URL(customDomainReturn);
-            const pathAndQuery = returnUrl.pathname + returnUrl.search;
-            if (pathAndQuery && pathAndQuery !== "/") {
-              setSessionUrl.searchParams.set("returnPath", pathAndQuery);
-            }
-          } catch {
-            // ignore malformed URL
-          }
-          console.log(`[OAuth] Login success (manus.space) for openId: ${userInfo.openId}, redirecting to custom domain: ${setSessionUrl.toString()}`);
-          return res.redirect(302, setSessionUrl.toString());
-        }
-      }
-
-      // Fallback: redirect to custom domain home via set-session
-      const setSessionUrl = new URL(`${CUSTOM_DOMAIN}/api/oauth/set-session`);
+      // ✅ FIX #9: redirect to /oauth/set-session (outside /api/) to avoid static file interception
+      const setSessionUrl = new URL(`${CUSTOM_DOMAIN}/oauth/set-session`);
       setSessionUrl.searchParams.set("token", sessionToken);
       if (redirectPath !== "/") {
         setSessionUrl.searchParams.set("returnPath", redirectPath);
@@ -158,7 +126,6 @@ export function registerOAuthRoutes(app: Express) {
       return res.redirect(302, setSessionUrl.toString());
     } catch (error) {
       console.error("[OAuth] Callback failed", error);
-      // Redirect to custom domain home with error param
       return res.redirect(302, `${CUSTOM_DOMAIN}/?login_error=oauth_failed`);
     }
   });
