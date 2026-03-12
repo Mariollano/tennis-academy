@@ -573,6 +573,9 @@ export default function BookingPage() {
   }, [urlTime, urlDate]);
   const [juniorDays, setJuniorDays] = useState(1);
   const [juniorSelectedDates, setJuniorSelectedDates] = useState<string[]>([]);
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash" | "check">("card");
 
   // Fetch booked + blocked hours for the selected date (private lesson only)
@@ -669,8 +672,10 @@ export default function BookingPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      window.location.href = getLoginUrl();
-      return;
+      if (!guestName.trim() || !guestEmail.trim()) {
+        toast.error("Please enter your name and email to book.");
+        return;
+      }
     }
     // Require date for clinic and private lesson
     if ((programType === "clinic_105" || programType === "private_lesson") && !sessionDate) {
@@ -708,6 +713,12 @@ export default function BookingPage() {
           const endH = (h + 1) % 24;
           return `${String(endH).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
         })() : undefined;
+    const guestFields = !isAuthenticated ? {
+      guestName: guestName.trim(),
+      guestEmail: guestEmail.trim(),
+      guestPhone: guestPhone.trim() || undefined,
+    } : {};
+
     if (programType === "junior_daily" && juniorSelectedDates.length > 0) {
       // Create one booking per selected date; charge the full total on the first one
       juniorSelectedDates.forEach((date, idx) => {
@@ -718,6 +729,7 @@ export default function BookingPage() {
           notes: fullNotes,
           totalAmountCents: idx === 0 ? chargeAmount : 0,
           paymentMethod,
+          ...guestFields,
         });
       });
     } else {
@@ -732,6 +744,7 @@ export default function BookingPage() {
         notes: fullNotes,
         totalAmountCents: chargeAmount,
         paymentMethod,
+        ...guestFields,
       });
     }
 
@@ -1116,24 +1129,7 @@ export default function BookingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {!isAuthenticated ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                      <User className="w-8 h-8 text-primary" />
-                    </div>
-                    <h3 className="font-bold text-foreground text-xl mb-2">Sign In to Continue</h3>
-                    <p className="text-muted-foreground mb-6 max-w-xs mx-auto text-sm">Create a free account or sign in to book your session with Coach Mario.</p>
-                    <Button
-                      size="lg"
-                      className="bg-accent text-accent-foreground hover:brightness-105 font-bold px-8 rounded-full"
-                      onClick={() => (window.location.href = getLoginUrl())}
-                    >
-                      Sign In / Create Account
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-4">Free to create · No credit card required to sign up</p>
-                  </div>
-                ) : (
+                {(
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Voice booking pre-fill banner */}
                     {urlDate && (
@@ -1149,16 +1145,48 @@ export default function BookingPage() {
                       </div>
                     )}
                     {/* Student Info */}
+                    {!isAuthenticated && (
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700 mb-1">
+                        <strong>No account needed!</strong> Just enter your name and email below to book.
+                        <a href={getLoginUrl()} className="ml-2 underline font-semibold">Sign in</a> if you have an account.
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label>Name</Label>
-                        <Input value={user?.name || ""} disabled className="bg-muted" />
+                        <Label>Name {!isAuthenticated && <span className="text-red-500">*</span>}</Label>
+                        <Input
+                          value={isAuthenticated ? (user?.name || "") : guestName}
+                          onChange={!isAuthenticated ? (e) => setGuestName(e.target.value) : undefined}
+                          disabled={isAuthenticated}
+                          className={isAuthenticated ? "bg-muted" : ""}
+                          placeholder={!isAuthenticated ? "Your full name" : ""}
+                          required={!isAuthenticated}
+                        />
                       </div>
                       <div>
-                        <Label>Email</Label>
-                        <Input value={user?.email || ""} disabled className="bg-muted" />
+                        <Label>Email {!isAuthenticated && <span className="text-red-500">*</span>}</Label>
+                        <Input
+                          value={isAuthenticated ? (user?.email || "") : guestEmail}
+                          onChange={!isAuthenticated ? (e) => setGuestEmail(e.target.value) : undefined}
+                          disabled={isAuthenticated}
+                          className={isAuthenticated ? "bg-muted" : ""}
+                          placeholder={!isAuthenticated ? "your@email.com" : ""}
+                          type="email"
+                          required={!isAuthenticated}
+                        />
                       </div>
                     </div>
+                    {!isAuthenticated && (
+                      <div>
+                        <Label>Phone (optional — for SMS reminders)</Label>
+                        <Input
+                          value={guestPhone}
+                          onChange={(e) => setGuestPhone(e.target.value)}
+                          placeholder="+1 (401) 555-0000"
+                          type="tel"
+                        />
+                      </div>
+                    )}
 
                     {/* Pricing Option */}
                     {config.pricing.length > 1 && (

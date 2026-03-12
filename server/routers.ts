@@ -262,9 +262,13 @@ export const appRouter = router({
 
   // ─── Bookings ───────────────────────────────────────────────────────────────
   booking: router({
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         programType: z.string(),
+        // Guest fields (required when not signed in)
+        guestName: z.string().optional(),
+        guestEmail: z.string().email().optional(),
+        guestPhone: z.string().optional(),
         sessionDate: z.string().optional(),
         scheduleSlotId: z.number().optional(), // link booking to a specific schedule slot
         sessionStartTime: z.string().optional(), // HH:MM:SS for private lessons
@@ -283,6 +287,34 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        // Resolve user: use logged-in user if available, otherwise find/create guest by email
+        let resolvedUserId: number;
+        if (ctx.user) {
+          resolvedUserId = ctx.user.id;
+        } else {
+          // Guest booking — require name + email
+          if (!input.guestEmail || !input.guestName) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Name and email are required to book as a guest." });
+          }
+          // Find existing user by email or create a new guest record
+          const existingUsers = await db.select({ id: users.id })
+            .from(users)
+            .where(eq(users.email, input.guestEmail))
+            .limit(1);
+          if (existingUsers[0]) {
+            resolvedUserId = existingUsers[0].id;
+          } else {
+            const guestInsert = await db.insert(users).values({
+              openId: `guest_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+              name: input.guestName,
+              email: input.guestEmail,
+              phone: input.guestPhone || null,
+              role: "user",
+            });
+            resolvedUserId = Number((guestInsert as any).insertId);
+          }
+        }
 
         // If a schedule slot is selected, enforce capacity
         if (input.scheduleSlotId) {
@@ -314,7 +346,7 @@ export const appRouter = router({
 
         // ✅ FIX #6: capture insertId directly to avoid race condition
         const bookingInsertResult = await db.insert(bookings).values({
-          userId: ctx.user.id,
+          userId: resolvedUserId,
           programId,
           scheduleSlotId: input.scheduleSlotId || null,
           totalAmountCents: input.totalAmountCents,
@@ -363,13 +395,17 @@ export const appRouter = router({
         const isCashOrCheck = input.paymentMethod === "cash" || input.paymentMethod === "check";
         const paymentLabel = input.paymentMethod === "check" ? "check" : "cash";
 
+        const notifyEmail = ctx.user?.email || input.guestEmail;
+        const notifyName = ctx.user?.name || input.guestName || "there";
+        const notifyPhone = ctx.user?.phone || input.guestPhone;
+
         // Send email confirmation to the student
-        if (isEmailConfigured() && ctx.user.email) {
+        if (isEmailConfigured() && notifyEmail) {
           if (isCashOrCheck) {
             // Cash/check: spot is reserved — send the "reserved" email with payment-at-lesson note
             sendBookingReservedCash({
-              toEmail: ctx.user.email,
-              toName: ctx.user.name || "there",
+              toEmail: notifyEmail!,
+              toName: notifyName,
               programLabel,
               sessionDate: dateStr,
               sessionTime: timeStr,
@@ -378,8 +414,8 @@ export const appRouter = router({
             }).catch(() => {});
           } else {
             sendBookingConfirmation({
-              toEmail: ctx.user.email,
-              toName: ctx.user.name || "there",
+              toEmail: notifyEmail!,
+              toName: notifyName,
               programLabel,
               sessionDate: dateStr,
               sessionTime: timeStr,
@@ -389,19 +425,19 @@ export const appRouter = router({
         }
 
         // Send SMS confirmation to the student
-        if (isTwilioConfigured() && ctx.user.phone) {
+        if (isTwilioConfigured() && notifyPhone) {
           const smsDateStr = input.sessionDate
             ? new Date(input.sessionDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
             : "";
           const smsTimePart = timeStr ? ` at ${timeStr}` : "";
           const msg = isCashOrCheck
-            ? `Hi ${ctx.user.name || "there"}! ✅ Your spot for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""}${smsTimePart} is RESERVED. Please bring ${paymentLabel} to the lesson. Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`
-            : `Hi ${ctx.user.name || "there"}! ✅ Booking received for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""}${smsTimePart}. Mario will confirm your spot shortly. Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`;
-          await sendSms(ctx.user.phone, msg).catch(() => {}); // non-blocking
+            ? `Hi ${notifyName}! ✅ Your spot for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""}${smsTimePart} is RESERVED. Please bring ${paymentLabel} to the lesson. Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`
+            : `Hi ${notifyName}! ✅ Booking received for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""}${smsTimePart}. Mario will confirm your spot shortly. Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`;
+          await sendSms(notifyPhone!, msg).catch(() => {}); // non-blocking
         }
 
         // Check if this is the user's first booking and reward the referrer if applicable
-        maybeRewardReferrer(ctx.user.id).catch(() => {});
+        maybeRewardReferrer(resolvedUserId).catch(() => {});
 
         return { success: true, paymentMethod: input.paymentMethod, bookingId: newBookingId };
       }),
