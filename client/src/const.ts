@@ -1,9 +1,8 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
-// The canonical manus.space URL is always registered as an allowed OAuth redirect URI.
-// Custom domains (tennispromario.com) may not be registered yet, so we always use the
-// manus.space URL for the OAuth redirect. After login, the server redirects to tennispromario.com.
-const CANONICAL_OAUTH_ORIGIN = "https://tennispro-kzzfscru.manus.space";
+// Using the custom domain as the canonical OAuth origin so the callback
+// fires directly on tennispromario.com instead of the old manus.space URL.
+const CANONICAL_OAUTH_ORIGIN = "https://tennispromario.com";
 
 // Generate login URL at runtime so redirect URI reflects the canonical origin.
 // IMPORTANT: state must be btoa(redirectUri) — the OAuth SDK decodes it with atob()
@@ -12,7 +11,7 @@ export const getLoginUrl = (returnPath?: string) => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
   const appId = import.meta.env.VITE_APP_ID;
 
-  // Always use the manus.space origin for the OAuth redirect URI — it's guaranteed to be registered.
+  // Always use the custom domain for the OAuth redirect URI.
   // Embed returnPath as a query param in the redirectUri itself so the server receives it in the callback.
   const callbackUrl = new URL(`${CANONICAL_OAUTH_ORIGIN}/api/oauth/callback`);
   if (returnPath && returnPath.startsWith("/")) {
