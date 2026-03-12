@@ -432,3 +432,4 @@
 - [x] Fix #9: Move set-session to /oauth/set-session (outside /api/) to bypass CDN interception
 - [x] Fix #10: Guest booking — allow booking without login (name + email only)
 - [x] Fix guest booking email: switch from Resend/getroger.biz to Gmail for better deliverability
+- [x] Fix navbar overflow-x bug and add overflow-x:hidden to body/html
