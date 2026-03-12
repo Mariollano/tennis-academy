@@ -426,4 +426,4 @@
 - [x] Fix #6: Booking ID race condition — use insertId instead of re-querying
 - [x] Fix #7: getUnavailableHours date comparison fails silently in MySQL
 - [x] Fix #8: Admin sendPaymentLink redirects to /profile with no confirmation
->>>>>>> Stashed changes
+- [x] Revert OAuth const.ts to use manus.space callback URL (www.tennispromario.com not registered)
