@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Home, Calendar, BookOpen, User, Trophy } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -24,16 +23,7 @@ export default function MobileBottomBar() {
           const isActive = location === href || (href !== "/" && location.startsWith(href));
 
           if (requiresAuth && !isAuthenticated) {
-            return (
-              <button
-                key={href}
-                onClick={() => (window.location.href = getLoginUrl())}
-                className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{label}</span>
-              </button>
-            );
+            return null;
           }
 
           if (primary) {

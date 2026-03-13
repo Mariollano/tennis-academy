@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Menu, X, User, LogOut, Youtube, Instagram, Facebook, Download, ChevronRight, Bell } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -190,7 +189,7 @@ export default function Navbar() {
             </Button>
           </Link>
 
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <div className="flex items-center gap-1">
               <Link href="/profile">
                 <Button variant="ghost" size="sm" className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/10 gap-1.5">
@@ -208,14 +207,6 @@ export default function Navbar() {
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>
-          ) : (
-            <Button
-              size="sm"
-              className="bg-white/10 text-primary-foreground hover:bg-white/20 font-medium rounded-full px-4 border border-white/20"
-              onClick={() => (window.location.href = getLoginUrl())}
-            >
-              Sign In
-            </Button>
           )}
         </div>
 
@@ -313,7 +304,7 @@ export default function Navbar() {
                   </Button>
                 </Link>
 
-                {isAuthenticated ? (
+                {isAuthenticated && (
                   <div className="space-y-1">
                     <Link href="/profile" onClick={() => setOpen(false)}>
                       <span className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/8 cursor-pointer">
@@ -329,14 +320,6 @@ export default function Navbar() {
                       Sign Out
                     </button>
                   </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    className="w-full border-white/20 text-white/70 hover:text-white hover:bg-white/10 rounded-xl"
-                    onClick={() => (window.location.href = getLoginUrl())}
-                  >
-                    Sign In
-                  </Button>
                 )}
               </div>
             </SheetContent>
