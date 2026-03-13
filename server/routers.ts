@@ -753,6 +753,18 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    // Admin: mark a cash/check booking as paid
+    markPaid: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.update(bookings)
+          .set({ paidAt: new Date(), status: "confirmed", updatedAt: new Date() })
+          .where(eq(bookings.id, input.id));
+        return { success: true };
+      }),
+
     // Admin: get a single booking with coach notes
     getById: adminProcedure
       .input(z.object({ id: z.number() }))

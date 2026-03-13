@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar as CalendarIcon, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check, Users, AlertCircle, CheckCircle2, Tag, X, ChevronLeft, ChevronRight, User, ArrowRight } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, CreditCard, ArrowLeft, CheckCircle, Loader2, Share2, Copy, Check, Users, AlertCircle, CheckCircle2, Tag, X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -1034,15 +1034,14 @@ export default function BookingPage() {
       </>
     );
   }
-  // Determine booking step for the wizard indicatorr
-  const bookingStep = !isAuthenticated ? 0 :
-    ((programType === 'clinic_105' || programType === 'private_lesson') && !sessionDate) ? 1 :
-    (programType === 'clinic_105' && (!selectedSlotId || selectedSlotId <= 0)) ? 1 :
-    (programType === 'junior_daily' && juniorSelectedDates.length === 0) ? 1 :
-    2;
+  // Determine booking step for the wizard indicator (no sign-in required — guests can book directly)
+  const bookingStep =
+    ((programType === 'clinic_105' || programType === 'private_lesson') && !sessionDate) ? 0 :
+    (programType === 'clinic_105' && (!selectedSlotId || selectedSlotId <= 0)) ? 0 :
+    (programType === 'junior_daily' && juniorSelectedDates.length === 0) ? 0 :
+    1;
 
   const steps = [
-    { label: "Sign In", icon: User },
     { label: "Pick Date", icon: CalendarIcon },
     { label: "Confirm & Pay", icon: CreditCard },
   ];

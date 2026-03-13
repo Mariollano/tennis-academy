@@ -233,6 +233,11 @@ export default function AdminDashboard() {
     onError: () => toast.error("Failed to save notes."),
   });
 
+  const markPaidMutation = trpc.booking.markPaid.useMutation({
+    onSuccess: () => { toast.success("Booking marked as paid and confirmed!"); refetchBookings(); },
+    onError: () => toast.error("Failed to mark booking as paid."),
+  });
+
   const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({});
   const [noteDrafts, setNoteDrafts] = useState<Record<number, string>>({});
 
@@ -556,6 +561,15 @@ export default function AdminDashboard() {
                           <div className="flex gap-1">
                             {item.booking.status === "pending" && (
                               <>
+                                {/* Show Mark Paid for cash/check bookings */}
+                                {((item.booking as any).paymentMethod === "cash" || (item.booking as any).paymentMethod === "check") && (
+                                  <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700 h-7 text-xs px-2"
+                                    onClick={() => markPaidMutation.mutate({ id: item.booking.id })}
+                                    disabled={markPaidMutation.isPending}
+                                    title="Mark as paid and confirm booking">
+                                    <CheckCircle className="w-3 h-3 mr-1" /> Mark Paid
+                                  </Button>
+                                )}
                                 <Button size="sm" className="bg-green-600 text-white hover:bg-green-700 h-7 text-xs px-2"
                                   onClick={() => confirmNowMutation.mutate({ id: item.booking.id })}
                                   disabled={confirmNowMutation.isPending}>
