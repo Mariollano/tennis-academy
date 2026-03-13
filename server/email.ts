@@ -317,16 +317,6 @@ export async function sendBookingConfirmed(data: BookingConfirmationData): Promi
         Please arrive 5–10 minutes early and bring your racquet and water. If you need to reschedule or have any questions,
         contact Coach Mario directly.
       </p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr>
-          <td align="center">
-            <a href="https://tennispromario.com/booking/private_lesson"
-               style="display:inline-block;background:#1a3a8f;color:#ffffff;font-weight:bold;font-size:14px;padding:12px 28px;border-radius:6px;text-decoration:none;">
-              Book Another Session →
-            </a>
-          </td>
-        </tr>
-      </table>
       ${contactBlock}`;
 
     const text = `Hi ${data.toName || "there"},\n\nGreat news — Coach Mario has confirmed your booking!\n\nProgram: ${data.programLabel}\n${data.sessionDate ? `Date: ${data.sessionDate}\n` : ""}${data.sessionTime ? `Time: ${data.sessionTime}\n` : ""}Booking #: ${data.bookingId}\nStatus: Confirmed\n\nPlease arrive 5–10 minutes early. Questions? Email ritennismario@gmail.com or call 401-965-5873.\n\n— RI Tennis Academy`;

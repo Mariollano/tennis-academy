@@ -332,12 +332,12 @@ export default function VoiceBooking() {
                           <h3 className="font-extrabold text-foreground text-lg mb-1" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
                             BOOKING CONFIRMED! 🎾
                           </h3>
-                          <p className="text-muted-foreground text-sm mb-4">Your session has been booked. Check your profile for details.</p>
+                          <p className="text-muted-foreground text-sm mb-4">Your session has been booked. A confirmation email is on its way!</p>
                           <button
-                            onClick={() => { setIsOpen(false); navigate("/profile"); }}
-                            className="w-full py-3 rounded-xl bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            onClick={() => setIsOpen(false)}
+                            className="w-full py-3 rounded-xl bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors"
                           >
-                            View My Bookings <ArrowRight className="w-4 h-4" />
+                            Done
                           </button>
                         </>
                       ) : (
