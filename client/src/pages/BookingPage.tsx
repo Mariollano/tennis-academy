@@ -319,11 +319,12 @@ function AvailabilityPanelInner({
   // Build a set of date strings that have available slots (for calendar dot indicators)
   const availableDates = new Set<string>();
   const fullDates = new Set<string>();
-  // Normalize a slot date to local YYYY-MM-DD string (avoids UTC offset issues)
+  // Normalize a slot date to YYYY-MM-DD using UTC to avoid timezone-shift issues
+  // (slots are stored as midnight UTC+offset; using local getDate() shifts dates back in EST)
   function toLocalDateStr(raw: unknown): string {
     if (typeof raw === "string") return (raw as string).slice(0, 10);
     const d = new Date(raw as any);
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
   }
 
   (slots || []).forEach(slot => {
