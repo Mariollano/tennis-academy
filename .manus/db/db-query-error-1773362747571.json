@@ -1,0 +1,8 @@
+{
+  "query": "SELECT DAYNAME(slotDate) as dayName, COUNT(*) as slotCount, SUM(currentParticipants) as totalBookings FROM schedule_slots WHERE programId IN (SELECT id FROM programs WHERE type = 'clinic_105') GROUP BY DAYNAME(slotDate) ORDER BY DAYOFWEEK(slotDate);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT DAYNAME(slotDate) as dayName, COUNT(*) as slotCount, SUM(currentParticipants) as totalBookings FROM schedule_slots WHERE programId IN (SELECT id FROM programs WHERE type = 'clinic_105') GROUP BY DAYNAME(slotDate) ORDER BY DAYOFWEEK(slotDate);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1055 (42000) at line 1: Expression #1 of ORDER BY is not in GROUP BY clause and contains nonaggregated column '' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by"
+  ]
+}

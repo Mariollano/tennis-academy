@@ -1,0 +1,9 @@
+{
+  "query": "SELECT id, slotDate, DAYNAME(slotDate) as dayName, currentParticipants FROM schedule_slots WHERE DAYNAME(slotDate) IN ('Tuesday', 'Thursday', 'Saturday') AND programId IN (SELECT id FROM programs WHERE type = 'clinic_105');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, slotDate, DAYNAME(slotDate) as dayName, currentParticipants FROM schedule_slots WHERE DAYNAME(slotDate) IN ('Tuesday', 'Thursday', 'Saturday') AND programId IN (SELECT id FROM programs WHERE type = 'clinic_105');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 61
+}

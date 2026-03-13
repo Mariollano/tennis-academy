@@ -1,0 +1,343 @@
+{
+  "query": "SELECT id, slotDate, DAYNAME(slotDate) as dayName, startTime, endTime, currentParticipants, isAvailable FROM schedule_slots WHERE programId IN (SELECT id FROM programs WHERE type = 'clinic_105') ORDER BY slotDate;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, slotDate, DAYNAME(slotDate) as dayName, startTime, endTime, currentParticipants, isAvailable FROM schedule_slots WHERE programId IN (SELECT id FROM programs WHERE type = 'clinic_105') ORDER BY slotDate;",
+  "rows": [
+    {
+      "id": "1",
+      "slotDate": "2026-03-02",
+      "dayName": "Monday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30001",
+      "slotDate": "2026-03-03",
+      "dayName": "Tuesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "2",
+      "slotDate": "2026-03-04",
+      "dayName": "Wednesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "1",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30002",
+      "slotDate": "2026-03-05",
+      "dayName": "Thursday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "3",
+      "slotDate": "2026-03-06",
+      "dayName": "Friday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30003",
+      "slotDate": "2026-03-07",
+      "dayName": "Saturday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30004",
+      "slotDate": "2026-03-08",
+      "dayName": "Sunday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30005",
+      "slotDate": "2026-03-09",
+      "dayName": "Monday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30006",
+      "slotDate": "2026-03-11",
+      "dayName": "Wednesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30007",
+      "slotDate": "2026-03-13",
+      "dayName": "Friday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30008",
+      "slotDate": "2026-03-15",
+      "dayName": "Sunday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30009",
+      "slotDate": "2026-03-16",
+      "dayName": "Monday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30010",
+      "slotDate": "2026-03-18",
+      "dayName": "Wednesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30011",
+      "slotDate": "2026-03-20",
+      "dayName": "Friday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30012",
+      "slotDate": "2026-03-22",
+      "dayName": "Sunday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30013",
+      "slotDate": "2026-03-23",
+      "dayName": "Monday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30014",
+      "slotDate": "2026-03-25",
+      "dayName": "Wednesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30015",
+      "slotDate": "2026-03-27",
+      "dayName": "Friday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30016",
+      "slotDate": "2026-03-29",
+      "dayName": "Sunday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "1",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30017",
+      "slotDate": "2026-03-30",
+      "dayName": "Monday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30018",
+      "slotDate": "2026-04-01",
+      "dayName": "Wednesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30019",
+      "slotDate": "2026-04-03",
+      "dayName": "Friday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30020",
+      "slotDate": "2026-04-05",
+      "dayName": "Sunday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30021",
+      "slotDate": "2026-04-06",
+      "dayName": "Monday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30022",
+      "slotDate": "2026-04-08",
+      "dayName": "Wednesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30023",
+      "slotDate": "2026-04-10",
+      "dayName": "Friday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30024",
+      "slotDate": "2026-04-12",
+      "dayName": "Sunday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30025",
+      "slotDate": "2026-04-13",
+      "dayName": "Monday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30026",
+      "slotDate": "2026-04-15",
+      "dayName": "Wednesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30027",
+      "slotDate": "2026-04-17",
+      "dayName": "Friday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30028",
+      "slotDate": "2026-04-19",
+      "dayName": "Sunday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30029",
+      "slotDate": "2026-04-20",
+      "dayName": "Monday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30030",
+      "slotDate": "2026-04-22",
+      "dayName": "Wednesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30031",
+      "slotDate": "2026-04-24",
+      "dayName": "Friday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30032",
+      "slotDate": "2026-04-26",
+      "dayName": "Sunday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30033",
+      "slotDate": "2026-04-27",
+      "dayName": "Monday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    },
+    {
+      "id": "30034",
+      "slotDate": "2026-04-29",
+      "dayName": "Wednesday",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "currentParticipants": "0",
+      "isAvailable": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tslotDate\tdayName\tstartTime\tendTime\tcurrentParticipants\tisAvailable\n1\t2026-03-02\tMonday\t09:00:00\t10:30:00\t0\t1\n30001\t2026-03-03\tTuesday\t09:00:00\t10:30:00\t0\t1\n2\t2026-03-04\tWednesday\t09:00:00\t10:30:00\t1\t1\n30002\t2026-03-05\tThursday\t09:00:00\t10:30:00\t0\t1\n3\t2026-03-06\tFriday\t09:00:00\t10:30:00\t0\t1\n30003\t2026-03-07\tSaturday\t09:00:00\t10:30:00\t0\t1\n30004\t2026-03-08\tSunday\t09:00:00\t10:30:00\t0\t1\n30005\t2026-03-09\tMonday\t09:00:00\t10:30:00\t0\t1\n30006\t2026-03-11\tWednesday\t09:00:00\t10:30:00\t0\t1\n30007\t2026-03-13\tFriday\t09:00:00\t10:30:00\t0\t1\n30008\t2026-03-15\tSunday\t09:00:00\t10:30:00\t0\t1\n30009\t2026-03-16\tMonday\t09:00:00\t10:30:00\t0\t1\n30010\t2026-03-18\tWednesday\t09:00:00\t10:30:00\t0\t1\n30011\t2026-03-20\tFriday\t09:00:00\t10:30:00\t0\t1\n30012\t2026-03-22\tSunday\t09:00:00\t10:30:00\t0\t1\n30013\t2026-03-23\tMonday\t09:00:00\t10:30:00\t0\t1\n30014\t2026-03-25\tWednesday\t09:00:00\t10:30:00\t0\t1\n30015\t2026-03-27\tFriday\t09:00:00\t10:30:00\t0\t1\n30016\t2026-03-29\tSunday\t09:00:00\t10:30:00\t1\t1\n30017\t2026-03-30\tMonday\t09:00:00\t10:30:00\t0\t1\n30018\t2026-04-01\tWednesday\t09:00:00\t10:30:00\t0\t1\n30019\t2026-04-03\tFriday\t09:00:00\t10:30:00\t0\t1\n30020\t2026-04-05\tSunday\t09:00:00\t10:30:00\t0\t1\n30021\t2026-04-06\tMonday\t09:00:00\t10:30:00\t0\t1\n30022\t2026-04-08\tWednesday\t09:00:00\t10:30:00\t0\t1\n30023\t2026-04-10\tFriday\t09:00:00\t10:30:00\t0\t1\n30024\t2026-04-12\tSunday\t09:00:00\t10:30:00\t0\t1\n30025\t2026-04-13\tMonday\t09:00:00\t10:30:00\t0\t1\n30026\t2026-04-15\tWednesday\t09:00:00\t10:30:00\t0\t1\n30027\t2026-04-17\tFriday\t09:00:00\t10:30:00\t0\t1\n30028\t2026-04-19\tSunday\t09:00:00\t10:30:00\t0\t1\n30029\t2026-04-20\tMonday\t09:00:00\t10:30:00\t0\t1\n30030\t2026-04-22\tWednesday\t09:00:00\t10:30:00\t0\t1\n30031\t2026-04-24\tFriday\t09:00:00\t10:30:00\t0\t1\n30032\t2026-04-26\tSunday\t09:00:00\t10:30:00\t0\t1\n30033\t2026-04-27\tMonday\t09:00:00\t10:30:00\t0\t1\n30034\t2026-04-29\tWednesday\t09:00:00\t10:30:00\t0\t1\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

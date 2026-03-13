@@ -1,0 +1,70 @@
+{
+  "query": "SHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SHOW TABLES;",
+  "rows": [
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "announcement_reads"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "announcements"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "blocked_times"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "bookings"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "gift_cards"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "mental_coaching_resources"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "merchandise"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "newsletters"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "payments"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "programs"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "promo_codes"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "referrals"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "schedule_slots"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "scheduled_reminders"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "session_waitlist"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "sms_broadcasts"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "tournament_bookings"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "tournament_participants"
+    },
+    {
+      "Tables_in_kzZFsCRUb4iWMZR8LEwAKz": "users"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_kzZFsCRUb4iWMZR8LEwAKz\n__drizzle_migrations\nannouncement_reads\nannouncements\nblocked_times\nbookings\ngift_cards\nmental_coaching_resources\nmerchandise\nnewsletters\npayments\nprograms\npromo_codes\nreferrals\nschedule_slots\nscheduled_reminders\nsession_waitlist\nsms_broadcasts\ntournament_bookings\ntournament_participants\nusers\n",
+  "stderr": "",
+  "execution_time_ms": 71
+}

@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, slotDate, DAYNAME(slotDate) as dayName, currentParticipants FROM schedule_slots WHERE id IN (1, 2, 3);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, slotDate, DAYNAME(slotDate) as dayName, currentParticipants FROM schedule_slots WHERE id IN (1, 2, 3);",
+  "rows": [
+    {
+      "id": "1",
+      "slotDate": "2026-03-02",
+      "dayName": "Monday",
+      "currentParticipants": "0"
+    },
+    {
+      "id": "2",
+      "slotDate": "2026-03-04",
+      "dayName": "Wednesday",
+      "currentParticipants": "1"
+    },
+    {
+      "id": "3",
+      "slotDate": "2026-03-06",
+      "dayName": "Friday",
+      "currentParticipants": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tslotDate\tdayName\tcurrentParticipants\n1\t2026-03-02\tMonday\t0\n2\t2026-03-04\tWednesday\t1\n3\t2026-03-06\tFriday\t0\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

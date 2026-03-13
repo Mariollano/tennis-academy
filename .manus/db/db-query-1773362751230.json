@@ -1,0 +1,45 @@
+{
+  "query": "SELECT DAYNAME(slotDate) as dayName, COUNT(*) as slotCount, SUM(currentParticipants) as totalBookings FROM schedule_slots WHERE programId IN (SELECT id FROM programs WHERE type = 'clinic_105') GROUP BY DAYNAME(slotDate);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT DAYNAME(slotDate) as dayName, COUNT(*) as slotCount, SUM(currentParticipants) as totalBookings FROM schedule_slots WHERE programId IN (SELECT id FROM programs WHERE type = 'clinic_105') GROUP BY DAYNAME(slotDate);",
+  "rows": [
+    {
+      "dayName": "Sunday",
+      "slotCount": "8",
+      "totalBookings": "1"
+    },
+    {
+      "dayName": "Monday",
+      "slotCount": "9",
+      "totalBookings": "0"
+    },
+    {
+      "dayName": "Wednesday",
+      "slotCount": "9",
+      "totalBookings": "1"
+    },
+    {
+      "dayName": "Tuesday",
+      "slotCount": "1",
+      "totalBookings": "0"
+    },
+    {
+      "dayName": "Thursday",
+      "slotCount": "1",
+      "totalBookings": "0"
+    },
+    {
+      "dayName": "Friday",
+      "slotCount": "8",
+      "totalBookings": "0"
+    },
+    {
+      "dayName": "Saturday",
+      "slotCount": "1",
+      "totalBookings": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "dayName\tslotCount\ttotalBookings\nSunday\t8\t1\nMonday\t9\t0\nWednesday\t9\t1\nTuesday\t1\t0\nThursday\t1\t0\nFriday\t8\t0\nSaturday\t1\t0\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}
