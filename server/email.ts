@@ -336,3 +336,61 @@ export async function sendBookingConfirmed(data: BookingConfirmationData): Promi
     return { success: false, error: err?.message || "Unknown error" };
   }
 }
+
+// ─── Owner: new booking alert ──────────────────────────────────────────────
+export interface OwnerBookingAlertData {
+  studentName: string;
+  studentEmail: string;
+  studentPhone?: string | null;
+  programLabel: string;
+  sessionDate?: string;
+  sessionTime?: string;
+  paymentMethod: string;
+  bookingId: number;
+}
+
+export async function sendOwnerNewBookingAlert(data: OwnerBookingAlertData): Promise<void> {
+  const ownerEmail = process.env.EMAIL_USER;
+  if (!ownerEmail || !isEmailConfigured()) return;
+
+  const paymentBadge = data.paymentMethod === "stripe"
+    ? "💳 Paid by Card"
+    : data.paymentMethod === "cash"
+    ? "💵 Cash Due at Lesson"
+    : "📝 Check Due at Lesson";
+
+  const bodyHtml = `
+    <div style="background:#1a2744;padding:20px 24px;border-radius:8px;margin-bottom:24px;">
+      <h2 style="color:#c8f135;margin:0 0 4px;">🎾 New Booking Alert</h2>
+      <p style="color:#a0aec0;margin:0;font-size:14px;">A student just reserved a session</p>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:15px;">
+      <tr><td style="padding:10px 0;color:#718096;width:140px;">Student</td><td style="padding:10px 0;font-weight:600;">${data.studentName}</td></tr>
+      <tr style="border-top:1px solid #e2e8f0;"><td style="padding:10px 0;color:#718096;">Email</td><td style="padding:10px 0;">${data.studentEmail}</td></tr>
+      ${data.studentPhone ? `<tr style="border-top:1px solid #e2e8f0;"><td style="padding:10px 0;color:#718096;">Phone</td><td style="padding:10px 0;">${data.studentPhone}</td></tr>` : ""}
+      <tr style="border-top:1px solid #e2e8f0;"><td style="padding:10px 0;color:#718096;">Program</td><td style="padding:10px 0;font-weight:600;">${data.programLabel}</td></tr>
+      ${data.sessionDate ? `<tr style="border-top:1px solid #e2e8f0;"><td style="padding:10px 0;color:#718096;">Date</td><td style="padding:10px 0;">${data.sessionDate}</td></tr>` : ""}
+      ${data.sessionTime ? `<tr style="border-top:1px solid #e2e8f0;"><td style="padding:10px 0;color:#718096;">Time</td><td style="padding:10px 0;">${data.sessionTime}</td></tr>` : ""}
+      <tr style="border-top:1px solid #e2e8f0;"><td style="padding:10px 0;color:#718096;">Payment</td><td style="padding:10px 0;">${paymentBadge}</td></tr>
+      <tr style="border-top:1px solid #e2e8f0;"><td style="padding:10px 0;color:#718096;">Booking #</td><td style="padding:10px 0;color:#718096;">#${data.bookingId}</td></tr>
+    </table>
+    <div style="margin-top:24px;padding:16px;background:#f0fff4;border-left:4px solid #48bb78;border-radius:4px;">
+      <p style="margin:0;color:#276749;font-size:14px;">Go to <a href="https://www.tennispromario.com/admin" style="color:#276749;font-weight:600;">Admin Dashboard</a> to view and manage this booking.</p>
+    </div>
+  `;
+
+  const text = `New Booking Alert!\n\nStudent: ${data.studentName}\nEmail: ${data.studentEmail}\n${data.studentPhone ? `Phone: ${data.studentPhone}\n` : ""}Program: ${data.programLabel}\n${data.sessionDate ? `Date: ${data.sessionDate}\n` : ""}${data.sessionTime ? `Time: ${data.sessionTime}\n` : ""}Payment: ${data.paymentMethod}\nBooking #: ${data.bookingId}\n\nManage at: https://www.tennispromario.com/admin`;
+
+  try {
+    await sendEmail({
+      to: ownerEmail,
+      toName: "Coach Mario",
+      subject: `🎾 New Booking: ${data.studentName} – ${data.programLabel}`,
+      html: buildEmailShell(bodyHtml),
+      text,
+    });
+    console.log(`[Email] Owner alert sent for booking #${data.bookingId}`);
+  } catch (err: any) {
+    console.error(`[Email] Failed to send owner alert for booking #${data.bookingId}:`, err?.message || err);
+  }
+}

@@ -10,7 +10,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "./_core/llm";
 import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
-import { sendBookingConfirmation, sendBookingConfirmed, sendBookingCancelled, sendBookingReminder, sendBookingReservedCash, isEmailConfigured } from "./email";
+import { sendBookingConfirmation, sendBookingCancelled, sendBookingReminder, sendBookingReservedCash, sendBookingConfirmed, sendOwnerNewBookingAlert, isEmailConfigured } from "./email";
 import { maybeRewardReferrer } from "./referral";
 import { postAnnouncement, getAnnouncements, markAnnouncementRead, getUnreadCount, deleteAnnouncement } from "./announcements";
 
@@ -460,6 +460,20 @@ export const appRouter = router({
               bookingId: newBookingId,
             }).catch(() => {}); // non-blocking
           }
+        }
+
+        // Send owner notification email
+        if (isEmailConfigured()) {
+          sendOwnerNewBookingAlert({
+            studentName: notifyName,
+            studentEmail: notifyEmail || "(no email)",
+            studentPhone: notifyPhone,
+            programLabel,
+            sessionDate: dateStr,
+            sessionTime: timeStr,
+            paymentMethod: input.paymentMethod,
+            bookingId: newBookingId,
+          }).catch(() => {});
         }
 
         // Send SMS confirmation to the student
