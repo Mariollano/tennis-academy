@@ -92,9 +92,12 @@ function buildEmailShell(bodyHtml: string): string {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
         <tr>
-          <td style="background:linear-gradient(135deg,#0a1628 0%,#1a3a8f 100%);padding:28px 32px;text-align:center;">
-            <h1 style="margin:0;color:#ffffff;font-size:22px;letter-spacing:2px;font-weight:900;">RI TENNIS ACADEMY</h1>
-            <p style="margin:6px 0 0;color:#c4ff00;font-size:13px;letter-spacing:1px;">Coach Mario Llano · #DeleteFear</p>
+          <td style="padding:0;">
+            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/email-header-banner_4eee588e.jpg"
+              alt="RI Tennis Academy – Coach Mario Llano"
+              width="600"
+              style="display:block;width:100%;max-width:600px;height:auto;border-radius:8px 8px 0 0;"
+            />
           </td>
         </tr>
         <tr><td style="padding:32px;">${bodyHtml}</td></tr>
