@@ -1676,6 +1676,12 @@ export const appRouter = router({
 
   // ─── Admin Stats ────────────────────────────────────────────────────────────
   admin: router({
+    getCalendarUrl: adminProcedure.query(() => {
+      const { getCalendarToken } = require("./ical");
+      const token = getCalendarToken();
+      return { token };
+    }),
+
     stats: adminProcedure.query(async () => {
       const db = await getDb();
       if (!db) return { totalStudents: 0, totalBookings: 0, pendingBookings: 0, smsSubscribers: 0 };

@@ -1,0 +1,22 @@
+{
+  "query": "SELECT 'bookings' as tbl, COUNT(*) as cnt FROM bookings UNION ALL SELECT 'schedule_slots', COUNT(*) FROM schedule_slots UNION ALL SELECT 'users', COUNT(*) FROM users",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT 'bookings' as tbl, COUNT(*) as cnt FROM bookings UNION ALL SELECT 'schedule_slots', COUNT(*) FROM schedule_slots UNION ALL SELECT 'users', COUNT(*) FROM users",
+  "rows": [
+    {
+      "tbl": "schedule_slots",
+      "cnt": "32"
+    },
+    {
+      "tbl": "bookings",
+      "cnt": "65"
+    },
+    {
+      "tbl": "users",
+      "cnt": "6"
+    }
+  ],
+  "messages": [],
+  "stdout": "tbl\tcnt\nschedule_slots\t32\nbookings\t65\nusers\t6\n",
+  "stderr": "",
+  "execution_time_ms": 72
+}

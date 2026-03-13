@@ -602,6 +602,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="sms" onClick={() => setActiveTab("sms")}><MessageSquare className="w-4 h-4 mr-1.5" />SMS Broadcast</TabsTrigger>
             <TabsTrigger value="promos" onClick={() => setActiveTab("promos")}><Tag className="w-4 h-4 mr-1.5" />Promo Codes</TabsTrigger>
             <TabsTrigger value="roster" onClick={() => setActiveTab("roster")}><Users className="w-4 h-4 mr-1.5" />Roster</TabsTrigger>
+            <TabsTrigger value="calendar" onClick={() => setActiveTab("calendar")}><Calendar className="w-4 h-4 mr-1.5" />Calendar Sync</TabsTrigger>
           </TabsList>
 
           {/* Today Tab */}
@@ -1036,6 +1037,10 @@ export default function AdminDashboard() {
           <TabsContent value="roster">
             <RosterTab />
           </TabsContent>
+          {/* Calendar Sync Tab */}
+          <TabsContent value="calendar">
+            <CalendarSyncTab />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
@@ -1240,6 +1245,103 @@ function RosterTab() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Calendar Sync Tab Component ──────────────────────────────────────────────
+function CalendarSyncTab() {
+  const { data } = trpc.admin.getCalendarUrl.useQuery();
+  const calendarUrl = data?.token
+    ? `${window.location.origin}/api/calendar/${data.token}/bookings.ics`
+    : null;
+
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    if (!calendarUrl) return;
+    navigator.clipboard.writeText(calendarUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  }
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            Sync Bookings to Your Calendar
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Subscribe to this private calendar URL in Apple Calendar or Google Calendar.
+            Every booking will appear automatically and stay up to date.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {calendarUrl ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value={calendarUrl}
+                  className="flex-1 text-xs font-mono bg-muted border border-border rounded-lg px-3 py-2 text-foreground truncate"
+                />
+                <Button onClick={handleCopy} size="sm" className="shrink-0">
+                  {copied ? "✓ Copied!" : "Copy URL"}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                This URL is private — only share it with yourself. It contains all your bookings.
+              </p>
+            </div>
+          ) : (
+            <div className="animate-pulse h-10 bg-muted rounded-lg" />
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">How to Subscribe</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Apple Calendar */}
+          <div>
+            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs">🍎</span>
+              Apple Calendar (iPhone, iPad, Mac)
+            </h4>
+            <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+              <li>Copy the URL above</li>
+              <li>Open <strong>Apple Calendar</strong> on your Mac</li>
+              <li>Click <strong>File → New Calendar Subscription</strong></li>
+              <li>Paste the URL and click <strong>Subscribe</strong></li>
+              <li>Set <strong>Auto-refresh</strong> to <strong>Every 15 minutes</strong></li>
+              <li>Click <strong>OK</strong> — done!</li>
+            </ol>
+            <p className="text-xs text-muted-foreground mt-2">
+              On iPhone: Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → paste URL.
+            </p>
+          </div>
+
+          {/* Google Calendar */}
+          <div>
+            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 bg-blue-50 rounded-full flex items-center justify-center text-xs">📅</span>
+              Google Calendar
+            </h4>
+            <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+              <li>Copy the URL above</li>
+              <li>Open <strong>Google Calendar</strong> at calendar.google.com</li>
+              <li>On the left, click <strong>+ Other calendars → From URL</strong></li>
+              <li>Paste the URL and click <strong>Add calendar</strong></li>
+              <li>Done! Google syncs it automatically (every few hours)</li>
+            </ol>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

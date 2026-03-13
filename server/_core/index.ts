@@ -17,6 +17,7 @@ import { startReminderScheduler } from "../reminderScheduler";
 import { storagePut } from "../storage";
 import { sendSms, isTwilioConfigured } from "../sms";
 import { sendBookingConfirmation, sendBookingConfirmed, isEmailConfigured } from "../email";
+import { handleIcalFeed } from "../ical";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -166,6 +167,9 @@ async function startServer() {
       return res.status(500).json({ error: "Failed to upload audio" });
     }
   });
+
+  // iCal calendar feed (private, token-protected)
+  app.get("/api/calendar/:token/bookings.ics", handleIcalFeed);
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);

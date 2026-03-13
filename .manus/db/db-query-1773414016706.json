@@ -1,0 +1,26 @@
+{
+  "query": "\nSELECT 'bookings' as tbl, COUNT(*) as cnt FROM bookings\nUNION ALL SELECT 'schedule_slots', COUNT(*) FROM schedule_slots\nUNION ALL SELECT 'users', COUNT(*) FROM users\nUNION ALL SELECT 'payments', COUNT(*) FROM payments WHERE 1=1\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \nSELECT 'bookings' as tbl, COUNT(*) as cnt FROM bookings\nUNION ALL SELECT 'schedule_slots', COUNT(*) FROM schedule_slots\nUNION ALL SELECT 'users', COUNT(*) FROM users\nUNION ALL SELECT 'payments', COUNT(*) FROM payments WHERE 1=1\n",
+  "rows": [
+    {
+      "tbl": "payments",
+      "cnt": "0"
+    },
+    {
+      "tbl": "schedule_slots",
+      "cnt": "32"
+    },
+    {
+      "tbl": "users",
+      "cnt": "6"
+    },
+    {
+      "tbl": "bookings",
+      "cnt": "65"
+    }
+  ],
+  "messages": [],
+  "stdout": "tbl\tcnt\npayments\t0\nschedule_slots\t32\nusers\t6\nbookings\t65\n",
+  "stderr": "",
+  "execution_time_ms": 226
+}
