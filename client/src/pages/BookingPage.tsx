@@ -577,6 +577,13 @@ export default function BookingPage() {
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
+
+  // Pre-fill name/email from logged-in user, but keep fields editable
+  useEffect(() => {
+    if (user?.name && !guestName) setGuestName(user.name);
+    if (user?.email && !guestEmail) setGuestEmail(user.email);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.name, user?.email]);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash" | "check">("card");
 
   // Fetch booked + blocked hours for the selected date (private lesson only)
@@ -672,11 +679,9 @@ export default function BookingPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated) {
-      if (!guestName.trim() || !guestEmail.trim()) {
-        toast.error("Please enter your name and email to book.");
-        return;
-      }
+    if (!guestName.trim() || !guestEmail.trim()) {
+      toast.error("Please enter your name and email to book.");
+      return;
     }
     // Require date for clinic and private lesson
     if ((programType === "clinic_105" || programType === "private_lesson") && !sessionDate) {
@@ -714,11 +719,11 @@ export default function BookingPage() {
           const endH = (h + 1) % 24;
           return `${String(endH).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
         })() : undefined;
-    const guestFields = !isAuthenticated ? {
+    const guestFields = {
       guestName: guestName.trim(),
       guestEmail: guestEmail.trim(),
       guestPhone: guestPhone.trim() || undefined,
-    } : {};
+    };
 
     if (programType === "junior_daily" && juniorSelectedDates.length > 0) {
       // Create one booking per selected date; charge the full total on the first one
@@ -1153,40 +1158,34 @@ export default function BookingPage() {
                     )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label>Name {!isAuthenticated && <span className="text-red-500">*</span>}</Label>
+                        <Label>Name <span className="text-red-500">*</span></Label>
                         <Input
-                          value={isAuthenticated ? (user?.name || "") : guestName}
-                          onChange={!isAuthenticated ? (e) => setGuestName(e.target.value) : undefined}
-                          disabled={isAuthenticated}
-                          className={isAuthenticated ? "bg-muted" : ""}
-                          placeholder={!isAuthenticated ? "Your full name" : ""}
-                          required={!isAuthenticated}
+                          value={guestName}
+                          onChange={(e) => setGuestName(e.target.value)}
+                          placeholder="Your full name"
+                          required
                         />
                       </div>
                       <div>
-                        <Label>Email {!isAuthenticated && <span className="text-red-500">*</span>}</Label>
+                        <Label>Email <span className="text-red-500">*</span></Label>
                         <Input
-                          value={isAuthenticated ? (user?.email || "") : guestEmail}
-                          onChange={!isAuthenticated ? (e) => setGuestEmail(e.target.value) : undefined}
-                          disabled={isAuthenticated}
-                          className={isAuthenticated ? "bg-muted" : ""}
-                          placeholder={!isAuthenticated ? "your@email.com" : ""}
+                          value={guestEmail}
+                          onChange={(e) => setGuestEmail(e.target.value)}
+                          placeholder="your@email.com"
                           type="email"
-                          required={!isAuthenticated}
+                          required
                         />
                       </div>
                     </div>
-                    {!isAuthenticated && (
-                      <div>
-                        <Label>Phone (optional — for SMS reminders)</Label>
-                        <Input
-                          value={guestPhone}
-                          onChange={(e) => setGuestPhone(e.target.value)}
-                          placeholder="+1 (401) 555-0000"
-                          type="tel"
-                        />
-                      </div>
-                    )}
+                    <div>
+                      <Label>Phone (optional — for SMS reminders)</Label>
+                      <Input
+                        value={guestPhone}
+                        onChange={(e) => setGuestPhone(e.target.value)}
+                        placeholder="+1 (401) 555-0000"
+                        type="tel"
+                      />
+                    </div>
 
                     {/* Pricing Option */}
                     {config.pricing.length > 1 && (
