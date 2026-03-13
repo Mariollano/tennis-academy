@@ -24,6 +24,150 @@ const statusColors: Record<string, string> = {
   completed: "bg-blue-100 text-blue-800",
 };
 
+const PROGRAM_LABELS: Record<string, string> = {
+  private_lesson: "Private Lesson",
+  clinic_105: "105 Clinic",
+  junior_program: "Junior Program",
+  summer_camp: "Summer Camp",
+  stringing: "Stringing",
+  merchandise: "Merchandise",
+  tournament: "Tournament",
+};
+
+const PROGRAM_COLORS: Record<string, string> = {
+  private_lesson: "bg-blue-100 text-blue-800",
+  clinic_105: "bg-yellow-100 text-yellow-800",
+  junior_program: "bg-purple-100 text-purple-800",
+  summer_camp: "bg-orange-100 text-orange-800",
+  stringing: "bg-gray-100 text-gray-800",
+  merchandise: "bg-pink-100 text-pink-800",
+  tournament: "bg-red-100 text-red-800",
+};
+
+function TodayTab({ markPaidMutation, refetchBookings }: { markPaidMutation: any; refetchBookings: () => void }) {
+  const today = new Date();
+  const todayStr = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+
+  const { data: bookings, isLoading } = trpc.booking.adminList.useQuery(
+    { limit: 200 },
+    { refetchInterval: 30000 }
+  );
+
+  const todayBookings = (bookings || []).filter(b => {
+    const d = b.booking.sessionDate;
+    if (!d) return false;
+    const ds = typeof d === "string" ? d : `${(d as Date).getUTCFullYear()}-${String((d as Date).getUTCMonth() + 1).padStart(2, "0")}-${String((d as Date).getUTCDate()).padStart(2, "0")}`;
+    return ds.startsWith(todayStr) && b.booking.status !== "cancelled";
+  });
+
+  // Group by program type
+  const grouped: Record<string, typeof todayBookings> = {};
+  for (const b of todayBookings) {
+    const key = b.program?.type || "other";
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(b);
+  }
+
+  const paidCount = todayBookings.filter(b => b.booking.paidAt || b.booking.paymentMethod === "card").length;
+  const unpaidCount = todayBookings.length - paidCount;
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center py-16"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary bar */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="border-l-4 border-l-primary">
+          <CardContent className="pt-4 pb-3">
+            <div className="text-2xl font-extrabold text-foreground">{todayBookings.length}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Total Today</div>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-green-500">
+          <CardContent className="pt-4 pb-3">
+            <div className="text-2xl font-extrabold text-green-600">{paidCount}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Paid (Card)</div>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-amber-500">
+          <CardContent className="pt-4 pb-3">
+            <div className="text-2xl font-extrabold text-amber-600">{unpaidCount}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Cash / Check Due</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {todayBookings.length === 0 ? (
+        <Card>
+          <CardContent className="py-16 text-center">
+            <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">No sessions scheduled for today.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        Object.entries(grouped).map(([programType, items]) => (
+          <Card key={programType}>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${PROGRAM_COLORS[programType] || "bg-gray-100 text-gray-800"}`}>
+                  {PROGRAM_LABELS[programType] || programType}
+                </span>
+                <span className="text-muted-foreground font-normal text-sm">{items.length} student{items.length !== 1 ? "s" : ""}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {items.map(({ booking, user, program }) => {
+                  const isPaid = !!(booking.paidAt || booking.paymentMethod === "card");
+                  const isCash = booking.paymentMethod === "cash";
+                  const isCheck = booking.paymentMethod === "check";
+                  const amountDollars = ((booking.totalAmountCents || 0) / 100).toFixed(0);
+                  return (
+                    <div key={booking.id} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-foreground truncate">{user?.name || "Guest"}</div>
+                        <div className="text-xs text-muted-foreground truncate">{user?.email || ""}{user?.phone ? ` · ${user.phone}` : ""}</div>
+                        {booking.sessionStartTime && (
+                          <div className="text-xs text-muted-foreground mt-0.5">⏰ {booking.sessionStartTime}</div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-sm font-bold text-foreground">${amountDollars}</span>
+                        {isPaid ? (
+                          <Badge className="bg-green-100 text-green-800 text-xs px-2 py-0.5">✅ PAID</Badge>
+                        ) : isCash ? (
+                          <Badge className="bg-amber-100 text-amber-800 text-xs px-2 py-0.5">💵 CASH DUE</Badge>
+                        ) : isCheck ? (
+                          <Badge className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5">📝 CHECK DUE</Badge>
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5">PENDING</Badge>
+                        )}
+                        {(isCash || isCheck) && !booking.paidAt && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs h-7 px-2 border-green-500 text-green-700 hover:bg-green-50"
+                            onClick={() => markPaidMutation.mutate({ id: booking.id }, { onSuccess: refetchBookings })}
+                            disabled={markPaidMutation.isPending}
+                          >
+                            Mark Paid
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        ))
+      )}
+    </div>
+  );
+}
+
 function AnalyticsTab() {
   const { data: analytics, isLoading } = trpc.admin.getAnalytics.useQuery({ months: 6 });
 
@@ -176,7 +320,7 @@ export default function AdminDashboard() {
   const { user, isAuthenticated, loading } = useAuth();
   const [bookingFilter, setBookingFilter] = useState("all");
   const [smsMessage, setSmsMessage] = useState("");
-  const [activeTab, setActiveTab] = useState("bookings");
+  const [activeTab, setActiveTab] = useState("today");
   const [publishBannerDismissed, setPublishBannerDismissed] = useState(() => {
     try { return localStorage.getItem("ri_tennis_publish_banner_dismissed") === "true"; } catch { return false; }
   });
@@ -451,6 +595,7 @@ export default function AdminDashboard() {
         <div id="admin-tabs" />
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 flex flex-wrap gap-1 h-auto bg-muted p-1 rounded-xl">
+            <TabsTrigger value="today" onClick={() => setActiveTab("today")}><Clock className="w-4 h-4 mr-1.5" />Today</TabsTrigger>
             <TabsTrigger value="bookings" onClick={() => setActiveTab("bookings")}><Calendar className="w-4 h-4 mr-1.5" />Bookings</TabsTrigger>
             <TabsTrigger value="students" onClick={() => setActiveTab("students")}><Users className="w-4 h-4 mr-1.5" />Students</TabsTrigger>
             <TabsTrigger value="analytics" onClick={() => setActiveTab("analytics")}><BarChart3 className="w-4 h-4 mr-1.5" />Analytics</TabsTrigger>
@@ -458,6 +603,11 @@ export default function AdminDashboard() {
             <TabsTrigger value="promos" onClick={() => setActiveTab("promos")}><Tag className="w-4 h-4 mr-1.5" />Promo Codes</TabsTrigger>
             <TabsTrigger value="roster" onClick={() => setActiveTab("roster")}><Users className="w-4 h-4 mr-1.5" />Roster</TabsTrigger>
           </TabsList>
+
+          {/* Today Tab */}
+          <TabsContent value="today">
+            <TodayTab markPaidMutation={markPaidMutation} refetchBookings={refetchBookings} />
+          </TabsContent>
 
           {/* Bookings Tab */}
           <TabsContent value="bookings">
@@ -893,21 +1043,6 @@ export default function AdminDashboard() {
 }
 
 // ─── Roster Tab Component ─────────────────────────────────────────────────────
-const PROGRAM_LABELS: Record<string, string> = {
-  clinic_105: "105 Clinic",
-  junior: "Junior Program",
-  private_lesson: "Private Lesson",
-  cardio_tennis: "Cardio Tennis",
-  adult_beginner: "Adult Beginner",
-};
-
-const PROGRAM_COLORS: Record<string, string> = {
-  clinic_105: "bg-green-100 text-green-800 border-green-200",
-  junior: "bg-blue-100 text-blue-800 border-blue-200",
-  private_lesson: "bg-purple-100 text-purple-800 border-purple-200",
-  cardio_tennis: "bg-orange-100 text-orange-800 border-orange-200",
-  adult_beginner: "bg-pink-100 text-pink-800 border-pink-200",
-};
 
 function SlotRosterRow({ slot }: { slot: {
   slotId: number; slotDate: unknown; startTime: string | null; endTime: string | null;
