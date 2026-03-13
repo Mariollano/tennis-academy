@@ -1110,6 +1110,58 @@ export const appRouter = router({
           .orderBy(bookings.createdAt);
       }),
 
+    // Admin: roster summary — all slots with enrollment counts, optionally filtered by program type
+    getRosterSummary: adminProcedure
+      .input(z.object({
+        programType: z.string().optional(), // e.g. 'clinic_105', 'junior', 'private_lesson'
+        from: z.string().optional(), // YYYY-MM-DD
+        to: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const fromStr = input.from ?? new Date().toISOString().slice(0, 10);
+        const toDate = new Date();
+        toDate.setDate(toDate.getDate() + 90);
+        const toStr = input.to ?? toDate.toISOString().slice(0, 10);
+        const rows = await db.select({
+          slotId: scheduleSlots.id,
+          slotDate: scheduleSlots.slotDate,
+          startTime: scheduleSlots.startTime,
+          endTime: scheduleSlots.endTime,
+          maxParticipants: scheduleSlots.maxParticipants,
+          programId: programs.id,
+          programName: programs.name,
+          programType: programs.type,
+          activeBookings: sql<number>`(
+            SELECT COUNT(*) FROM bookings b
+            WHERE b.scheduleSlotId = ${scheduleSlots.id}
+            AND b.status IN ('pending','confirmed')
+          )`,
+        })
+          .from(scheduleSlots)
+          .leftJoin(programs, eq(scheduleSlots.programId, programs.id))
+          .where(and(
+            eq(scheduleSlots.isAvailable, true),
+            sql`DATE(${scheduleSlots.slotDate}) >= ${fromStr}`,
+            sql`DATE(${scheduleSlots.slotDate}) <= ${toStr}`,
+            input.programType ? eq(programs.type, input.programType as any) : undefined,
+          ))
+          .orderBy(scheduleSlots.slotDate, scheduleSlots.startTime);
+        return rows.map(r => ({
+          slotId: r.slotId,
+          slotDate: r.slotDate,
+          startTime: r.startTime,
+          endTime: r.endTime,
+          maxParticipants: r.maxParticipants,
+          enrolled: Number(r.activeBookings ?? 0),
+          spotsLeft: Math.max(0, r.maxParticipants - Number(r.activeBookings ?? 0)),
+          programId: r.programId,
+          programName: r.programName,
+          programType: r.programType,
+        }));
+      }),
+
     // Admin: create a slot
     create: adminProcedure
       .input(z.object({

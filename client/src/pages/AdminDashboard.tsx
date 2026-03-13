@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -456,6 +456,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="analytics" onClick={() => setActiveTab("analytics")}><BarChart3 className="w-4 h-4 mr-1.5" />Analytics</TabsTrigger>
             <TabsTrigger value="sms" onClick={() => setActiveTab("sms")}><MessageSquare className="w-4 h-4 mr-1.5" />SMS Broadcast</TabsTrigger>
             <TabsTrigger value="promos" onClick={() => setActiveTab("promos")}><Tag className="w-4 h-4 mr-1.5" />Promo Codes</TabsTrigger>
+            <TabsTrigger value="roster" onClick={() => setActiveTab("roster")}><Users className="w-4 h-4 mr-1.5" />Roster</TabsTrigger>
           </TabsList>
 
           {/* Bookings Tab */}
@@ -881,8 +882,229 @@ export default function AdminDashboard() {
               </Card>
             </div>
           </TabsContent>
+          {/* Roster Tab */}
+          <TabsContent value="roster">
+            <RosterTab />
+          </TabsContent>
         </Tabs>
       </div>
+    </div>
+  );
+}
+
+// ─── Roster Tab Component ─────────────────────────────────────────────────────
+const PROGRAM_LABELS: Record<string, string> = {
+  clinic_105: "105 Clinic",
+  junior: "Junior Program",
+  private_lesson: "Private Lesson",
+  cardio_tennis: "Cardio Tennis",
+  adult_beginner: "Adult Beginner",
+};
+
+const PROGRAM_COLORS: Record<string, string> = {
+  clinic_105: "bg-green-100 text-green-800 border-green-200",
+  junior: "bg-blue-100 text-blue-800 border-blue-200",
+  private_lesson: "bg-purple-100 text-purple-800 border-purple-200",
+  cardio_tennis: "bg-orange-100 text-orange-800 border-orange-200",
+  adult_beginner: "bg-pink-100 text-pink-800 border-pink-200",
+};
+
+function SlotRosterRow({ slot }: { slot: {
+  slotId: number; slotDate: unknown; startTime: string | null; endTime: string | null;
+  maxParticipants: number; enrolled: number; spotsLeft: number;
+  programName: string | null; programType: string | null;
+}}) {
+  const [expanded, setExpanded] = useState(false);
+  const { data: enrollees, isLoading } = trpc.schedule.getEnrollees.useQuery(
+    { slotId: slot.slotId },
+    { enabled: expanded }
+  );
+
+  function slotDateStr(raw: unknown): string {
+    if (typeof raw === "string") return raw.slice(0, 10);
+    const d = new Date(raw as any);
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+  }
+
+  function fmtTime(t: string | null | undefined) {
+    if (!t) return "";
+    const [h, m] = t.split(":");
+    const hour = parseInt(h);
+    return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
+  }
+
+  const dateStr = slotDateStr(slot.slotDate);
+  const dateObj = new Date(dateStr + "T12:00:00");
+  const dayName = dateObj.toLocaleDateString("en-US", { weekday: "short" });
+  const dateFmt = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const pct = slot.maxParticipants > 0 ? (slot.enrolled / slot.maxParticipants) * 100 : 0;
+  const barColor = pct >= 100 ? "bg-red-500" : pct >= 75 ? "bg-amber-500" : "bg-green-500";
+  const typeKey = slot.programType ?? "";
+  const badgeClass = PROGRAM_COLORS[typeKey] ?? "bg-gray-100 text-gray-800 border-gray-200";
+
+  return (
+    <div className="border border-border rounded-xl overflow-hidden">
+      <button
+        className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 transition-colors text-left"
+        onClick={() => setExpanded(e => !e)}
+      >
+        {/* Date */}
+        <div className="flex-shrink-0 w-16 text-center">
+          <div className="text-xs font-bold text-muted-foreground uppercase">{dayName}</div>
+          <div className="text-sm font-bold text-foreground">{dateFmt}</div>
+        </div>
+        {/* Program badge */}
+        <Badge className={`text-xs border flex-shrink-0 ${badgeClass}`}>
+          {PROGRAM_LABELS[typeKey] ?? slot.programName ?? typeKey}
+        </Badge>
+        {/* Time */}
+        <div className="text-xs text-muted-foreground flex-shrink-0">
+          {fmtTime(slot.startTime)}{slot.endTime ? ` – ${fmtTime(slot.endTime)}` : ""}
+        </div>
+        {/* Fill bar */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+              <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+            </div>
+            <span className="text-xs font-semibold text-foreground flex-shrink-0">
+              {slot.enrolled}/{slot.maxParticipants}
+            </span>
+          </div>
+        </div>
+        {/* Expand icon */}
+        <div className="flex-shrink-0 text-muted-foreground">
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="border-t border-border bg-muted/20 px-4 py-3">
+          {isLoading ? (
+            <div className="text-sm text-muted-foreground py-2">Loading roster…</div>
+          ) : !enrollees || enrollees.length === 0 ? (
+            <div className="text-sm text-muted-foreground py-2 italic">No sign-ups yet for this session.</div>
+          ) : (
+            <div className="space-y-2">
+              {enrollees.map((e, i) => (
+                <div key={e.bookingId} className="flex items-center gap-3 text-sm">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                  <span className="font-medium text-foreground flex-1">{e.studentName ?? "Guest"}</span>
+                  <span className="text-muted-foreground text-xs">{e.studentEmail}</span>
+                  {e.studentPhone && <span className="text-muted-foreground text-xs">{e.studentPhone}</span>}
+                  <Badge className={`text-xs ${e.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>{e.status}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RosterTab() {
+  const [programFilter, setProgramFilter] = useState("all");
+  const [showPast, setShowPast] = useState(false);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const pastFrom = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().slice(0, 10);
+  }, []);
+
+  const { data: slots, isLoading } = trpc.schedule.getRosterSummary.useQuery({
+    programType: programFilter === "all" ? undefined : programFilter,
+    from: showPast ? pastFrom : today,
+  }, { staleTime: 30_000 });
+
+  // Group by date
+  const grouped = useMemo(() => {
+    if (!slots) return [];
+    const map: Record<string, typeof slots> = {};
+    for (const s of slots) {
+      const raw: unknown = s.slotDate;
+      const dateStr = typeof raw === "string" ? raw.slice(0, 10) : (() => { const d = new Date(raw as any); return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; })();
+      if (!map[dateStr]) map[dateStr] = [];
+      map[dateStr].push(s);
+    }
+    return Object.entries(map).sort(([a], [b]) => a.localeCompare(b));
+  }, [slots]);
+
+  const totalEnrolled = slots?.reduce((sum, s) => sum + s.enrolled, 0) ?? 0;
+  const totalSlots = slots?.length ?? 0;
+
+  return (
+    <div className="space-y-4">
+      {/* Header controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold text-foreground">Session Roster</h2>
+          <p className="text-xs text-muted-foreground">{totalEnrolled} sign-up{totalEnrolled !== 1 ? 's' : ''} across {totalSlots} session{totalSlots !== 1 ? 's' : ''}</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={programFilter} onValueChange={setProgramFilter}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="All Programs" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Programs</SelectItem>
+              <SelectItem value="clinic_105">105 Clinic</SelectItem>
+              <SelectItem value="junior">Junior Program</SelectItem>
+              <SelectItem value="private_lesson">Private Lesson</SelectItem>
+              <SelectItem value="cardio_tennis">Cardio Tennis</SelectItem>
+              <SelectItem value="adult_beginner">Adult Beginner</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPast(p => !p)}
+            className={showPast ? "bg-primary/10 border-primary/30" : ""}
+          >
+            {showPast ? "Hide Past" : "Show Past 30 Days"}
+          </Button>
+        </div>
+      </div>
+
+      {/* Slot list */}
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-14 rounded-xl bg-muted animate-pulse" />
+          ))}
+        </div>
+      ) : grouped.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12 text-muted-foreground">
+            <Users className="w-10 h-10 mx-auto mb-3 opacity-30" />
+            <p className="font-medium">No sessions found</p>
+            <p className="text-xs mt-1">Try changing the program filter or enabling past sessions.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          {grouped.map(([dateStr, daySlots]) => {
+            const dateObj = new Date(dateStr + "T12:00:00");
+            const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+            const dayTotal = daySlots.reduce((s, x) => s + x.enrolled, 0);
+            return (
+              <div key={dateStr}>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-sm font-bold text-foreground">{dayLabel}</h3>
+                  <span className="text-xs text-muted-foreground">· {dayTotal} enrolled</span>
+                </div>
+                <div className="space-y-2">
+                  {daySlots.map(slot => (
+                    <SlotRosterRow key={slot.slotId} slot={slot} />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
