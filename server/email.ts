@@ -282,16 +282,6 @@ export async function sendBookingReservedCash(data: BookingConfirmationData & { 
         Please arrive 5–10 minutes early and bring your racquet and water. If you need to cancel or reschedule,
         please contact Coach Mario at least 24 hours in advance.
       </p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr>
-          <td align="center">
-            <a href="https://tennispromario.com/profile"
-               style="display:inline-block;background:#1a3a8f;color:#ffffff;font-weight:bold;font-size:14px;padding:12px 28px;border-radius:6px;text-decoration:none;">
-              View My Bookings →
-            </a>
-          </td>
-        </tr>
-      </table>
       ${contactBlock}`;
 
     const text = `Hi ${data.toName || "there"},\n\nYour spot has been reserved with RI Tennis Academy!\n\nProgram: ${data.programLabel}\n${data.sessionDate ? `Date: ${data.sessionDate}\n` : ""}${data.sessionTime ? `Time: ${data.sessionTime}\n` : ""}Booking #: ${data.bookingId}\nStatus: Spot Reserved\nPayment: ${payLabel} due at lesson\n\nPlease arrive 5–10 minutes early. To cancel or reschedule, contact Coach Mario at least 24 hours in advance.\nQuestions? Email ritennismario@gmail.com or call 401-965-5873.\n\n— RI Tennis Academy`;
