@@ -179,6 +179,16 @@ export default function Navbar() {
           {/* Announcements Bell — only when logged in */}
           {isAuthenticated && <AnnouncementsBell />}
 
+          {/* Admin shortcut — always visible, subtle */}
+          <Link href="/admin">
+            <button
+              title="Admin Dashboard"
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-accent/30 border border-white/20 hover:border-accent/50 flex items-center justify-center text-white/60 hover:text-accent transition-all font-black text-sm"
+            >
+              A
+            </button>
+          </Link>
+
           {/* Book Now CTA */}
           <Link href="/programs">
             <Button
@@ -296,6 +306,13 @@ export default function Navbar() {
                     </a>
                   ))}
                 </div>
+
+                {/* Admin shortcut */}
+                <Link href="/admin" onClick={() => setOpen(false)}>
+                  <Button variant="outline" className="w-full mb-2 border-white/20 text-white/70 hover:text-accent hover:border-accent/40 rounded-xl font-bold">
+                    Admin Dashboard
+                  </Button>
+                </Link>
 
                 {/* Book Now CTA - always visible in mobile */}
                 <Link href="/programs" onClick={() => setOpen(false)}>
