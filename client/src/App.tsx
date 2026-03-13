@@ -27,6 +27,7 @@ import WelcomeModal from "./components/WelcomeModal";
 import Leaderboard from "./pages/Leaderboard";
 import GiftCard from "./pages/GiftCard";
 import AdminNewsletter from "./pages/AdminNewsletter";
+import AdminLogin from "./pages/AdminLogin";
 import VoiceBooking from "./components/VoiceBooking";
 import Announcements from "./pages/Announcements";
 import NewsletterArchive from "./pages/NewsletterArchive";
@@ -68,6 +69,7 @@ function Router() {
           <Route path="/services" component={Services} />
           <Route path="/profile" component={Profile} />
           <Route path="/gallery" component={Gallery} />
+          <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/schedule" component={AdminSchedule} />
           <Route path="/schedule" component={Schedule} />

@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { stripeRouter } from "./stripeRouter";
 import { promoCodeRouter } from "./promoCodeRouter";
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { sdk } from "./_core/sdk";
+import { ENV } from "./_core/env";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
@@ -126,6 +128,42 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+
+    // Simple password-only admin login — no OAuth required
+    adminLogin: publicProcedure
+      .input(z.object({ password: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "Ritennismario";
+        if (input.password !== ADMIN_PASSWORD) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Incorrect password" });
+        }
+        // Find or create the owner admin user
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const ownerOpenId = ENV.ownerOpenId || "admin-local";
+        let adminUser = await db.select().from(users).where(eq(users.openId, ownerOpenId)).limit(1).then(r => r[0] ?? null);
+        if (!adminUser) {
+          // Create admin user record if it doesn't exist
+          await db.insert(users).values({
+            openId: ownerOpenId,
+            name: "Coach Mario",
+            email: null,
+            role: "admin",
+            loginMethod: "password",
+            lastSignedIn: new Date(),
+          }).onDuplicateKeyUpdate({ set: { role: "admin", lastSignedIn: new Date() } });
+          adminUser = await db.select().from(users).where(eq(users.openId, ownerOpenId)).limit(1).then(r => r[0] ?? null);
+        } else if (adminUser.role !== "admin") {
+          await db.update(users).set({ role: "admin", lastSignedIn: new Date() }).where(eq(users.openId, ownerOpenId));
+        } else {
+          await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.openId, ownerOpenId));
+        }
+        // Issue session cookie
+        const token = await sdk.createSessionToken(ownerOpenId, { name: "Coach Mario" });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true };
+      }),
   }),
 
   // ─── User Profile ───────────────────────────────────────────────────────────
