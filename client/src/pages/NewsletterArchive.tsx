@@ -13,16 +13,16 @@ export default function NewsletterArchive() {
       {/* Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-[#0f1f5c] to-[#0a0f1e] border-b border-white/10">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#ccff00] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#22c55e] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         </div>
         <div className="relative max-w-4xl mx-auto px-6 py-16 text-center">
-          <div className="inline-flex items-center gap-2 bg-[#ccff00]/10 border border-[#ccff00]/30 rounded-full px-4 py-1.5 text-[#ccff00] text-sm font-semibold mb-6 uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 bg-[#22c55e]/10 border border-[#22c55e]/30 rounded-full px-4 py-1.5 text-[#22c55e] text-sm font-semibold mb-6 uppercase tracking-widest">
             <Mail className="w-4 h-4" />
             Newsletter Archive
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
             RI Tennis Academy<br />
-            <span className="text-[#ccff00]">Newsletter</span>
+            <span className="text-[#22c55e]">Newsletter</span>
           </h1>
           <p className="text-white/60 text-lg max-w-xl mx-auto">
             Tips, updates, program schedules, and inspiration from Coach Mario Llano — straight from the court.
@@ -48,16 +48,16 @@ export default function NewsletterArchive() {
           <div className="grid gap-4">
             {newsletters.map((nl, idx) => (
               <Link key={nl.id} href={`/newsletter/${nl.slug}`}>
-                <Card className="bg-white/5 border-white/10 hover:bg-white/8 hover:border-[#ccff00]/30 transition-all duration-200 cursor-pointer group">
+                <Card className="bg-white/5 border-white/10 hover:bg-white/8 hover:border-[#22c55e]/30 transition-all duration-200 cursor-pointer group">
                   <CardContent className="p-6 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4 min-w-0">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#ccff00]/10 border border-[#ccff00]/20 flex items-center justify-center">
-                        <Mail className="w-5 h-5 text-[#ccff00]" />
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#22c55e]/10 border border-[#22c55e]/20 flex items-center justify-center">
+                        <Mail className="w-5 h-5 text-[#22c55e]" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           {idx === 0 && (
-                            <Badge className="bg-[#ccff00] text-[#0a0f1e] text-xs font-bold px-2 py-0.5">
+                            <Badge className="bg-[#22c55e] text-white text-xs font-bold px-2 py-0.5">
                               Latest
                             </Badge>
                           )}
@@ -67,7 +67,7 @@ export default function NewsletterArchive() {
                             </Badge>
                           )}
                         </div>
-                        <h3 className="text-white font-bold text-lg truncate group-hover:text-[#ccff00] transition-colors">
+                        <h3 className="text-white font-bold text-lg truncate group-hover:text-[#22c55e] transition-colors">
                           {nl.subject}
                         </h3>
                         {nl.publishedAt && (
@@ -82,7 +82,7 @@ export default function NewsletterArchive() {
                         )}
                       </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-[#ccff00] flex-shrink-0 transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-[#22c55e] flex-shrink-0 transition-colors" />
                   </CardContent>
                 </Card>
               </Link>
@@ -94,7 +94,7 @@ export default function NewsletterArchive() {
         <div className="mt-12 text-center">
           <p className="text-white/40 text-sm mb-4">Want to book a session with Coach Mario?</p>
           <Link href="/programs">
-            <Button className="bg-[#ccff00] text-[#0a0f1e] font-bold hover:bg-[#b8e600]">
+            <Button className="bg-[#22c55e] text-white font-bold hover:bg-[#16a34a]">
               Book a Session →
             </Button>
           </Link>

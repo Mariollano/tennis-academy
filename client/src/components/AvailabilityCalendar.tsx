@@ -191,7 +191,7 @@ export default function AvailabilityCalendar({ compact = false }: { compact?: bo
           </div>
           <p className="text-white/60 text-xs mb-3">{selectedInfo.totalSlots} session{selectedInfo.totalSlots !== 1 ? 's' : ''} scheduled</p>
           <Link href={`/schedule`}>
-            <Button size="sm" className="w-full rounded-xl text-primary font-bold text-xs" style={{ background: 'linear-gradient(135deg, #FACC15, #f59e0b)' }}>
+            <Button size="sm" className="w-full rounded-xl text-white font-bold text-xs" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
               <Calendar className="w-3.5 h-3.5 mr-1.5" />
               View & Book This Day
             </Button>

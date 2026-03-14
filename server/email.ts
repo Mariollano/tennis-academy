@@ -87,25 +87,49 @@ function buildEmailShell(bodyHtml: string): string {
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:30px 0;">
+<body style="margin:0;padding:0;background:#0A1520;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0A1520;padding:24px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#0D1B2A;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.4);">
+        <!-- Masthead with Logo -->
+        <tr><td style="background:#0D1B2A;padding:18px 28px;border-bottom:1px solid #253545;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="vertical-align:middle;">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="vertical-align:middle;padding-right:12px;">
+                      <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/ri-tennis-logo_17005d5c.png" alt="RI Tennis Academy" width="60" height="60" style="display:block;border-radius:50%;" />
+                    </td>
+                    <td style="vertical-align:middle;">
+                      <div style="font-size:18px;font-weight:900;letter-spacing:2px;color:#ffffff;line-height:1;">RI <span style="color:#22c55e;">TENNIS</span> ACADEMY</div>
+                      <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#8A9BAD;margin-top:3px;">Coach Mario Llano · Rhode Island</div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td style="text-align:right;vertical-align:middle;">
+                <div style="font-size:9px;letter-spacing:2px;color:#22c55e;font-style:italic;">#DeleteFear</div>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        <!-- Banner Photo -->
         <tr>
           <td style="padding:0;">
             <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/email-header-banner_4eee588e.jpg"
               alt="RI Tennis Academy – Coach Mario Llano"
               width="600"
-              style="display:block;width:100%;max-width:600px;height:auto;border-radius:8px 8px 0 0;"
+              style="display:block;width:100%;max-width:600px;height:auto;"
             />
           </td>
         </tr>
-        <tr><td style="padding:32px;">${bodyHtml}</td></tr>
+        <tr><td style="padding:28px 32px;background:#ffffff;">${bodyHtml}</td></tr>
         <tr>
-          <td style="background:#f0f3ff;padding:16px 32px;text-align:center;border-top:1px solid #dde3f5;">
-            <p style="margin:0;font-size:12px;color:#888;">
+          <td style="background:#0D1B2A;padding:18px 28px;text-align:center;border-top:1px solid #253545;">
+            <p style="margin:0;font-size:11px;color:#8A9BAD;line-height:1.8;">
               RI Tennis Academy · Rhode Island's Premier Tennis Academy<br>
-              <a href="https://tennispromario.com" style="color:#1a3a8f;">tennispromario.com</a> · 401-965-5873<br>
+              <a href="https://tennispromario.com" style="color:#22c55e;">tennispromario.com</a> · <a href="tel:4019655873" style="color:#8A9BAD;">401-965-5873</a><br>
               This is an automated message. Please do not reply to this email.
             </p>
           </td>

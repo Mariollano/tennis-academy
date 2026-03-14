@@ -74,7 +74,7 @@ export default function NewsletterView() {
 
           <div className="flex items-center gap-2 min-w-0">
             {newsletter.season && (
-              <span className="text-[#ccff00] text-xs font-bold uppercase tracking-widest hidden sm:inline">
+              <span className="text-[#22c55e] text-xs font-bold uppercase tracking-widest hidden sm:inline">
                 {newsletter.season}
               </span>
             )}
@@ -98,7 +98,7 @@ export default function NewsletterView() {
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4 text-[#ccff00]" />
+                <Check className="w-4 h-4 text-[#22c55e]" />
                 <span className="hidden sm:inline">Copied!</span>
               </>
             ) : (
@@ -170,7 +170,7 @@ export default function NewsletterView() {
       <div className="bg-[#0f1f5c] py-10 text-center">
         <p className="text-white/60 text-sm mb-4">Ready to take your game to the next level?</p>
         <Link href="/programs">
-          <Button className="bg-[#ccff00] text-[#0a0f1e] font-bold hover:bg-[#b8e600] text-base px-8 py-3">
+          <Button className="bg-[#22c55e] text-white font-bold hover:bg-[#16a34a] text-base px-8 py-3">
             Book a Session with Coach Mario →
           </Button>
         </Link>

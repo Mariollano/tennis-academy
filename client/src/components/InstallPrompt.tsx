@@ -92,8 +92,8 @@ export function InstallPrompt() {
 
             {isIOS && (
               <div className="bg-white/5 rounded-xl p-3 text-xs text-gray-300 space-y-1.5">
-                <p className="font-semibold text-[#ccff00] mb-2">📱 iPhone / iPad:</p>
-                <p>1. Tap the <strong className="text-white">Share</strong> button <span className="text-[#ccff00]">↑</span> at the bottom of Safari</p>
+                <p className="font-semibold text-[#22c55e] mb-2">📱 iPhone / iPad:</p>
+                <p>1. Tap the <strong className="text-white">Share</strong> button <span className="text-[#22c55e]">↑</span> at the bottom of Safari</p>
                 <p>2. Scroll down and tap <strong className="text-white">"Add to Home Screen"</strong></p>
                 <p>3. Tap <strong className="text-white">"Add"</strong> — done! ✅</p>
               </div>
@@ -101,7 +101,7 @@ export function InstallPrompt() {
 
             {isAndroid && !deferredPrompt && (
               <div className="bg-white/5 rounded-xl p-3 text-xs text-gray-300 space-y-1.5">
-                <p className="font-semibold text-[#ccff00] mb-2">🤖 Android:</p>
+                <p className="font-semibold text-[#22c55e] mb-2">🤖 Android:</p>
                 <p>1. Tap the <strong className="text-white">3-dot menu ⋮</strong> at the top right</p>
                 <p>2. Tap <strong className="text-white">"Add to Home Screen"</strong> or <strong className="text-white">"Install App"</strong></p>
                 <p>3. Tap <strong className="text-white">"Install"</strong> — done! ✅</p>
@@ -112,7 +112,7 @@ export function InstallPrompt() {
               <button
                 onClick={handleInstall}
                 className="w-full py-2.5 rounded-xl font-bold text-sm text-black flex items-center justify-center gap-2"
-                style={{ background: "#ccff00" }}
+                style={{ background: "#22c55e" }}
               >
                 <Download size={16} />
                 Install App — It's Free!

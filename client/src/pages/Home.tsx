@@ -226,14 +226,14 @@ function TipOfTheWeekSection() {
   return (
     <section className="py-20 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1e293b 50%, #0F172A 100%)' }}>
       {/* Decorative tennis ball accent */}
-      <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, #FACC15 0%, transparent 70%)' }} />
+      <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, #22c55e 0%, transparent 70%)' }} />
       <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full opacity-5" style={{ background: 'radial-gradient(circle, #2563EB 0%, transparent 70%)' }} />
       <div className="container relative">
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #FACC15, #f59e0b)' }}>
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
                 <Lightbulb className="w-6 h-6 text-primary" />
               </div>
               <div>
@@ -288,7 +288,7 @@ function TipOfTheWeekSection() {
                   </div>
                 </div>
                 <Link href="/mental-coaching">
-                  <Button size="sm" className="rounded-full text-primary font-bold" style={{ background: 'linear-gradient(135deg, #FACC15, #f59e0b)' }}>
+                  <Button size="sm" className="rounded-full text-white font-bold" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
                     More Tips <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </Link>

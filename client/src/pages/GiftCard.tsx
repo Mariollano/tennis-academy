@@ -38,7 +38,7 @@ function GiftCardSuccess() {
 
         {code && (
           <div className="bg-gradient-to-br from-[#0f1f5c] to-[#1a3a8f] rounded-2xl p-6 mb-6">
-            <div className="text-xs text-[#ccff00] font-bold letter-spacing-2 uppercase mb-2">Gift Code</div>
+            <div className="text-xs text-[#22c55e] font-bold letter-spacing-2 uppercase mb-2">Gift Code</div>
             <div className="text-2xl font-black text-white font-mono tracking-widest mb-4">{code}</div>
             <Button
               onClick={handleCopy}
@@ -125,12 +125,12 @@ export default function GiftCard() {
       <div className="bg-gradient-to-br from-[#0f1f5c] via-[#1a3a8f] to-[#0f1f5c] text-white py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
-            <Gift className="h-4 w-4 text-[#ccff00]" />
+            <Gift className="h-4 w-4 text-[#22c55e]" />
             <span>Gift a Session</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">
             THE PERFECT GIFT<br />
-            <span className="text-[#ccff00]">FOR TENNIS LOVERS</span>
+            <span className="text-[#22c55e]">FOR TENNIS LOVERS</span>
           </h1>
           <p className="text-white/70 text-lg max-w-xl mx-auto">
             Give the gift of tennis — a private lesson, clinic session, or junior program day. 
@@ -255,14 +255,14 @@ export default function GiftCard() {
           <div className="space-y-6">
             {/* Preview card */}
             <div className="bg-gradient-to-br from-[#0f1f5c] to-[#1a3a8f] rounded-2xl p-6 text-white">
-              <div className="text-xs text-[#ccff00] font-bold tracking-widest uppercase mb-4">RI TENNIS ACADEMY</div>
+              <div className="text-xs text-[#22c55e] font-bold tracking-widest uppercase mb-4">RI TENNIS ACADEMY</div>
               <div className="text-2xl font-black mb-1">🎾 Gift Card</div>
               <div className="text-white/70 text-sm mb-4">
                 {selectedProgramData ? selectedProgramData.label : "Select a program above"}
               </div>
               <div className="bg-white/10 rounded-xl p-4 text-center">
                 <div className="text-xs text-white/60 mb-1">Gift Code</div>
-                <div className="text-lg font-mono font-bold tracking-widest text-[#ccff00]">GIFT-XXXX-XXXX</div>
+                <div className="text-lg font-mono font-bold tracking-widest text-[#22c55e]">GIFT-XXXX-XXXX</div>
               </div>
               <div className="mt-4 text-xs text-white/50 text-center">Valid for 1 year · Redeemable at checkout</div>
             </div>

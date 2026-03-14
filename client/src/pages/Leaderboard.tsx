@@ -44,7 +44,7 @@ export default function Leaderboard() {
       <div className="bg-gradient-to-br from-[#0f1f5c] via-[#1a3a8f] to-[#0f1f5c] text-white py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
-            <Trophy className="h-4 w-4 text-[#ccff00]" />
+            <Trophy className="h-4 w-4 text-[#22c55e]" />
             <span>Community Leaderboard</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">
@@ -56,15 +56,15 @@ export default function Leaderboard() {
           {/* Stats bar */}
           <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
             <div className="bg-white/10 rounded-xl p-4">
-              <div className="text-2xl font-black text-[#ccff00]">{stats?.totalSessions ?? "—"}</div>
+              <div className="text-2xl font-black text-[#22c55e]">{stats?.totalSessions ?? "—"}</div>
               <div className="text-xs text-white/60 mt-1">Total Sessions</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4">
-              <div className="text-2xl font-black text-[#ccff00]">{stats?.totalStudents ?? "—"}</div>
+              <div className="text-2xl font-black text-[#22c55e]">{stats?.totalStudents ?? "—"}</div>
               <div className="text-xs text-white/60 mt-1">Active Players</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4">
-              <div className="text-2xl font-black text-[#ccff00]">{stats?.thisMonthSessions ?? "—"}</div>
+              <div className="text-2xl font-black text-[#22c55e]">{stats?.thisMonthSessions ?? "—"}</div>
               <div className="text-xs text-white/60 mt-1">This Month</div>
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function Leaderboard() {
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* My rank card */}
         {user && myRank && (
-          <div className="mb-8 bg-gradient-to-r from-[#1a3a8f]/10 to-[#ccff00]/10 border border-[#1a3a8f]/20 rounded-2xl p-6 flex items-center justify-between">
+          <div className="mb-8 bg-gradient-to-r from-[#1a3a8f]/10 to-[#22c55e]/10 border border-[#1a3a8f]/20 rounded-2xl p-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-[#1a3a8f] flex items-center justify-center text-white font-black text-lg">
                 #{myRank.rank}

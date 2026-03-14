@@ -72,6 +72,13 @@ export default function AdminNewsletter() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const sendPreviewMutation = trpc.newsletter.sendPreviewToOwner.useMutation({
+    onSuccess: (data: any) => {
+      toast.success(`✅ Preview sent to ${data.sentTo}! Check your inbox, then click "Send to All Students" when ready.`);
+    },
+    onError: (err: any) => toast.error("Preview send failed: " + (err.message || "Unknown error")),
+  });
+
   const aiGenerateMutation = trpc.newsletter.aiGenerate.useMutation({
     onSuccess: (data: any) => {
       if (data.subject) setSubject(data.subject);
@@ -227,21 +234,21 @@ export default function AdminNewsletter() {
       <div className="bg-gradient-to-br from-[#0f1f5c] to-[#1a3a8f] text-white py-10 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <Mail className="h-6 w-6 text-[#ccff00]" />
+            <Mail className="h-6 w-6 text-[#22c55e]" />
             <h1 className="text-3xl font-black">Newsletter Manager</h1>
           </div>
           <p className="text-white/60">Send weekly updates, tips, and schedules to your students.</p>
           <div className="flex gap-4 mt-6 flex-wrap">
             <div className="bg-white/10 rounded-xl px-5 py-3">
-              <div className="text-2xl font-black text-[#ccff00]">{subscriberCount}</div>
+              <div className="text-2xl font-black text-[#22c55e]">{subscriberCount}</div>
               <div className="text-xs text-white/60">Students (recipients)</div>
             </div>
             <div className="bg-white/10 rounded-xl px-5 py-3">
-              <div className="text-2xl font-black text-[#ccff00]">{sentNewsletters.length}</div>
+              <div className="text-2xl font-black text-[#22c55e]">{sentNewsletters.length}</div>
               <div className="text-xs text-white/60">Newsletters Sent</div>
             </div>
             <div className="bg-white/10 rounded-xl px-5 py-3">
-              <div className="text-2xl font-black text-[#ccff00]">{draftNewsletters.length}</div>
+              <div className="text-2xl font-black text-[#22c55e]">{draftNewsletters.length}</div>
               <div className="text-xs text-white/60">Drafts</div>
             </div>
           </div>
@@ -425,6 +432,31 @@ export default function AdminNewsletter() {
                     </Button>
                   </div>
 
+                  {/* Step 2b: Send Preview to Owner */}
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1.5 font-medium">Step 2b — Send preview to your inbox</p>
+                    <Button
+                      onClick={() => {
+                        if (!draftId) {
+                          toast.error("Save the draft first (Step 1) before sending a preview.");
+                          return;
+                        }
+                        sendPreviewMutation.mutate({ id: draftId });
+                      }}
+                      disabled={sendPreviewMutation.isPending || !draftId || !subject.trim() || !body.trim()}
+                      variant="outline"
+                      className="w-full border-[#22c55e] text-[#22c55e] hover:bg-[#22c55e]/10"
+                      type="button"
+                    >
+                      {sendPreviewMutation.isPending ? (
+                        <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Sending preview...</>
+                      ) : (
+                        <><Mail className="h-4 w-4 mr-2" /> Send Preview to Me</>
+                      )}
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1">Sends the draft to ritennismario@gmail.com for review.</p>
+                  </div>
+
                   {/* Step 3: Send */}
                   <div>
                     <p className="text-xs text-muted-foreground mb-1.5 font-medium">Step 3 — Send to all students</p>
@@ -591,7 +623,7 @@ export default function AdminNewsletter() {
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm truncate">{item.subject}</div>
                           {item.season && (
-                            <div className="text-xs text-[#ccff00] font-bold">{item.season}</div>
+                            <div className="text-xs text-[#22c55e] font-bold">{item.season}</div>
                           )}
                           {item.slug && (
                             <div className="text-xs text-muted-foreground font-mono mt-0.5 truncate">

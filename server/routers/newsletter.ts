@@ -55,18 +55,18 @@ function buildNewsletterHtml(nl: {
 }): string {
   const scheduleHtml = nl.includeSchedule
     ? `<tr><td style="padding:24px 32px 0;">
-        <h3 style="margin:0 0 12px;font-size:16px;color:#1a3a8f;font-family:Arial,sans-serif;">📅 Upcoming Programs & Schedule</h3>
+        <h3 style="margin:0 0 12px;font-size:16px;color:#22c55e;font-family:Arial,sans-serif;">📅 Upcoming Programs & Schedule</h3>
         <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;">
-          <thead><tr style="background:#1a3a8f;color:#fff;">
+          <thead><tr style="background:#22c55e;color:#0D1B2A;">
             <th style="padding:8px 12px;text-align:left;">Program</th>
             <th style="padding:8px 12px;text-align:left;">Schedule</th>
             <th style="padding:8px 12px;text-align:right;">Price</th>
           </tr></thead>
           <tbody>
-            <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Private Lesson</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">By appointment</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$120/hr</td></tr>
-            <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">105 Game Clinic</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon/Wed/Fri/Sun</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$35/1.5hr</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Junior Program</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$80/day · $350/wk</td></tr>
-            <tr><td style="padding:8px 12px;">Summer Camp</td><td style="padding:8px 12px;">Mon–Fri, 9 AM–2 PM</td><td style="padding:8px 12px;text-align:right;">$90/day · $420/wk</td></tr>
+            <tr style="background:rgba(255,255,255,0.05);"><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#F4F6F0;">Private Lesson</td><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#8A9BAD;">By appointment</td><td style="padding:8px 12px;border-bottom:1px solid #253545;text-align:right;color:#F4F6F0;">$120/hr</td></tr>
+            <tr><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#F4F6F0;">105 Game Clinic</td><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#8A9BAD;">Mon/Wed/Fri/Sun</td><td style="padding:8px 12px;border-bottom:1px solid #253545;text-align:right;color:#F4F6F0;">$35/1.5hr</td></tr>
+            <tr style="background:rgba(255,255,255,0.05);"><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#F4F6F0;">Junior Program</td><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#8A9BAD;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #253545;text-align:right;color:#F4F6F0;">$80/day · $350/wk</td></tr>
+            <tr><td style="padding:8px 12px;color:#F4F6F0;">Summer Camp</td><td style="padding:8px 12px;color:#8A9BAD;">Mon–Fri, 9 AM–2 PM</td><td style="padding:8px 12px;text-align:right;color:#F4F6F0;">$90/day · $420/wk</td></tr>
           </tbody>
         </table>
       </td></tr>`
@@ -74,47 +74,76 @@ function buildNewsletterHtml(nl: {
 
   const tennisTipHtml = nl.tennisTip
     ? `<tr><td style="padding:24px 32px 0;">
-        <div style="background:#f0f7ff;border-left:4px solid #1a3a8f;padding:16px 20px;border-radius:0 8px 8px 0;">
-          <h3 style="margin:0 0 8px;font-size:15px;color:#1a3a8f;font-family:Arial,sans-serif;">🎾 Tennis Tip of the Week</h3>
-          <p style="margin:0;font-size:14px;color:#333;line-height:1.6;">${nl.tennisTip}</p>
+        <div style="background:rgba(34,197,94,0.08);border-left:4px solid #22c55e;padding:16px 20px;border-radius:0 8px 8px 0;">
+          <h3 style="margin:0 0 8px;font-size:15px;color:#22c55e;font-family:Arial,sans-serif;">🎾 Tennis Tip of the Week</h3>
+          <p style="margin:0;font-size:14px;color:#F4F6F0;line-height:1.6;">${nl.tennisTip}</p>
         </div>
       </td></tr>`
     : "";
 
   const mentalTipHtml = nl.mentalTip
     ? `<tr><td style="padding:24px 32px 0;">
-        <div style="background:#f5f0ff;border-left:4px solid #7c3aed;padding:16px 20px;border-radius:0 8px 8px 0;">
-          <h3 style="margin:0 0 8px;font-size:15px;color:#7c3aed;font-family:Arial,sans-serif;">🧠 Mental Tip of the Week</h3>
-          <p style="margin:0;font-size:14px;color:#333;line-height:1.6;">${nl.mentalTip}</p>
+        <div style="background:rgba(124,58,237,0.1);border-left:4px solid #7c3aed;padding:16px 20px;border-radius:0 8px 8px 0;">
+          <h3 style="margin:0 0 8px;font-size:15px;color:#a78bfa;font-family:Arial,sans-serif;">🧠 Mental Tip of the Week</h3>
+          <p style="margin:0;font-size:14px;color:#F4F6F0;line-height:1.6;">${nl.mentalTip}</p>
         </div>
       </td></tr>`
     : "";
 
   const winnerHtml = nl.winnerSpotlight
     ? `<tr><td style="padding:24px 32px 0;">
-        <div style="background:#fffbeb;border-left:4px solid #f59e0b;padding:16px 20px;border-radius:0 8px 8px 0;">
-          <h3 style="margin:0 0 8px;font-size:15px;color:#d97706;font-family:Arial,sans-serif;">🏆 Weekly Winner Spotlight</h3>
-          <p style="margin:0;font-size:14px;color:#333;line-height:1.6;">${nl.winnerSpotlight}</p>
+        <div style="background:rgba(245,158,11,0.1);border-left:4px solid #f59e0b;padding:16px 20px;border-radius:0 8px 8px 0;">
+          <h3 style="margin:0 0 8px;font-size:15px;color:#fbbf24;font-family:Arial,sans-serif;">🏆 Weekly Winner Spotlight</h3>
+          <p style="margin:0;font-size:14px;color:#F4F6F0;line-height:1.6;">${nl.winnerSpotlight}</p>
         </div>
       </td></tr>`
     : "";
 
   const bodyHtml = nl.body
-    ? `<tr><td style="padding:24px 32px 0;font-size:14px;color:#333;line-height:1.7;">${nl.body.replace(/\n/g, "<br>")}</td></tr>`
+    ? `<tr><td style="padding:24px 32px 0;font-size:14px;color:#9BAFC0;line-height:1.8;">${nl.body.replace(/\n/g, "<br>")}</td></tr>`
     : "";
 
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:24px 0;">
+<body style="margin:0;padding:0;background:#0A1520;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0A1520;padding:24px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-        <!-- Header -->
-        <tr><td style="background:linear-gradient(135deg,#0f1f5c 0%,#1a3a8f 100%);padding:32px;text-align:center;">
-          <div style="font-size:13px;color:#ccff00;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">RI TENNIS ACADEMY</div>
-          <h1 style="margin:0;font-size:26px;color:#fff;font-weight:900;line-height:1.2;">${nl.headline || "Weekly Tennis Update"}</h1>
-          <div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.6);">Coach Mario Llano · Rhode Island</div>
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#0D1B2A;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.4);">
+        <!-- Masthead with Logo -->
+        <tr><td style="background:#0D1B2A;padding:20px 32px;border-bottom:1px solid #253545;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="vertical-align:middle;">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="vertical-align:middle;padding-right:14px;">
+                      <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/ri-tennis-logo_17005d5c.png" alt="RI Tennis Academy" width="72" height="72" style="display:block;border-radius:50%;object-fit:contain;" />
+                    </td>
+                    <td style="vertical-align:middle;">
+                      <div style="font-size:20px;font-weight:900;letter-spacing:2px;color:#ffffff;line-height:1;">RI <span style="color:#22c55e;">TENNIS</span> ACADEMY</div>
+                      <div style="font-size:9px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#8A9BAD;margin-top:4px;">COACH MARIO LLANO · RHODE ISLAND</div>
+                      <div style="font-size:9px;letter-spacing:2px;color:#22c55e;margin-top:3px;font-style:italic;">#DeleteFear · #PlayStrong</div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td style="text-align:right;vertical-align:middle;">
+                <div style="font-size:9px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#8A9BAD;margin-bottom:4px;">WEEKLY NEWSLETTER</div>
+                <div style="font-size:16px;font-style:italic;color:#F4F6F0;font-weight:300;">Spring 2026</div>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        <!-- Hero Header -->
+        <tr><td style="background:linear-gradient(135deg,#162436 0%,#1E3045 100%);padding:36px 32px 32px;text-align:center;border-bottom:3px solid #22c55e;">
+          <div style="display:inline-block;margin-bottom:14px;">
+            <span style="display:inline-block;width:26px;height:2px;background:#22c55e;vertical-align:middle;"></span>
+            <span style="font-size:9px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#22c55e;vertical-align:middle;margin:0 8px;">COACH MARIO LLANO</span>
+            <span style="display:inline-block;width:26px;height:2px;background:#22c55e;vertical-align:middle;"></span>
+          </div>
+          <h1 style="margin:0 0 10px;font-size:30px;color:#fff;font-weight:900;line-height:1.15;letter-spacing:1px;">${nl.headline || "Weekly Tennis Update"}</h1>
+          <div style="font-size:12px;color:#8A9BAD;margin-top:8px;">Rhode Island Tennis Academy · Weekly Update</div>
         </td></tr>
         <!-- Body sections -->
         ${bodyHtml}
@@ -123,13 +152,35 @@ function buildNewsletterHtml(nl: {
         ${mentalTipHtml}
         ${winnerHtml}
         <!-- CTA -->
-        <tr><td style="padding:32px;text-align:center;">
-          <a href="https://tennispro-kzzfscru.manus.space/programs" style="display:inline-block;background:#ccff00;color:#0f1f5c;font-weight:900;font-size:15px;padding:14px 32px;border-radius:8px;text-decoration:none;letter-spacing:0.5px;">BOOK A SESSION →</a>
+        <tr><td style="background:#162436;padding:36px 32px;text-align:center;border-top:1px solid #253545;">
+          <div style="font-size:9px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#22c55e;margin-bottom:12px;">READY TO PLAY?</div>
+          <div style="font-size:22px;font-weight:900;color:#ffffff;margin-bottom:8px;line-height:1.2;">TAKE YOUR GAME<br><span style="color:#22c55e;">TO THE NEXT LEVEL</span></div>
+          <div style="font-size:13px;color:#8A9BAD;margin-bottom:22px;">Book a session with Coach Mario today.</div>
+          <a href="https://www.tennispromario.com/programs" style="display:inline-block;background:#22c55e;color:#ffffff;font-weight:900;font-size:13px;padding:14px 36px;border-radius:100px;text-decoration:none;letter-spacing:2px;text-transform:uppercase;">BOOK A SESSION →</a>
         </td></tr>
         <!-- Footer -->
-        <tr><td style="background:#f9f9f9;padding:20px 32px;text-align:center;font-size:11px;color:#999;border-top:1px solid #eee;">
-          RI Tennis Academy · Coach Mario Llano · Rhode Island<br>
-          <a href="https://tennispro-kzzfscru.manus.space" style="color:#1a3a8f;">tennispro-kzzfscru.manus.space</a>
+        <tr><td style="background:#0D1B2A;padding:22px 32px;border-top:1px solid #253545;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="vertical-align:top;">
+                <div style="font-size:14px;font-weight:900;letter-spacing:2px;color:#ffffff;margin-bottom:4px;">RI <span style="color:#22c55e;">TENNIS</span> ACADEMY</div>
+                <div style="font-size:11px;color:#8A9BAD;line-height:1.9;">
+                  Coach Mario Llano · Rhode Island<br>
+                  <a href="mailto:ritennismario@gmail.com" style="color:#22c55e;text-decoration:none;">ritennismario@gmail.com</a><br>
+                  <a href="tel:4019655873" style="color:#8A9BAD;text-decoration:none;">401-965-5873</a>
+                </div>
+              </td>
+              <td style="text-align:right;vertical-align:top;">
+                <div style="font-size:10px;color:#8A9BAD;line-height:2.2;">
+                  <a href="https://www.tennispromario.com" style="display:block;color:#8A9BAD;text-decoration:none;">tennispromario.com</a>
+                  <a href="https://www.tennispromario.com/newsletter" style="display:block;color:#8A9BAD;text-decoration:none;">Newsletter Archive</a>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="background:#0a1520;padding:12px 32px;text-align:center;font-size:10px;color:#3A5060;border-top:1px solid #253545;">
+          You are receiving this because you are a student at RI Tennis Academy.
         </td></tr>
       </table>
     </td></tr>
@@ -407,6 +458,39 @@ export const newsletterRouter = router({
       }).where(eq(newsletters.id, input.id));
 
       return { sent, total: subscribers.length };
+    }),
+
+  // ── Send preview email to owner for approval (admin) ───────────────────────
+  sendPreviewToOwner: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      const rows = await db.select().from(newsletters).where(eq(newsletters.id, input.id)).limit(1);
+      if (!rows.length) throw new TRPCError({ code: "NOT_FOUND", message: "Newsletter not found" });
+      const nl = rows[0];
+      if (!isEmailConfigured()) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Email not configured" });
+      }
+      const ownerEmail = process.env.EMAIL_USER;
+      if (!ownerEmail) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Owner email not configured" });
+      }
+      const htmlBody = buildNewsletterHtml(nl);
+      // Wrap with approval banner at top of body
+      const approvalBanner = `<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:8px;padding:16px 20px;margin:0 0 0 0;font-family:Arial,sans-serif;"><p style="margin:0 0 6px;font-size:15px;font-weight:bold;color:#856404;">&#128203; PREVIEW &mdash; For Your Approval Only</p><p style="margin:0;font-size:13px;color:#856404;">This is exactly how the newsletter will look to your students. Review it, then go back to the Newsletter Manager and click <strong>"Send to All Students"</strong> when ready.</p></div>`;
+      const previewHtml = htmlBody.replace(/<body([^>]*)>/, `<body$1>${approvalBanner}`);
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_APP_PASSWORD },
+      });
+      await transporter.sendMail({
+        from: `"RI Tennis Academy" <${process.env.EMAIL_USER}>`,
+        to: ownerEmail,
+        subject: `[PREVIEW FOR APPROVAL] ${nl.subject}`,
+        html: previewHtml,
+      });
+      return { ok: true, sentTo: ownerEmail };
     }),
 
   // ── Preview newsletter HTML (admin) ─────────────────────────────────────
