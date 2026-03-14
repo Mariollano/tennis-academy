@@ -438,3 +438,9 @@
 - [x] Upload new newsletter HTML from Admin panel (replaces /newsletter/latest)
 - [x] Back-to-site banner injected at top of /newsletter/latest page
 - [x] Newsletter Archive link added to navbar (already present)
+
+## Newsletter Latest Fix (Mar 14)
+- [x] Store newsletter HTML in S3 (not local file) so it survives deploys
+- [x] Update /newsletter/latest route to fetch from S3
+- [x] Seed initial newsletter HTML into S3
+- [x] Update admin upload endpoint to write to S3 instead of local file

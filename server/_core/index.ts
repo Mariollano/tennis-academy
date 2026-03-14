@@ -17,7 +17,7 @@ import { bookings, payments, programs, users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { notifyOwner } from "./notification";
 import { startReminderScheduler } from "../reminderScheduler";
-import { storagePut } from "../storage";
+import { storagePut, storageGet } from "../storage";
 import { sendSms, isTwilioConfigured } from "../sms";
 import { sendBookingConfirmation, sendBookingConfirmed, isEmailConfigured } from "../email";
 import { handleIcalFeed } from "../ical";
@@ -176,10 +176,28 @@ async function startServer() {
   app.get("/api/calendar/:token/bookings.ics", handleIcalFeed);
 
   // Newsletter: serve the latest HTML newsletter inline (renders in browser)
-  app.get("/newsletter/latest", (_req, res) => {
+  app.get("/newsletter/latest", async (_req, res) => {
     try {
-      const __dirname = dirname(fileURLToPath(import.meta.url));
-      const html = readFileSync(join(__dirname, "../newsletter-latest.html"), "utf-8");
+      // Try S3 first (production), fall back to local file (dev)
+      let html: string | null = null;
+      try {
+        const { url } = await storageGet("newsletter/latest.html");
+        const resp = await fetch(url);
+        if (resp.ok) html = await resp.text();
+      } catch { /* fall through to local file */ }
+
+      if (!html) {
+        // Local file fallback (dev environment)
+        try {
+          const __dirname = dirname(fileURLToPath(import.meta.url));
+          html = readFileSync(join(__dirname, "../newsletter-latest.html"), "utf-8");
+        } catch { /* no local file either */ }
+      }
+
+      if (!html) {
+        return res.status(404).send("<html><body style='font-family:sans-serif;text-align:center;padding:60px;'><h2>Newsletter coming soon!</h2><p><a href='/'>Back to RI Tennis Academy</a></p></body></html>");
+      }
+
       // Inject a back-to-site banner just after <body>
       const banner = `
 <div style="position:sticky;top:0;z-index:9999;background:#0f172a;border-bottom:2px solid #22c55e;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;font-family:sans-serif;">
@@ -193,8 +211,9 @@ async function startServer() {
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.setHeader("X-Content-Type-Options", "nosniff");
       res.send(withBanner);
-    } catch {
-      res.status(404).send("Newsletter not found");
+    } catch (err) {
+      console.error("[Newsletter] Error serving latest:", err);
+      res.status(500).send("Error loading newsletter");
     }
   });
 
@@ -223,10 +242,8 @@ async function startServer() {
       if (!user) return res.status(401).json({ error: "Not authenticated" });
       if (user?.role !== "admin") return res.status(403).json({ error: "Admin only" });
       if (!req.file) return res.status(400).json({ error: "No file provided" });
-      const __dirname = dirname(fileURLToPath(import.meta.url));
-      const dest = join(__dirname, "../newsletter-latest.html");
-      const { writeFileSync } = await import("fs");
-      writeFileSync(dest, req.file.buffer);
+      // Upload to S3 so it persists across deploys
+      await storagePut("newsletter/latest.html", req.file.buffer, "text/html");
       return res.json({ ok: true, message: "Newsletter updated successfully" });
     } catch (err) {
       console.error("[NewsletterUpload] Error:", err);
