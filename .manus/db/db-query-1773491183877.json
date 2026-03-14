@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, slug, subject, status, publishedAt, CHAR_LENGTH(htmlContent) as html_length FROM newsletters WHERE slug = 'spring-2026';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, slug, subject, status, publishedAt, CHAR_LENGTH(htmlContent) as html_length FROM newsletters WHERE slug = 'spring-2026';",
+  "rows": [
+    {
+      "id": "1",
+      "slug": "spring-2026",
+      "subject": "RI Tennis Academy — Spring 2026 Newsletter",
+      "status": "published",
+      "publishedAt": "2026-03-11 15:10:27",
+      "html_length": "1003231"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tslug\tsubject\tstatus\tpublishedAt\thtml_length\n1\tspring-2026\tRI Tennis Academy — Spring 2026 Newsletter\tpublished\t2026-03-11 15:10:27\t1003231\n",
+  "stderr": "",
+  "execution_time_ms": 254
+}

@@ -47,7 +47,7 @@ export default function NewsletterArchive() {
         ) : (
           <div className="grid gap-4">
             {newsletters.map((nl, idx) => (
-              <Link key={nl.id} href={`/newsletter/${nl.slug}`}>
+              <a key={nl.id} href={`/api/newsletter/${nl.slug}`} target="_blank" rel="noopener noreferrer" className="block">
                 <Card className="bg-white/5 border-white/10 hover:bg-white/8 hover:border-[#22c55e]/30 transition-all duration-200 cursor-pointer group">
                   <CardContent className="p-6 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4 min-w-0">
@@ -85,7 +85,7 @@ export default function NewsletterArchive() {
                     <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-[#22c55e] flex-shrink-0 transition-colors" />
                   </CardContent>
                 </Card>
-              </Link>
+              </a>
             ))}
           </div>
         )}

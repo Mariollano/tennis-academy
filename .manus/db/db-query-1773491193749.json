@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, slug, status, CASE WHEN htmlContent IS NULL THEN 'NULL' WHEN htmlContent = '' THEN 'EMPTY' ELSE CONCAT('HAS_CONTENT_', CHAR_LENGTH(htmlContent), '_chars') END as html_status FROM newsletters LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, slug, status, CASE WHEN htmlContent IS NULL THEN 'NULL' WHEN htmlContent = '' THEN 'EMPTY' ELSE CONCAT('HAS_CONTENT_', CHAR_LENGTH(htmlContent), '_chars') END as html_status FROM newsletters LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "slug": "spring-2026",
+      "status": "published",
+      "html_status": "HAS_CONTENT_1003231_chars"
+    },
+    {
+      "id": "30001",
+      "slug": "friday-focus-power-up-your-weekend-tennis-1773407163557",
+      "status": "sent",
+      "html_status": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tslug\tstatus\thtml_status\n1\tspring-2026\tpublished\tHAS_CONTENT_1003231_chars\n30001\tfriday-focus-power-up-your-weekend-tennis-1773407163557\tsent\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

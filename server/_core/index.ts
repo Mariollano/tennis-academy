@@ -176,7 +176,7 @@ async function startServer() {
   app.get("/api/calendar/:token/bookings.ics", handleIcalFeed);
 
   // Newsletter: serve the latest HTML newsletter inline (renders in browser)
-  app.get("/newsletter/latest", async (_req, res) => {
+  app.get("/api/newsletter/latest", async (_req, res) => {
     try {
       // Try S3 first (production), fall back to local file (dev)
       let html: string | null = null;
@@ -214,6 +214,40 @@ async function startServer() {
     } catch (err) {
       console.error("[Newsletter] Error serving latest:", err);
       res.status(500).send("Error loading newsletter");
+    }
+  });
+
+  // Newsletter: serve a specific newsletter by slug from the database
+  app.get("/api/newsletter/:slug", async (req, res) => {
+    const { slug } = req.params;
+    // 'latest' is handled by the route above — this handles named slugs
+    if (slug === "latest") { res.redirect("/api/newsletter/latest"); return; }
+    try {
+      const db = await getDb();
+      if (!db) { res.status(500).send("Database unavailable"); return; }
+      const { newsletters: nlTable } = await import("../../drizzle/schema");
+      const { eq: eqFn } = await import("drizzle-orm");
+      const rows = await db.select().from(nlTable).where(eqFn(nlTable.slug, slug)).limit(1);
+      if (!rows.length || !rows[0].htmlContent) {
+        // No HTML stored — redirect to latest
+        res.redirect("/api/newsletter/latest"); return;
+      }
+      const html = rows[0].htmlContent as string;
+      const banner = `
+<div style="position:sticky;top:0;z-index:9999;background:#0f172a;border-bottom:2px solid #22c55e;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;font-family:sans-serif;">
+  <a href="/newsletter" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-size:14px;font-weight:700;letter-spacing:0.04em;">
+    <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='#22c55e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M19 12H5'/><path d='m12 5-7 7 7 7'/></svg>
+    Newsletter Archive
+  </a>
+  <span style="color:#22c55e;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">Newsletter</span>
+</div>`;
+      const withBanner = html.replace(/<body([^>]*)>/i, `<body$1>${banner}`);
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.send(withBanner);
+    } catch (err) {
+      console.error("[Newsletter/:slug] Error:", err);
+      res.redirect("/api/newsletter/latest");
     }
   });
 
