@@ -433,3 +433,8 @@
 - [x] Fix #10: Guest booking — allow booking without login (name + email only)
 - [x] Fix guest booking email: switch from Resend/getroger.biz to Gmail for better deliverability
 - [x] Fix navbar overflow-x bug and add overflow-x:hidden to body/html
+
+## Newsletter Enhancements (Mar 14)
+- [x] Upload new newsletter HTML from Admin panel (replaces /newsletter/latest)
+- [x] Back-to-site banner injected at top of /newsletter/latest page
+- [x] Newsletter Archive link added to navbar (already present)

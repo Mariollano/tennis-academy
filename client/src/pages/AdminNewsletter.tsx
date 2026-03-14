@@ -28,6 +28,8 @@ export default function AdminNewsletter() {
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [activeTab, setActiveTab] = useState("compose");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -269,6 +271,10 @@ export default function AdminNewsletter() {
           <TabsTrigger value="published" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
             Published ({publishedNewsletters.length})
+          </TabsTrigger>
+          <TabsTrigger value="upload" className="flex items-center gap-2">
+            <Upload className="h-4 w-4" />
+            Upload Latest
           </TabsTrigger>
           </TabsList>
 
@@ -686,6 +692,91 @@ export default function AdminNewsletter() {
                   ))}
                 </div>
               )}
+            </div>
+          </TabsContent>
+
+          {/* ── Upload Latest Issue Tab ─────────────────────────────────────── */}
+          <TabsContent value="upload">
+            <div className="max-w-xl">
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#1a3a8f] flex items-center justify-center">
+                    <Upload className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Upload New Newsletter</h3>
+                    <p className="text-sm text-muted-foreground">Replaces the HTML file served at /newsletter/latest</p>
+                  </div>
+                </div>
+
+                <div className="bg-muted/40 rounded-xl p-4 mb-5 text-sm text-muted-foreground">
+                  <p>Upload an <strong>.html</strong> file (max 10 MB). Once uploaded, anyone who taps the <strong>Newsletter</strong> button on the homepage will see the new issue immediately — no deploy needed.</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="newsletter-file" className="text-sm font-semibold mb-2 block">Select HTML file</Label>
+                    <input
+                      id="newsletter-file"
+                      type="file"
+                      accept=".html,text/html"
+                      className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
+                      onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+                    />
+                  </div>
+
+                  {uploadFile && (
+                    <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
+                      <span className="text-green-800 font-medium">{uploadFile.name}</span>
+                      <span className="text-green-600 ml-auto">{(uploadFile.size / 1024).toFixed(0)} KB</span>
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full bg-[#1a3a8f] hover:bg-[#1a3a8f]/90 text-white gap-2"
+                    disabled={!uploadFile || isUploading}
+                    onClick={async () => {
+                      if (!uploadFile) return;
+                      setIsUploading(true);
+                      try {
+                        const formData = new FormData();
+                        formData.append("newsletter", uploadFile);
+                        const res = await fetch("/api/newsletter/upload", {
+                          method: "POST",
+                          body: formData,
+                          credentials: "include",
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || "Upload failed");
+                        toast.success("✅ Newsletter updated! The homepage link now shows the new issue.");
+                        setUploadFile(null);
+                        const input = document.getElementById("newsletter-file") as HTMLInputElement;
+                        if (input) input.value = "";
+                      } catch (err: any) {
+                        toast.error("Upload failed: " + (err.message || "Unknown error"));
+                      } finally {
+                        setIsUploading(false);
+                      }
+                    }}
+                  >
+                    {isUploading ? (
+                      <><span className="animate-spin">⏳</span> Uploading...</>
+                    ) : (
+                      <><Upload className="h-4 w-4" /> Publish New Issue</>
+                    )}
+                  </Button>
+
+                  <div className="pt-2">
+                    <a href="/newsletter/latest" target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" className="w-full gap-2">
+                        <ExternalLink className="h-4 w-4" />
+                        Preview Current Live Newsletter
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

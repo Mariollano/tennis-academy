@@ -21,6 +21,7 @@ import { storagePut } from "../storage";
 import { sendSms, isTwilioConfigured } from "../sms";
 import { sendBookingConfirmation, sendBookingConfirmed, isEmailConfigured } from "../email";
 import { handleIcalFeed } from "../ical";
+import { sdk } from "./sdk";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -179,11 +180,57 @@ async function startServer() {
     try {
       const __dirname = dirname(fileURLToPath(import.meta.url));
       const html = readFileSync(join(__dirname, "../newsletter-latest.html"), "utf-8");
+      // Inject a back-to-site banner just after <body>
+      const banner = `
+<div style="position:sticky;top:0;z-index:9999;background:#0f172a;border-bottom:2px solid #22c55e;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;font-family:sans-serif;">
+  <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-size:14px;font-weight:700;letter-spacing:0.04em;">
+    <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='#22c55e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M19 12H5'/><path d='m12 5-7 7 7 7'/></svg>
+    Back to RI Tennis Academy
+  </a>
+  <span style="color:#22c55e;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">Newsletter</span>
+</div>`;
+      const withBanner = html.replace(/<body([^>]*)>/i, `<body$1>${banner}`);
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.setHeader("X-Content-Type-Options", "nosniff");
-      res.send(html);
+      res.send(withBanner);
     } catch {
       res.status(404).send("Newsletter not found");
+    }
+  });
+
+  // Newsletter upload: admin-only endpoint to replace the latest newsletter HTML
+  const newsletterUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+    fileFilter: (_req, file, cb) => {
+      if (file.mimetype === "text/html" || file.originalname.endsWith(".html")) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only HTML files are allowed"));
+      }
+    },
+  });
+
+  app.post("/api/newsletter/upload", newsletterUpload.single("newsletter"), async (req, res) => {
+    try {
+      // Verify the user is an admin via session cookie
+      let user: any = null;
+      try {
+        user = await sdk.authenticateRequest(req);
+      } catch {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      if (!user) return res.status(401).json({ error: "Not authenticated" });
+      if (user?.role !== "admin") return res.status(403).json({ error: "Admin only" });
+      if (!req.file) return res.status(400).json({ error: "No file provided" });
+      const __dirname = dirname(fileURLToPath(import.meta.url));
+      const dest = join(__dirname, "../newsletter-latest.html");
+      const { writeFileSync } = await import("fs");
+      writeFileSync(dest, req.file.buffer);
+      return res.json({ ok: true, message: "Newsletter updated successfully" });
+    } catch (err) {
+      console.error("[NewsletterUpload] Error:", err);
+      return res.status(500).json({ error: "Failed to update newsletter" });
     }
   });
 
