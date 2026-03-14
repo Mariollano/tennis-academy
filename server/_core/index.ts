@@ -1,5 +1,8 @@
 import "dotenv/config";
 import express from "express";
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -170,6 +173,19 @@ async function startServer() {
 
   // iCal calendar feed (private, token-protected)
   app.get("/api/calendar/:token/bookings.ics", handleIcalFeed);
+
+  // Newsletter: serve the latest HTML newsletter inline (renders in browser)
+  app.get("/newsletter/latest", (_req, res) => {
+    try {
+      const __dirname = dirname(fileURLToPath(import.meta.url));
+      const html = readFileSync(join(__dirname, "../newsletter-latest.html"), "utf-8");
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.send(html);
+    } catch {
+      res.status(404).send("Newsletter not found");
+    }
+  });
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);

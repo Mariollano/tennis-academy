@@ -519,7 +519,7 @@ export default function Home() {
               { label: "Junior Program", price: "$80/day", href: "/book/junior_daily", color: "bg-green-600", emoji: "⭐", external: false },
               { label: "Summer Camp", price: "$90/day", href: "/book/summer_camp_daily", color: "bg-orange-500", emoji: "☀️", external: false },
               { label: "Mental Coaching", price: "Contact", href: "/mental-coaching", color: "bg-purple-600", emoji: "🧠", external: false },
-              { label: "Newsletter", price: "Latest Issue", href: "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/ri-tennis-academy-newsletter_90b9ceb9.html", color: "bg-[#1a3a8f]", emoji: "📰", external: true },
+              { label: "Newsletter", price: "Latest Issue", href: "/newsletter/latest", color: "bg-[#1a3a8f]", emoji: "📰", external: true },
             ].map(({ label, price, href, color, emoji, external }) => (
               external ? (
                 <a key={href} href={href} target="_blank" rel="noopener noreferrer">
