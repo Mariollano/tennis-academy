@@ -512,23 +512,36 @@ export default function Home() {
               </Button>
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              { label: "Private Lesson", price: "$120/hr", href: "/book/private_lesson", color: "bg-blue-600", emoji: "🎾" },
-              { label: "105 Clinic", price: "$35", href: "/book/clinic_105", color: "bg-amber-500", emoji: "👥" },
-              { label: "Junior Program", price: "$80/day", href: "/book/junior_daily", color: "bg-green-600", emoji: "⭐" },
-              { label: "Summer Camp", price: "$90/day", href: "/book/summer_camp_daily", color: "bg-orange-500", emoji: "☀️" },
-              { label: "Mental Coaching", price: "Contact", href: "/mental-coaching", color: "bg-purple-600", emoji: "🧠" },
-            ].map(({ label, price, href, color, emoji }) => (
-              <Link key={href} href={href}>
-                <div className="group flex flex-col items-center text-center p-4 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer">
-                  <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform`}>
-                    {emoji}
+              { label: "Private Lesson", price: "$120/hr", href: "/book/private_lesson", color: "bg-blue-600", emoji: "🎾", external: false },
+              { label: "105 Clinic", price: "$35", href: "/book/clinic_105", color: "bg-amber-500", emoji: "👥", external: false },
+              { label: "Junior Program", price: "$80/day", href: "/book/junior_daily", color: "bg-green-600", emoji: "⭐", external: false },
+              { label: "Summer Camp", price: "$90/day", href: "/book/summer_camp_daily", color: "bg-orange-500", emoji: "☀️", external: false },
+              { label: "Mental Coaching", price: "Contact", href: "/mental-coaching", color: "bg-purple-600", emoji: "🧠", external: false },
+              { label: "Newsletter", price: "Latest Issue", href: "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/ri-tennis-academy-newsletter_90b9ceb9.html", color: "bg-[#1a3a8f]", emoji: "📰", external: true },
+            ].map(({ label, price, href, color, emoji, external }) => (
+              external ? (
+                <a key={href} href={href} target="_blank" rel="noopener noreferrer">
+                  <div className="group flex flex-col items-center text-center p-4 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer">
+                    <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform`}>
+                      {emoji}
+                    </div>
+                    <div className="font-semibold text-foreground text-sm leading-tight mb-1">{label}</div>
+                    <div className="text-accent font-bold text-xs">{price}</div>
                   </div>
-                  <div className="font-semibold text-foreground text-sm leading-tight mb-1">{label}</div>
-                  <div className="text-accent font-bold text-xs">{price}</div>
-                </div>
-              </Link>
+                </a>
+              ) : (
+                <Link key={href} href={href}>
+                  <div className="group flex flex-col items-center text-center p-4 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer">
+                    <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform`}>
+                      {emoji}
+                    </div>
+                    <div className="font-semibold text-foreground text-sm leading-tight mb-1">{label}</div>
+                    <div className="text-accent font-bold text-xs">{price}</div>
+                  </div>
+                </Link>
+              )
             ))}
           </div>
         </div>
