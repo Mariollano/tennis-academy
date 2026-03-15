@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT id, student_name, student_email, student_phone, program_type, sessionDate, sessionStartTime, sessionEndTime, status, notes\nFROM bookings\nWHERE sessionDate = CURDATE()\nORDER BY sessionStartTime ASC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \nSELECT id, student_name, student_email, student_phone, program_type, sessionDate, sessionStartTime, sessionEndTime, status, notes\nFROM bookings\nWHERE sessionDate = CURDATE()\nORDER BY sessionStartTime ASC;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'student_name' in 'field list'"
+  ]
+}

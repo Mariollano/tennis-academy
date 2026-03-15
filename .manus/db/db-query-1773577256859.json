@@ -1,0 +1,23 @@
+{
+  "query": "\nSELECT b.id, u.name as student_name, u.email as student_email, u.phone as student_phone, \n       p.name as program_name, b.sessionDate, b.sessionStartTime, b.sessionEndTime, \n       b.status, b.notes, b.totalAmountCents\nFROM bookings b\nJOIN users u ON b.userId = u.id\nJOIN programs p ON b.programId = p.id\nWHERE b.sessionDate = CURDATE()\nORDER BY b.sessionStartTime ASC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \nSELECT b.id, u.name as student_name, u.email as student_email, u.phone as student_phone, \n       p.name as program_name, b.sessionDate, b.sessionStartTime, b.sessionEndTime, \n       b.status, b.notes, b.totalAmountCents\nFROM bookings b\nJOIN users u ON b.userId = u.id\nJOIN programs p ON b.programId = p.id\nWHERE b.sessionDate = CURDATE()\nORDER BY b.sessionStartTime ASC;\n",
+  "rows": [
+    {
+      "id": "690001",
+      "student_name": "Mario Llano",
+      "student_email": "ritennismario@gmail.com",
+      "student_phone": "4019655873",
+      "program_name": "Private Lesson",
+      "sessionDate": "2026-03-15",
+      "sessionStartTime": "06:00:00",
+      "sessionEndTime": "07:00:00",
+      "status": "confirmed",
+      "notes": "[Preferred time: 06:00]",
+      "totalAmountCents": "12000"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstudent_name\tstudent_email\tstudent_phone\tprogram_name\tsessionDate\tsessionStartTime\tsessionEndTime\tstatus\tnotes\ttotalAmountCents\n690001\tMario Llano\tritennismario@gmail.com\t4019655873\tPrivate Lesson\t2026-03-15\t06:00:00\t07:00:00\tconfirmed\t[Preferred time: 06:00]\t12000\n",
+  "stderr": "",
+  "execution_time_ms": 67
+}

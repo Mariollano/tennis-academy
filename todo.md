@@ -444,3 +444,13 @@
 - [x] Update /newsletter/latest route to fetch from S3
 - [x] Seed initial newsletter HTML into S3
 - [x] Update admin upload endpoint to write to S3 instead of local file
+
+## Apple Calendar Sync (Mar 15, 2026)
+- [x] Add ical_sync_settings table to store the iCal URL and last sync timestamp
+- [x] Install node-ical package for parsing .ics feeds
+- [x] Build server-side iCal fetcher that parses Apple Calendar events
+- [x] Auto-create blocked_times entries from Apple Calendar events
+- [x] Add 30-minute sync scheduler
+- [x] Add Admin panel UI: paste iCal URL, manual sync button, last sync status
+- [x] Show sync'd Apple Calendar blocks as "Unavailable" in the booking calendar
+- [x] Add vitest tests for iCal sync service

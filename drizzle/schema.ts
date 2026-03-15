@@ -370,3 +370,18 @@ export const announcementReads = mysqlTable("announcement_reads", {
   readAt: timestamp("readAt").defaultNow().notNull(),
 });
 export type AnnouncementRead = typeof announcementReads.$inferSelect;
+
+// ─── iCal Sync Settings ───────────────────────────────────────────────────────
+// Stores the Apple Calendar / iCal subscription URL for auto-blocking
+export const icalSyncSettings = mysqlTable("ical_sync_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  icalUrl: text("icalUrl").notNull(),
+  isEnabled: boolean("isEnabled").default(true).notNull(),
+  lastSyncedAt: timestamp("lastSyncedAt"),
+  lastSyncStatus: varchar("lastSyncStatus", { length: 50 }), // 'success' | 'error'
+  lastSyncMessage: text("lastSyncMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type IcalSyncSettings = typeof icalSyncSettings.$inferSelect;
+export type InsertIcalSyncSettings = typeof icalSyncSettings.$inferInsert;

@@ -33,6 +33,7 @@ import { newsletterRouter } from "./routers/newsletter";
 import { giftCardsRouter } from "./routers/giftCards";
 import { leaderboardRouter } from "./routers/leaderboard";
 import { voiceBookingRouter } from "./routers/voiceBooking";
+import { icalSyncRouter } from "./routers/icalSync";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
 
 function buildProgramScheduleHtml(): string {
@@ -70,6 +71,7 @@ export const appRouter = router({
   giftCards: giftCardsRouter,
   leaderboard: leaderboardRouter,
   voiceBooking: voiceBookingRouter,
+  icalSync: icalSyncRouter,
   promoCodes: promoCodeRouter,
 
   // ─── Announcements ──────────────────────────────────────────────────────────

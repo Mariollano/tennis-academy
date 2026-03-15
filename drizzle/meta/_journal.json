@@ -134,6 +134,13 @@
       "when": 1773243768581,
       "tag": "0018_cynical_elektra",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1773577854307,
+      "tag": "0019_tranquil_next_avengers",
+      "breakpoints": true
     }
   ]
 }

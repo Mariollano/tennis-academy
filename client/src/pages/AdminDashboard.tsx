@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Users, Calendar, DollarSign, MessageSquare, CheckCircle,
-  Clock, XCircle, Send, Trophy, BarChart3, Shield, Tag, Trash2, Plus, Percent, Mail, Bell, PenLine, Save, ChevronDown, ChevronUp
+  Clock, XCircle, Send, Trophy, BarChart3, Shield, Tag, Trash2, Plus, Percent, Mail, Bell, PenLine, Save, ChevronDown, ChevronUp, RefreshCw, Link2
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -1257,6 +1257,26 @@ function CalendarSyncTab() {
     : null;
 
   const [copied, setCopied] = useState(false);
+  const [icalUrl, setIcalUrl] = useState("");
+  const utils = trpc.useUtils();
+
+  // iCal sync settings
+  const { data: icalSettings, isLoading: icalLoading } = trpc.icalSync.getSettings.useQuery();
+  const saveSettingsMutation = trpc.icalSync.saveSettings.useMutation({
+    onSuccess: () => { toast.success("iCal URL saved!"); utils.icalSync.getSettings.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const syncNowMutation = trpc.icalSync.syncNow.useMutation({
+    onSuccess: (r) => { toast.success(r.message); utils.icalSync.getSettings.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const toggleMutation = trpc.icalSync.toggleEnabled.useMutation({
+    onSuccess: () => utils.icalSync.getSettings.invalidate(),
+    onError: (e) => toast.error(e.message),
+  });
+
+  // Pre-fill the URL input when settings load
+  useState(() => { if (icalSettings?.icalUrl) setIcalUrl(icalSettings.icalUrl); });
 
   function handleCopy() {
     if (!calendarUrl) return;
@@ -1339,6 +1359,111 @@ function CalendarSyncTab() {
               <li>Paste the URL and click <strong>Add calendar</strong></li>
               <li>Done! Google syncs it automatically (every few hours)</li>
             </ol>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ─── Apple Calendar → App Sync (block times) ─── */}
+      <Card className="border-2 border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Link2 className="w-5 h-5 text-primary" />
+            Import Your Apple Calendar → Block Times
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Paste your Apple Calendar's public subscription URL below. The app will check it every 30 minutes and automatically block those times so students can't book during your personal appointments (haircuts, meetings, etc.).
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {icalLoading ? (
+            <div className="animate-pulse h-10 bg-muted rounded-lg" />
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="ical-url">Your Apple Calendar Subscription URL</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="ical-url"
+                    placeholder="webcal://p12-caldav.icloud.com/..."
+                    value={icalUrl || icalSettings?.icalUrl || ""}
+                    onChange={e => setIcalUrl(e.target.value)}
+                    className="font-mono text-xs"
+                  />
+                  <Button
+                    onClick={() => saveSettingsMutation.mutate({ icalUrl: icalUrl, isEnabled: true })}
+                    disabled={saveSettingsMutation.isPending || !icalUrl.trim()}
+                    className="shrink-0"
+                  >
+                    Save
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">How to get this URL: see instructions below ↓</p>
+              </div>
+
+              {icalSettings?.icalUrl && (
+                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="text-sm">
+                    <p className="font-medium">{icalSettings.isEnabled ? "✅ Sync active" : "⏸ Sync paused"}</p>
+                    {icalSettings.lastSyncedAt && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Last synced: {new Date(icalSettings.lastSyncedAt).toLocaleString()}
+                        {icalSettings.lastSyncMessage && icalSettings.lastSyncStatus === "error" && <span className="text-red-500 ml-2">⚠ {icalSettings.lastSyncMessage}</span>}
+                        {icalSettings.lastSyncMessage && icalSettings.lastSyncStatus === "success" && <span className="text-green-600 ml-2">{icalSettings.lastSyncMessage}</span>}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => syncNowMutation.mutate()}
+                      disabled={syncNowMutation.isPending}
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${syncNowMutation.isPending ? 'animate-spin' : ''}`} />
+                      Sync Now
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => toggleMutation.mutate({ isEnabled: !icalSettings.isEnabled })}
+                      disabled={toggleMutation.isPending}
+                    >
+                      {icalSettings.isEnabled ? "Pause" : "Resume"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <span>🍎</span> How to Get Your Apple Calendar URL
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h4 className="font-semibold text-sm mb-2">On Mac:</h4>
+            <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+              <li>Open <strong>Calendar</strong> app on your Mac</li>
+              <li>Right-click the calendar you want to share (e.g. "Home" or "Personal")</li>
+              <li>Click <strong>"Share Calendar..."</strong></li>
+              <li>Check <strong>"Public Calendar"</strong></li>
+              <li>Click <strong>"Copy Link"</strong> — this is your subscription URL</li>
+              <li>Paste it in the field above and click Save</li>
+            </ol>
+          </div>
+          <div>
+            <h4 className="font-semibold text-sm mb-2">On iPhone/iPad:</h4>
+            <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+              <li>Open <strong>Settings</strong> → <strong>Calendar</strong> → <strong>Accounts</strong></li>
+              <li>Tap <strong>iCloud</strong> → make sure Calendar is toggled on</li>
+              <li>Then on Mac, follow the steps above to get the public URL</li>
+            </ol>
+            <p className="text-xs text-amber-600 mt-2 font-medium">⚠ Note: The URL starts with "webcal://" — paste it exactly as copied.</p>
           </div>
         </CardContent>
       </Card>

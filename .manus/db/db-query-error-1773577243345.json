@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT b.id, u.name as student_name, u.email as student_email, u.phone as student_phone, \n       p.name as program_name, b.sessionDate, b.sessionStartTime, b.sessionEndTime, \n       b.status, b.notes, b.totalAmountCents\nFROM bookings b\nJOIN user u ON b.userId = u.id\nJOIN programs p ON b.programId = p.id\nWHERE b.sessionDate = CURDATE()\nORDER BY b.sessionStartTime ASC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \nSELECT b.id, u.name as student_name, u.email as student_email, u.phone as student_phone, \n       p.name as program_name, b.sessionDate, b.sessionStartTime, b.sessionEndTime, \n       b.status, b.notes, b.totalAmountCents\nFROM bookings b\nJOIN user u ON b.userId = u.id\nJOIN programs p ON b.programId = p.id\nWHERE b.sessionDate = CURDATE()\nORDER BY b.sessionStartTime ASC;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 2: Table 'kzzfscrub4iwmzr8lewakz.user' doesn't exist"
+  ]
+}

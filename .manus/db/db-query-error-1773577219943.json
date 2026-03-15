@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT id, student_name, student_email, student_phone, program_type, scheduled_at, time_slot, status, notes\nFROM bookings\nWHERE DATE(FROM_UNIXTIME(scheduled_at / 1000)) = CURDATE()\nORDER BY scheduled_at ASC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \nSELECT id, student_name, student_email, student_phone, program_type, scheduled_at, time_slot, status, notes\nFROM bookings\nWHERE DATE(FROM_UNIXTIME(scheduled_at / 1000)) = CURDATE()\nORDER BY scheduled_at ASC;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'scheduled_at' in 'where clause'"
+  ]
+}

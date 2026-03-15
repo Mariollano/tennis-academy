@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT b.id, b.student_name, b.student_email, b.student_phone, b.program_type, b.session_date, b.session_time, b.status, b.notes\nFROM bookings b\nWHERE DATE(FROM_UNIXTIME(b.session_date / 1000)) = CURDATE()\nORDER BY b.session_date ASC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute \nSELECT b.id, b.student_name, b.student_email, b.student_phone, b.program_type, b.session_date, b.session_time, b.status, b.notes\nFROM bookings b\nWHERE DATE(FROM_UNIXTIME(b.session_date / 1000)) = CURDATE()\nORDER BY b.session_date ASC;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'b.session_date' in 'order clause'"
+  ]
+}

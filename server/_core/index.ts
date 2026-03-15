@@ -17,6 +17,7 @@ import { bookings, payments, programs, users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { notifyOwner } from "./notification";
 import { startReminderScheduler } from "../reminderScheduler";
+import { syncIcalCalendar } from "../icalSync";
 import { storagePut, storageGet } from "../storage";
 import { sendSms, isTwilioConfigured } from "../sms";
 import { sendBookingConfirmation, sendBookingConfirmed, isEmailConfigured } from "../email";
@@ -313,6 +314,18 @@ async function startServer() {
     console.log(`Server running on http://localhost:${port}/`);
     // Start the reminder scheduler after server is up
     startReminderScheduler();
+    // Start the iCal sync scheduler — runs every 30 minutes
+    const ICAL_SYNC_INTERVAL_MS = 30 * 60 * 1000;
+    setTimeout(async () => {
+      console.log("[iCalSync] Running initial sync...");
+      const result = await syncIcalCalendar();
+      console.log(`[iCalSync] Initial sync: ${result.message}`);
+    }, 5000); // wait 5s after startup
+    setInterval(async () => {
+      console.log("[iCalSync] Running scheduled sync...");
+      const result = await syncIcalCalendar();
+      console.log(`[iCalSync] Scheduled sync: ${result.message}`);
+    }, ICAL_SYNC_INTERVAL_MS);
   });
 }
 
