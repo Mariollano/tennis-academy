@@ -1413,8 +1413,12 @@ export const appRouter = router({
           if (block.isAllDay) continue; // handled by allDayBlocked flag
           if (block.startTime && block.endTime) {
             const startH = parseInt((block.startTime as string).split(':')[0], 10);
-            const endH = parseInt((block.endTime as string).split(':')[0], 10);
-            for (let h = startH; h <= endH; h++) blockedHours.push(h);
+            const [endHour, endMin] = (block.endTime as string).split(':').map(Number);
+            // Block all hours that overlap: from startH up to (but not including) endHour
+            // unless the event ends exactly on the hour (e.g. 15:00), in which case
+            // endHour itself is NOT blocked (the lesson can start at 3 PM if event ends at 3:00 PM)
+            const effectiveEnd = endMin > 0 ? endHour : endHour - 1;
+            for (let h = startH; h <= effectiveEnd; h++) blockedHours.push(h);
           }
         }
 

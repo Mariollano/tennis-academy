@@ -454,3 +454,10 @@
 - [x] Add Admin panel UI: paste iCal URL, manual sync button, last sync status
 - [x] Show sync'd Apple Calendar blocks as "Unavailable" in the booking calendar
 - [x] Add vitest tests for iCal sync service
+
+## iCal Sync Debug (Mar 19, 2026)
+- [x] Diagnose: Apple Calendar events not blocking times in app booking page
+- [x] Fix: webcal:// protocol not supported by fetch() — convert to https:// at save time AND at sync time
+- [x] Fix: blockedHours loop used <= endH causing over-blocking — now uses correct boundary logic
+- [x] Root cause #1: No iCal URL was ever saved in the DB (ical_sync_settings table empty)
+- [x] Root cause #2: webcal:// URLs silently fail because fetch() only supports http/https

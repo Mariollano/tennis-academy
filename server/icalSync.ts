@@ -45,7 +45,16 @@ export async function syncIcalCalendar(): Promise<{
     return { success: false, message: "iCal sync not configured or disabled", blocksCreated: 0 };
   }
 
-  const { icalUrl } = settings[0];
+  let { icalUrl } = settings[0];
+
+  // Convert webcal:// to https:// — fetch() does not support the webcal:// protocol
+  if (icalUrl.startsWith("webcal://")) {
+    icalUrl = "https://" + icalUrl.slice("webcal://".length);
+  } else if (icalUrl.startsWith("webcals://")) {
+    icalUrl = "https://" + icalUrl.slice("webcals://".length);
+  }
+
+  console.log(`[iCalSync] Fetching calendar from: ${icalUrl.substring(0, 60)}...`);
 
   try {
     // 2. Fetch and parse the .ics feed
