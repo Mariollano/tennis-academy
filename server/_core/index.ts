@@ -176,6 +176,20 @@ async function startServer() {
   // iCal calendar feed (private, token-protected)
   app.get("/api/calendar/:token/bookings.ics", handleIcalFeed);
 
+  // Temporary: secret-key-protected sync trigger (remove after use)
+  app.post("/api/admin/force-ical-sync", async (req, res) => {
+    const secret = req.headers["x-sync-secret"];
+    if (secret !== "tennis-sync-2026") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    try {
+      const result = await syncIcalCalendar();
+      return res.json({ success: true, message: result.message });
+    } catch (e: any) {
+      return res.status(500).json({ error: (e as Error).message });
+    }
+  });
+
   // Newsletter: serve the latest HTML newsletter inline (renders in browser)
   app.get("/api/newsletter/latest", async (_req, res) => {
     try {
