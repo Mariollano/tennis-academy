@@ -1,0 +1,22 @@
+{
+  "query": "SELECT title, blockedDate, startTime, endTime FROM blocked_times WHERE title LIKE '[iCal]%' AND blockedDate = '2026-03-23';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT title, blockedDate, startTime, endTime FROM blocked_times WHERE title LIKE '[iCal]%' AND blockedDate = '2026-03-23';",
+  "rows": [
+    {
+      "title": "[iCal] 105",
+      "blockedDate": "2026-03-23",
+      "startTime": "17:00:00",
+      "endTime": "18:30:00"
+    },
+    {
+      "title": "[iCal] 105",
+      "blockedDate": "2026-03-23",
+      "startTime": "17:00:00",
+      "endTime": "18:30:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "title\tblockedDate\tstartTime\tendTime\n[iCal] 105\t2026-03-23\t17:00:00\t18:30:00\n[iCal] 105\t2026-03-23\t17:00:00\t18:30:00\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

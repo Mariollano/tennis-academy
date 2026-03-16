@@ -20,19 +20,33 @@ import { eq } from "drizzle-orm";
 const SYNC_DAYS_AHEAD = 90;
 // Prefix used to identify auto-synced blocks (so we can update/delete them safely)
 const ICAL_BLOCK_PREFIX = "[iCal]";
+// Timezone for Coach Mario's calendar — all times stored in this zone
+const COACH_TIMEZONE = "America/New_York";
 
-/** Format a Date as "HH:MM:SS" in local time */
+/** Format a Date as "HH:MM:SS" in the coach's local timezone */
 function toTimeString(date: Date): string {
-  const h = date.getHours().toString().padStart(2, "0");
-  const m = date.getMinutes().toString().padStart(2, "0");
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: COACH_TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const h = parts.find((p) => p.type === "hour")?.value ?? "00";
+  const m = parts.find((p) => p.type === "minute")?.value ?? "00";
   return `${h}:${m}:00`;
 }
 
-/** Format a Date as "YYYY-MM-DD" in local time */
+/** Format a Date as "YYYY-MM-DD" in the coach's local timezone */
 function toDateString(date: Date): string {
-  const y = date.getFullYear();
-  const mo = (date.getMonth() + 1).toString().padStart(2, "0");
-  const d = date.getDate().toString().padStart(2, "0");
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: COACH_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const y = parts.find((p) => p.type === "year")?.value ?? "2000";
+  const mo = parts.find((p) => p.type === "month")?.value ?? "01";
+  const d = parts.find((p) => p.type === "day")?.value ?? "01";
   return `${y}-${mo}-${d}`;
 }
 

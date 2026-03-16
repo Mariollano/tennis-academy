@@ -472,3 +472,8 @@
 - [x] Fix: recurring events not being expanded (rrule events need date expansion)
 - [x] Rewrote icalSync.ts to expand recurring events using rrule library (141 future occurrences found)
 - [x] All 63 tests still passing after fix
+
+## iCal Sync Timezone Bug (Mar 16, 2026)
+- [x] Fix: iCal events stored in UTC instead of Eastern time (4 hour offset — 9 AM shows as 5 PM)
+- [x] Fixed toTimeString() and toDateString() to use Intl.DateTimeFormat with America/New_York timezone
+- [ ] Re-sync after fix and verify March 23 shows 9 AM and 3:30 PM blocked correctly
