@@ -129,7 +129,6 @@ async function insertBlocksForOccurrence(
 
       dayStart = toTimeString(dayStartDt);
       dayEnd = toTimeString(dayEndDt);
-
       // Skip zero-length blocks
       if (dayStart === dayEnd) continue;
     }

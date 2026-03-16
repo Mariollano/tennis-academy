@@ -496,3 +496,9 @@
 - [x] Fix: Added Book button for Junior Program slots on Schedule page
 - [x] Fix: Added Generate Junior button + dialog to Admin Schedule page
 - [x] Seeded 67 Junior Program slots (Mon–Fri 3:30–6:30 PM) from Mar 16 to Jun 16, 2026
+
+## iCal Sync Color Filtering Bug (Mar 16, 2026)
+- [x] Check if iCal sync filters/skips events based on Google Calendar color
+- [x] Confirmed: NO color-based filtering exists — all events have color="none" and are processed equally
+- [x] Root cause of wrong times: stale DB data from pre-fix syncs; latest sync stores correct Eastern times
+- [x] Verified: 105 clinic = 09:00-10:30, Junior program = 15:30-18:30 (3:30-6:30 PM) ✓

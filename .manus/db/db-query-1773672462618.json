@@ -1,0 +1,154 @@
+{
+  "query": "SELECT id, title, blockedDate, startTime, endTime, createdAt FROM blocked_times WHERE title LIKE '[iCal]%' AND blockedDate >= '2026-03-16' AND blockedDate <= '2026-03-22' ORDER BY blockedDate, startTime LIMIT 30;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, title, blockedDate, startTime, endTime, createdAt FROM blocked_times WHERE title LIKE '[iCal]%' AND blockedDate >= '2026-03-16' AND blockedDate <= '2026-03-22' ORDER BY blockedDate, startTime LIMIT 30;",
+  "rows": [
+    {
+      "id": "32912",
+      "title": "[iCal] Accountant zoom call at noon",
+      "blockedDate": "2026-03-16",
+      "startTime": "12:00:00",
+      "endTime": "13:00:00",
+      "createdAt": "2026-03-16 14:44:41"
+    },
+    {
+      "id": "32839",
+      "title": "[iCal] 105",
+      "blockedDate": "2026-03-16",
+      "startTime": "13:00:00",
+      "endTime": "14:30:00",
+      "createdAt": "2026-03-16 14:43:42"
+    },
+    {
+      "id": "32893",
+      "title": "[iCal] Daniella",
+      "blockedDate": "2026-03-16",
+      "startTime": "18:45:00",
+      "endTime": "19:45:00",
+      "createdAt": "2026-03-16 14:44:20"
+    },
+    {
+      "id": "32867",
+      "title": "[iCal] Look at fidelity investing",
+      "blockedDate": "2026-03-17",
+      "startTime": "09:00:00",
+      "endTime": "10:00:00",
+      "createdAt": "2026-03-16 14:44:01"
+    },
+    {
+      "id": "32853",
+      "title": "[iCal] 105",
+      "blockedDate": "2026-03-18",
+      "startTime": "13:00:00",
+      "endTime": "14:30:00",
+      "createdAt": "2026-03-16 14:43:54"
+    },
+    {
+      "id": "32910",
+      "title": "[iCal] Ethan",
+      "blockedDate": "2026-03-18",
+      "startTime": "14:15:00",
+      "endTime": "15:15:00",
+      "createdAt": "2026-03-16 14:44:40"
+    },
+    {
+      "id": "32894",
+      "title": "[iCal] New Event",
+      "blockedDate": "2026-03-19",
+      "startTime": "09:00:00",
+      "endTime": "10:00:00",
+      "createdAt": "2026-03-16 14:44:20"
+    },
+    {
+      "id": "32797",
+      "title": "[iCal] Haircut",
+      "blockedDate": "2026-03-19",
+      "startTime": "11:15:00",
+      "endTime": "14:00:00",
+      "createdAt": "2026-03-16 14:43:00"
+    },
+    {
+      "id": "32838",
+      "title": "[iCal] Ethan",
+      "blockedDate": "2026-03-19",
+      "startTime": "14:15:00",
+      "endTime": "15:15:00",
+      "createdAt": "2026-03-16 14:43:35"
+    },
+    {
+      "id": "32799",
+      "title": "[iCal] Junior program",
+      "blockedDate": "2026-03-19",
+      "startTime": "20:30:00",
+      "endTime": "23:30:00",
+      "createdAt": "2026-03-16 14:43:11"
+    },
+    {
+      "id": "32783",
+      "title": "[iCal] Audrey and Katie",
+      "blockedDate": "2026-03-20",
+      "startTime": "12:00:00",
+      "endTime": "13:00:00",
+      "createdAt": "2026-03-16 14:42:55"
+    },
+    {
+      "id": "32897",
+      "title": "[iCal] 105",
+      "blockedDate": "2026-03-20",
+      "startTime": "13:00:00",
+      "endTime": "14:30:00",
+      "createdAt": "2026-03-16 14:44:31"
+    },
+    {
+      "id": "32812",
+      "title": "[iCal] JUNIOR PROGRAM",
+      "blockedDate": "2026-03-20",
+      "startTime": "19:30:00",
+      "endTime": "22:30:00",
+      "createdAt": "2026-03-16 14:43:18"
+    },
+    {
+      "id": "32770",
+      "title": "[iCal] Shaun and Alex",
+      "blockedDate": "2026-03-21",
+      "startTime": "15:30:00",
+      "endTime": "17:00:00",
+      "createdAt": "2026-03-16 14:42:40"
+    },
+    {
+      "id": "32868",
+      "title": "[iCal] Carol",
+      "blockedDate": "2026-03-21",
+      "startTime": "16:00:00",
+      "endTime": "17:00:00",
+      "createdAt": "2026-03-16 14:44:06"
+    },
+    {
+      "id": "32826",
+      "title": "[iCal] 105",
+      "blockedDate": "2026-03-22",
+      "startTime": "13:00:00",
+      "endTime": "14:30:00",
+      "createdAt": "2026-03-16 14:43:30"
+    },
+    {
+      "id": "32757",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-03-22",
+      "startTime": "15:30:00",
+      "endTime": "16:00:00",
+      "createdAt": "2026-03-16 14:42:32"
+    },
+    {
+      "id": "32881",
+      "title": "[iCal] JUNIOR PROGRAM",
+      "blockedDate": "2026-03-22",
+      "startTime": "16:00:00",
+      "endTime": "19:00:00",
+      "createdAt": "2026-03-16 14:44:15"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tblockedDate\tstartTime\tendTime\tcreatedAt\n32912\t[iCal] Accountant zoom call at noon\t2026-03-16\t12:00:00\t13:00:00\t2026-03-16 14:44:41\n32839\t[iCal] 105\t2026-03-16\t13:00:00\t14:30:00\t2026-03-16 14:43:42\n32893\t[iCal] Daniella\t2026-03-16\t18:45:00\t19:45:00\t2026-03-16 14:44:20\n32867\t[iCal] Look at fidelity investing\t2026-03-17\t09:00:00\t10:00:00\t2026-03-16 14:44:01\n32853\t[iCal] 105\t2026-03-18\t13:00:00\t14:30:00\t2026-03-16 14:43:54\n32910\t[iCal] Ethan\t2026-03-18\t14:15:00\t15:15:00\t2026-03-16 14:44:40\n32894\t[iCal] New Event\t2026-03-19\t09:00:00\t10:00:00\t2026-03-16 14:44:20\n32797\t[iCal] Haircut\t2026-03-19\t11:15:00\t14:00:00\t2026-03-16 14:43:00\n32838\t[iCal] Ethan\t2026-03-19\t14:15:00\t15:15:00\t2026-03-16 14:43:35\n32799\t[iCal] Junior program\t2026-03-19\t20:30:00\t23:30:00\t2026-03-16 14:43:11\n32783\t[iCal] Audrey and Katie\t2026-03-20\t12:00:00\t13:00:00\t2026-03-16 14:42:55\n32897\t[iCal] 105\t2026-03-20\t13:00:00\t14:30:00\t2026-03-16 14:44:31\n32812\t[iCal] JUNIOR PROGRAM\t2026-03-20\t19:30:00\t22:30:00\t2026-03-16 14:43:18\n32770\t[iCal] Shaun and Alex\t2026-03-21\t15:30:00\t17:00:00\t2026-03-16 14:42:40\n32868\t[iCal] Carol\t2026-03-21\t16:00:00\t17:00:00\t2026-03-16 14:44:06\n32826\t[iCal] 105\t2026-03-22\t13:00:00\t14:30:00\t2026-03-16 14:43:30\n32757\t[iCal] Maggie\t2026-03-22\t15:30:00\t16:00:00\t2026-03-16 14:42:32\n32881\t[iCal] JUNIOR PROGRAM\t2026-03-22\t16:00:00\t19:00:00\t2026-03-16 14:44:15\n",
+  "stderr": "",
+  "execution_time_ms": 81
+}
