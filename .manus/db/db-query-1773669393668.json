@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, name, type, priceInCents FROM programs WHERE type IN ('junior_daily', 'junior_weekly', 'junior_program') ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, name, type, priceInCents FROM programs WHERE type IN ('junior_daily', 'junior_weekly', 'junior_program') ORDER BY id;",
+  "rows": [
+    {
+      "id": "60001",
+      "name": "Junior Daily",
+      "type": "junior_daily",
+      "priceInCents": "8000"
+    },
+    {
+      "id": "60002",
+      "name": "Junior Weekly",
+      "type": "junior_weekly",
+      "priceInCents": "35000"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\ttype\tpriceInCents\n60001\tJunior Daily\tjunior_daily\t8000\n60002\tJunior Weekly\tjunior_weekly\t35000\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

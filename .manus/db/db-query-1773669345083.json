@@ -1,0 +1,9 @@
+{
+  "query": "SELECT ss.id, ss.programId, p.name, p.type, ss.slotDate, ss.startTime, ss.endTime FROM schedule_slots ss JOIN programs p ON ss.programId = p.id ORDER BY ss.slotDate DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT ss.id, ss.programId, p.name, p.type, ss.slotDate, ss.startTime, ss.endTime FROM schedule_slots ss JOIN programs p ON ss.programId = p.id ORDER BY ss.slotDate DESC LIMIT 20;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 72
+}

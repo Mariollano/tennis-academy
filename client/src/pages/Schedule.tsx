@@ -157,6 +157,10 @@ function SlotBlock({ slot }: { slot: any }) {
         <Link href="/book/private_lesson">
           <Button size="sm" className="h-7 text-xs px-3 shrink-0">Book</Button>
         </Link>
+      ) : (programType === "junior_daily" || programType === "junior_weekly") && !isFull ? (
+        <Link href="/book/junior_program">
+          <Button size="sm" className="h-7 text-xs px-3 shrink-0 bg-purple-600 hover:bg-purple-700 text-white">Book</Button>
+        </Link>
       ) : (
         <Badge variant="outline" className="text-xs text-red-600 border-red-300 shrink-0">Full</Badge>
       )}
@@ -397,7 +401,7 @@ export default function Schedule() {
   const { data: slots = [], isLoading } = trpc.schedule.listAvailableMulti.useQuery({
     from: fromDate,
     to: toDate,
-    programTypes: ["private_lesson", "clinic_105"],
+    programTypes: ["private_lesson", "clinic_105", "junior_daily", "junior_weekly"],
   });
 
   // Fetch the logged-in user's own bookings (all types) and merge them into the calendar
@@ -406,15 +410,19 @@ export default function Schedule() {
     { enabled: isAuthenticated }
   );
 
-  // Merge: public 105 Clinic slots + all of the user's own bookings (any program type)
+  // Merge: public 105 Clinic + Junior Program slots + all of the user's own bookings (any program type)
   const allSlots = useMemo(() => {
-    const clinicSlots = slots.filter((s) => s.programType === "clinic_105");
+    const publicSlots = slots.filter((s) =>
+      s.programType === "clinic_105" ||
+      s.programType === "junior_daily" ||
+      s.programType === "junior_weekly"
+    );
     // Ensure every user booking has a startTime so it can be placed on the hour grid
     const myBookingsNormalized = myBookings.map((b) => ({
       ...b,
       startTime: b.startTime || "09:00:00", // default to 9 AM for non-timed programs
     }));
-    return [...clinicSlots, ...myBookingsNormalized];
+    return [...publicSlots, ...myBookingsNormalized];
   }, [slots, myBookings]);
 
   const navigate = (dir: 1 | -1) => {

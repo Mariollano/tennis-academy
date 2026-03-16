@@ -902,14 +902,14 @@ export const appRouter = router({
     // Public: list available slots for multiple program types (used by Schedule page)
     listAvailableMulti: publicProcedure
       .input(z.object({
-        programTypes: z.array(z.enum(["clinic_105", "private_lesson"])).optional(),
+        programTypes: z.array(z.enum(["clinic_105", "private_lesson", "junior_daily", "junior_weekly"])).optional(),
         from: z.string().optional(),
         to: z.string().optional(),
       }))
       .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return [];
-        const types = input.programTypes ?? ["clinic_105", "private_lesson"];
+        const types = input.programTypes ?? ["clinic_105", "private_lesson", "junior_daily", "junior_weekly"];
         const matchingPrograms = await db.select({ id: programs.id, type: programs.type })
           .from(programs)
           .where(and(
@@ -1303,6 +1303,49 @@ export const appRouter = router({
               startTime: input.startTime,
               endTime: input.endTime,
               maxParticipants: cap,
+              isAvailable: true,
+              currentParticipants: 0,
+            });
+          }
+          cur.setDate(cur.getDate() + 1);
+        }
+        if (toInsert.length > 0) {
+          for (const slot of toInsert) {
+            await db.insert(scheduleSlots).values(slot);
+          }
+        }
+        return { success: true, created: toInsert.length };
+      }),
+
+    // Admin: generate Junior Program slots (Mon–Fri, configurable time)
+    generateJuniorSlots: adminProcedure
+      .input(z.object({
+        programId: z.number(),
+        fromDate: z.string(),
+        toDate: z.string(),
+        cap: z.number().default(20),
+        startTime: z.string().default("15:30:00"),
+        endTime: z.string().default("18:30:00"),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const start = new Date(input.fromDate);
+        const end = new Date(input.toDate);
+        const toInsert: any[] = [];
+        const cur = new Date(start);
+        while (cur <= end) {
+          const dow = cur.getDay(); // 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri
+          if (dow >= 1 && dow <= 5) {
+            const dayName = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dow];
+            const dateStr = cur.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+            toInsert.push({
+              programId: input.programId,
+              title: `Junior Program – ${dayName} ${dateStr}`,
+              slotDate: new Date(cur) as any,
+              startTime: input.startTime,
+              endTime: input.endTime,
+              maxParticipants: input.cap,
               isAvailable: true,
               currentParticipants: 0,
             });

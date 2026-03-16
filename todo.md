@@ -486,3 +486,13 @@
 - [x] Verified: March 17 shows 9 AM + 10 AM (105 clinic) + 2 PM + 3 PM (Ethan) ✓
 - [x] Verified: March 18 shows 9 AM (New Event), 11 AM-1 PM (Haircut), 2 PM-3 PM (Ethan), 4 PM-7 PM (Junior program) ✓
 - [x] All 67 tests passing after fix
+
+## Schedule Junior Program Bug (Mar 16, 2026)
+- [x] Fix: Junior Program sessions (weekdays 3:30–6:30 PM) not showing on Schedule page
+- [x] Root cause: schedule_slots table was empty (no slots seeded) AND listAvailableMulti only queried clinic_105 + private_lesson
+- [x] Fix: Added generateJuniorSlots server procedure (Mon–Fri, configurable time/capacity)
+- [x] Fix: Updated listAvailableMulti to include junior_daily + junior_weekly program types
+- [x] Fix: Updated Schedule page allSlots merge to include junior_daily + junior_weekly slots
+- [x] Fix: Added Book button for Junior Program slots on Schedule page
+- [x] Fix: Added Generate Junior button + dialog to Admin Schedule page
+- [x] Seeded 67 Junior Program slots (Mon–Fri 3:30–6:30 PM) from Mar 16 to Jun 16, 2026

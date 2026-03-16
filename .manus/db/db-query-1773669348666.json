@@ -1,0 +1,37 @@
+{
+  "query": "SELECT COUNT(*) as slot_count FROM schedule_slots; SELECT id, name, type FROM programs ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT COUNT(*) as slot_count FROM schedule_slots; SELECT id, name, type FROM programs ORDER BY id;",
+  "rows": [
+    {
+      "slot_count": "0"
+    },
+    {
+      "slot_count": "id\tname\ttype"
+    },
+    {
+      "slot_count": "1\tClinic 105\tclinic_105"
+    },
+    {
+      "slot_count": "2\tPrivate Lesson\tprivate_lesson"
+    },
+    {
+      "slot_count": "30001\tMental Coaching\tmental_coaching"
+    },
+    {
+      "slot_count": "60001\tJunior Daily\tjunior_daily"
+    },
+    {
+      "slot_count": "60002\tJunior Weekly\tjunior_weekly"
+    },
+    {
+      "slot_count": "70001\tSummer Camp Daily\tsummer_camp_daily"
+    },
+    {
+      "slot_count": "70002\tSummer Camp Weekly\tsummer_camp_weekly"
+    }
+  ],
+  "messages": [],
+  "stdout": "slot_count\n0\nid\tname\ttype\n1\tClinic 105\tclinic_105\n2\tPrivate Lesson\tprivate_lesson\n30001\tMental Coaching\tmental_coaching\n60001\tJunior Daily\tjunior_daily\n60002\tJunior Weekly\tjunior_weekly\n70001\tSummer Camp Daily\tsummer_camp_daily\n70002\tSummer Camp Weekly\tsummer_camp_weekly\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

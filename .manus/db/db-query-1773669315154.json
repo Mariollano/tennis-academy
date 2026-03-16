@@ -1,0 +1,73 @@
+{
+  "query": "SELECT table_name FROM information_schema.tables WHERE table_schema = DATABASE() ORDER BY table_name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT table_name FROM information_schema.tables WHERE table_schema = DATABASE() ORDER BY table_name;",
+  "rows": [
+    {
+      "table_name": "__drizzle_migrations"
+    },
+    {
+      "table_name": "announcement_reads"
+    },
+    {
+      "table_name": "announcements"
+    },
+    {
+      "table_name": "blocked_times"
+    },
+    {
+      "table_name": "bookings"
+    },
+    {
+      "table_name": "gift_cards"
+    },
+    {
+      "table_name": "ical_sync_settings"
+    },
+    {
+      "table_name": "mental_coaching_resources"
+    },
+    {
+      "table_name": "merchandise"
+    },
+    {
+      "table_name": "newsletters"
+    },
+    {
+      "table_name": "payments"
+    },
+    {
+      "table_name": "programs"
+    },
+    {
+      "table_name": "promo_codes"
+    },
+    {
+      "table_name": "referrals"
+    },
+    {
+      "table_name": "schedule_slots"
+    },
+    {
+      "table_name": "scheduled_reminders"
+    },
+    {
+      "table_name": "session_waitlist"
+    },
+    {
+      "table_name": "sms_broadcasts"
+    },
+    {
+      "table_name": "tournament_bookings"
+    },
+    {
+      "table_name": "tournament_participants"
+    },
+    {
+      "table_name": "users"
+    }
+  ],
+  "messages": [],
+  "stdout": "table_name\n__drizzle_migrations\nannouncement_reads\nannouncements\nblocked_times\nbookings\ngift_cards\nical_sync_settings\nmental_coaching_resources\nmerchandise\nnewsletters\npayments\nprograms\npromo_codes\nreferrals\nschedule_slots\nscheduled_reminders\nsession_waitlist\nsms_broadcasts\ntournament_bookings\ntournament_participants\nusers\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

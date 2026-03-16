@@ -471,6 +471,79 @@ function Generate105Dialog({ onClose, onRefetch }: { onClose: () => void; onRefe
   );
 }
 
+// ─── Generate Junior Program dialog ─────────────────────────────────────────
+const JUNIOR_PREFS_KEY = "ri_tennis_junior_prefs";
+function getJuniorPrefs() {
+  try { return JSON.parse(localStorage.getItem(JUNIOR_PREFS_KEY) || "{}"); } catch { return {}; }
+}
+function saveJuniorPrefs(prefs: Record<string, string>) {
+  try { localStorage.setItem(JUNIOR_PREFS_KEY, JSON.stringify({ ...getJuniorPrefs(), ...prefs })); } catch {}
+}
+
+function GenerateJuniorDialog({ onClose, onRefetch }: { onClose: () => void; onRefetch: () => void }) {
+  const { data: programList } = trpc.admin.listPrograms.useQuery();
+  const prefs = getJuniorPrefs();
+  const [form, setForm] = useState({
+    programId: prefs.programId || "",
+    fromDate: isoDate(new Date()),
+    toDate: isoDate(addDays(new Date(), 90)),
+    cap: prefs.cap || "20",
+    startTime: prefs.startTime || "15:30",
+    endTime: prefs.endTime || "18:30",
+  });
+  const gen = trpc.schedule.generateJuniorSlots.useMutation({
+    onSuccess: (d) => { toast.success(`Created ${d.created} Junior Program sessions!`); onRefetch(); onClose(); },
+    onError: (e) => toast.error(e.message || "Failed to generate sessions."),
+  });
+  const set = (k: string, v: string) => {
+    setForm(f => ({ ...f, [k]: v }));
+    saveJuniorPrefs({ [k]: v });
+  };
+  // Pre-select junior_daily program if available
+  const juniorPrograms = (programList as any[] | undefined)?.filter((p: any) =>
+    p.type === "junior_daily" || p.type === "junior_weekly" || p.name?.toLowerCase().includes("junior")
+  );
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Generate Junior Program Sessions</DialogTitle></DialogHeader>
+        <p className="text-sm text-muted-foreground">Creates sessions for <strong>Mon–Fri, 3:30–6:30 PM</strong> in the selected date range.</p>
+        <div className="space-y-3">
+          <div>
+            <Label>Program</Label>
+            <Select value={form.programId} onValueChange={v => set("programId", v)}>
+              <SelectTrigger><SelectValue placeholder="Select program" /></SelectTrigger>
+              <SelectContent>
+                {(juniorPrograms || programList as any[] | undefined)?.map((p: any) => (
+                  <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
+                ))}
+                {!programList && <SelectItem value="0">Loading…</SelectItem>}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>From date</Label><Input type="date" value={form.fromDate} onChange={e => set("fromDate", e.target.value)} /></div>
+            <div><Label>To date</Label><Input type="date" value={form.toDate} onChange={e => set("toDate", e.target.value)} /></div>
+            <div><Label>Capacity (spots)</Label><Input type="number" min={1} max={100} value={form.cap} onChange={e => set("cap", e.target.value)} /></div>
+            <div />
+            <div><Label>Start time</Label><Input type="time" value={form.startTime} onChange={e => set("startTime", e.target.value)} /></div>
+            <div><Label>End time</Label><Input type="time" value={form.endTime} onChange={e => set("endTime", e.target.value)} /></div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={() => {
+            if (!form.programId) { toast.error("Select a program first."); return; }
+            gen.mutate({ programId: parseInt(form.programId), fromDate: form.fromDate, toDate: form.toDate, cap: parseInt(form.cap), startTime: form.startTime + ":00", endTime: form.endTime + ":00" });
+          }} disabled={gen.isPending}>
+            {gen.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null} Generate
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ─── Month View ───────────────────────────────────────────────────────────────
 function MonthView({ anchor, events, onEventClick }: { anchor: Date; events: CalEvent[]; onEventClick: (ev: CalEvent) => void }) {
   const monthStart = startOfMonth(anchor);
@@ -740,6 +813,7 @@ export default function AdminSchedule() {
   const [showAddSession, setShowAddSession] = useState(false);
   const [showBlockTime, setShowBlockTime] = useState(false);
   const [showGenerate, setShowGenerate] = useState(false);
+  const [showGenerateJunior, setShowGenerateJunior] = useState(false);
 
   // Compute date range to fetch based on view
   const { from, to } = useMemo(() => {
@@ -902,6 +976,9 @@ export default function AdminSchedule() {
           <Button size="sm" className="h-8 bg-green-600 hover:bg-green-700 text-white gap-1 text-xs" onClick={() => setShowGenerate(true)}>
             <Zap className="w-3.5 h-3.5" /> Generate 105
           </Button>
+          <Button size="sm" className="h-8 bg-purple-600 hover:bg-purple-700 text-white gap-1 text-xs" onClick={() => setShowGenerateJunior(true)}>
+            <Zap className="w-3.5 h-3.5" /> Generate Junior
+          </Button>
           <Button size="sm" className="h-8 bg-primary text-primary-foreground gap-1 text-xs" onClick={() => setShowAddSession(true)}>
             <Plus className="w-3.5 h-3.5" /> Add Session
           </Button>
@@ -947,6 +1024,7 @@ export default function AdminSchedule() {
       {showAddSession && <AddSessionDialog onClose={() => setShowAddSession(false)} onRefetch={refetch} />}
       {showBlockTime && <BlockTimeDialog onClose={() => setShowBlockTime(false)} onRefetch={refetch} />}
       {showGenerate && <Generate105Dialog onClose={() => setShowGenerate(false)} onRefetch={refetch} />}
+      {showGenerateJunior && <GenerateJuniorDialog onClose={() => setShowGenerateJunior(false)} onRefetch={refetch} />}
     </div>
   );
 }
