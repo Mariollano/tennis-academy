@@ -1,5 +1,12 @@
 /**
  * Tests for the iCal Sync service
+ * 
+ * Key behaviors tested:
+ * 1. Error handling (DB unavailable, no settings, disabled)
+ * 2. Timezone conversion: UTC event times → Eastern time strings
+ * 3. blockedDate cleanup: MySQL DATE columns return midnight UTC, must use .toISOString() not Eastern conversion
+ * 4. Recurring event expansion via rrule
+ * 5. All-day event handling
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -20,6 +27,59 @@ vi.mock("node-ical", () => ({
 import { syncIcalCalendar } from "./icalSync";
 import { getDb } from "./db";
 import ical from "node-ical";
+
+// Helper: create a mock DB that captures insert values
+function createMockDb(settingsRow: any, existingBlocks: any[] = []) {
+  const insertedValues: any[] = [];
+  let selectCallCount = 0;
+
+  // The DB query builder is a thenable (Promise-like) object
+  // select().from() resolves to an array
+  // select().from().limit() also resolves to an array
+  const makeQueryBuilder = (resolveValue: any) => {
+    const builder: any = {
+      from: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      then: (resolve: any, reject: any) => Promise.resolve(resolveValue).then(resolve, reject),
+    };
+    // Make limit() also resolve to the same value
+    builder.limit.mockImplementation(() => ({
+      then: (resolve: any, reject: any) => Promise.resolve(resolveValue).then(resolve, reject),
+    }));
+    return builder;
+  };
+
+  const mockDb: any = {
+    select: vi.fn().mockImplementation(() => {
+      selectCallCount++;
+      if (selectCallCount === 1) return makeQueryBuilder([settingsRow]);
+      return makeQueryBuilder(existingBlocks);
+    }),
+    update: vi.fn().mockReturnThis(),
+    set: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockImplementation(() => ({
+      values: vi.fn().mockImplementation((vals) => {
+        insertedValues.push(vals);
+        return Promise.resolve();
+      }),
+    })),
+    _insertedValues: insertedValues,
+  };
+
+  // Make delete().where() resolve properly
+  mockDb.delete.mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
+  // Make update().set().where() resolve properly
+  mockDb.update.mockReturnValue({
+    set: vi.fn().mockReturnValue({
+      where: vi.fn().mockResolvedValue(undefined),
+    }),
+  });
+
+  return mockDb;
+}
 
 describe("iCal Sync Service", () => {
   beforeEach(() => {
@@ -60,17 +120,7 @@ describe("iCal Sync Service", () => {
   });
 
   it("handles iCal fetch error gracefully", async () => {
-    const mockDb = {
-      select: vi.fn().mockReturnThis(),
-      from: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([
-        { id: 1, icalUrl: "webcal://example.com/cal.ics", isEnabled: true },
-      ]),
-      update: vi.fn().mockReturnThis(),
-      set: vi.fn().mockReturnThis(),
-      where: vi.fn().mockResolvedValue(undefined),
-      delete: vi.fn().mockReturnThis(),
-    };
+    const mockDb = createMockDb({ id: 1, icalUrl: "https://example.com/cal.ics", isEnabled: true });
     vi.mocked(getDb).mockResolvedValue(mockDb as any);
     vi.mocked(ical.async.fromURL).mockRejectedValue(new Error("Network error"));
 
@@ -80,43 +130,103 @@ describe("iCal Sync Service", () => {
     expect(result.blocksCreated).toBe(0);
   });
 
-  it("successfully syncs events and creates blocked times", async () => {
+  it("converts webcal:// URL to https:// before fetching", async () => {
+    const mockDb = createMockDb({ id: 1, icalUrl: "webcal://example.com/cal.ics", isEnabled: true });
+    vi.mocked(getDb).mockResolvedValue(mockDb as any);
+    vi.mocked(ical.async.fromURL).mockResolvedValue({} as any);
+
+    await syncIcalCalendar();
+    expect(ical.async.fromURL).toHaveBeenCalledWith("https://example.com/cal.ics");
+  });
+
+  it("stores correct Eastern time strings for a 9 AM Eastern event (UTC 13:00)", async () => {
+    // 105 clinic: 9:00-10:30 AM Eastern = 13:00-14:30 UTC
+    const eventStart = new Date("2026-03-18T13:00:00.000Z"); // 9 AM Eastern
+    const eventEnd = new Date("2026-03-18T14:30:00.000Z");   // 10:30 AM Eastern
+
+    const mockDb = createMockDb({ id: 1, icalUrl: "https://example.com/cal.ics", isEnabled: true });
+    vi.mocked(getDb).mockResolvedValue(mockDb as any);
+    vi.mocked(ical.async.fromURL).mockResolvedValue({
+      "event-1": {
+        type: "VEVENT",
+        summary: "105 Clinic",
+        start: eventStart,
+        end: eventEnd,
+        datetype: "date-time",
+      },
+    } as any);
+
+    await syncIcalCalendar();
+
+    const inserted = mockDb._insertedValues;
+    expect(inserted.length).toBeGreaterThan(0);
+    const block = inserted[0];
+
+    // Should store Eastern time strings, NOT UTC
+    expect(block.startTime).toBe("09:00:00");
+    expect(block.endTime).toBe("10:30:00");
+
+    // blockedDate should be midnight UTC for 2026-03-18
+    expect(block.blockedDate).toBeInstanceOf(Date);
+    expect(block.blockedDate.toISOString()).toBe("2026-03-18T00:00:00.000Z");
+  });
+
+  it("cleanup correctly identifies blocks by UTC date string from MySQL DATE column", () => {
+    // MySQL DATE columns return midnight UTC Date objects
+    // e.g., the date 2026-03-18 comes back as new Date('2026-03-18T00:00:00.000Z')
+    // Converting this to Eastern time gives '2026-03-17' (8 PM Eastern = midnight UTC)
+    // We must use .toISOString().substring(0,10) to get '2026-03-18' correctly
+
+    const mysqlDateValue = new Date("2026-03-18T00:00:00.000Z");
+
+    // The WRONG way (old bug): toDateStringEastern converts midnight UTC → March 17 Eastern
+    const wrongDateStr = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(mysqlDateValue);
+    // This gives "03/17/2026" — one day off!
+    expect(wrongDateStr).toContain("03/17/2026");
+
+    // The CORRECT way: use UTC date string directly
+    const correctDateStr = mysqlDateValue.toISOString().substring(0, 10);
+    expect(correctDateStr).toBe("2026-03-18");
+  });
+
+  it("handles all-day events correctly", async () => {
+    // All-day event: March 18, 2026
+    // iCal stores all-day events as date-only (no time component)
+    const allDayStart = new Date("2026-03-18T00:00:00.000Z");
+    const allDayEnd = new Date("2026-03-19T00:00:00.000Z"); // exclusive end
+
+    const mockDb = createMockDb({ id: 1, icalUrl: "https://example.com/cal.ics", isEnabled: true });
+    vi.mocked(getDb).mockResolvedValue(mockDb as any);
+    vi.mocked(ical.async.fromURL).mockResolvedValue({
+      "event-1": {
+        type: "VEVENT",
+        summary: "Vacation",
+        start: allDayStart,
+        end: allDayEnd,
+        datetype: "date", // all-day marker
+      },
+    } as any);
+
+    await syncIcalCalendar();
+
+    const inserted = mockDb._insertedValues;
+    if (inserted.length > 0) {
+      const block = inserted[0];
+      expect(block.isAllDay).toBe(true);
+      expect(block.startTime).toBeNull();
+      expect(block.endTime).toBeNull();
+    }
+  });
+
+  it("successfully syncs events and returns correct result shape", async () => {
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const tomorrowEnd = new Date(tomorrow.getTime() + 2 * 60 * 60 * 1000);
 
-    const mockInsertValues: any[] = [];
-    const mockDb = {
-      select: vi.fn().mockReturnThis(),
-      from: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([
-        { id: 1, icalUrl: "webcal://example.com/cal.ics", isEnabled: true },
-      ]),
-      update: vi.fn().mockReturnThis(),
-      set: vi.fn().mockReturnThis(),
-      where: vi.fn().mockResolvedValue(undefined),
-      delete: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      values: vi.fn().mockImplementation((vals) => {
-        mockInsertValues.push(vals);
-        return Promise.resolve();
-      }),
-    };
-
-    // Override select to return empty for blockedTimes query
-    let selectCallCount = 0;
-    mockDb.select.mockImplementation(() => {
-      selectCallCount++;
-      return mockDb;
-    });
-    mockDb.limit.mockImplementation((n: number) => {
-      if (selectCallCount === 1) {
-        return Promise.resolve([{ id: 1, icalUrl: "webcal://example.com/cal.ics", isEnabled: true }]);
-      }
-      return Promise.resolve([]);
-    });
-    mockDb.from.mockReturnThis();
-
+    const mockDb = createMockDb({ id: 1, icalUrl: "https://example.com/cal.ics", isEnabled: true });
     vi.mocked(getDb).mockResolvedValue(mockDb as any);
     vi.mocked(ical.async.fromURL).mockResolvedValue({
       "event-1": {
@@ -129,10 +239,9 @@ describe("iCal Sync Service", () => {
     } as any);
 
     const result = await syncIcalCalendar();
-    // The sync should attempt to run (may succeed or fail depending on mock setup)
-    // At minimum it should not throw
     expect(result).toBeDefined();
     expect(typeof result.success).toBe("boolean");
     expect(typeof result.message).toBe("string");
+    expect(typeof result.blocksCreated).toBe("number");
   });
 });

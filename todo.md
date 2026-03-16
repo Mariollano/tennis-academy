@@ -463,9 +463,9 @@
 - [x] Root cause #2: webcal:// URLs silently fail because fetch() only supports http/https
 
 ## iCal Sync 0 Blocks Bug (Mar 16, 2026)
-- [ ] Diagnose why 2017 events found but 0 blocks created
-- [ ] Fix date filtering / event type filtering in icalSync.ts
-- [ ] Verify blocked_times rows are created after fix
+- [x] Diagnose why 2017 events found but 0 blocks created
+- [x] Fix date filtering / event type filtering in icalSync.ts
+- [x] Verify blocked_times rows are created after fix
 
 ## iCal Sync Partial Blocking Bug (Mar 16, 2026)
 - [x] Inspect which 14 blocks were created and which days are missing
@@ -476,4 +476,13 @@
 ## iCal Sync Timezone Bug (Mar 16, 2026)
 - [x] Fix: iCal events stored in UTC instead of Eastern time (4 hour offset — 9 AM shows as 5 PM)
 - [x] Fixed toTimeString() and toDateString() to use Intl.DateTimeFormat with America/New_York timezone
-- [ ] Re-sync after fix and verify March 23 shows 9 AM and 3:30 PM blocked correctly
+- [x] Re-sync after fix and verify March 23 shows 9 AM and 3:30 PM blocked correctly
+
+## iCal Sync Wednesday Missing Blocks (Mar 16, 2026)
+- [x] Diagnose: Wednesday March 18 missing 105 clinic (9 AM), Ethan (2:15 PM), Clinic (4 PM)
+- [x] Root cause: MySQL DATE columns return midnight UTC; toDateStringEastern() was converting midnight UTC → March 17 Eastern (1 day off), causing cleanup to miss old blocks
+- [x] Fix: cleanup now uses .toISOString().substring(0,10) to get UTC date string (matches MySQL DATE storage)
+- [x] Fix: insertBlocksForOccurrence now uses Eastern date strings for iteration, stores blockedDate as midnight UTC
+- [x] Verified: March 17 shows 9 AM + 10 AM (105 clinic) + 2 PM + 3 PM (Ethan) ✓
+- [x] Verified: March 18 shows 9 AM (New Event), 11 AM-1 PM (Haircut), 2 PM-3 PM (Ethan), 4 PM-7 PM (Junior program) ✓
+- [x] All 67 tests passing after fix

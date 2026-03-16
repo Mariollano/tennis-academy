@@ -8,6 +8,15 @@
  *   - Recurring events (RRULE) — expanded into individual occurrences
  *   - All-day events
  *   - Multi-day events
+ *
+ * TIMEZONE NOTES:
+ *   - All calendar events are in America/New_York timezone
+ *   - blockedDate is stored as a MySQL DATE column (YYYY-MM-DD string)
+ *   - startTime / endTime are stored as "HH:MM:SS" strings in Eastern time
+ *   - The blockedDate value stored must match what MySQL DATE() returns
+ *     (i.e., the Eastern-timezone date of the event, stored as a UTC midnight Date)
+ *   - Cleanup uses toISOString().substring(0,10) to get the UTC date from
+ *     the database-returned Date object (MySQL DATE columns come back as midnight UTC)
  */
 import ical, { VEvent } from "node-ical";
 import pkg from "rrule";
@@ -23,7 +32,7 @@ const ICAL_BLOCK_PREFIX = "[iCal]";
 // Timezone for Coach Mario's calendar — all times stored in this zone
 const COACH_TIMEZONE = "America/New_York";
 
-/** Format a Date as "HH:MM:SS" in the coach's local timezone */
+/** Format a Date as "HH:MM:SS" in the coach's Eastern timezone */
 function toTimeString(date: Date): string {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: COACH_TIMEZONE,
@@ -36,8 +45,11 @@ function toTimeString(date: Date): string {
   return `${h}:${m}:00`;
 }
 
-/** Format a Date as "YYYY-MM-DD" in the coach's local timezone */
-function toDateString(date: Date): string {
+/**
+ * Format a Date as "YYYY-MM-DD" in the coach's Eastern timezone.
+ * Used for windowStart/windowEnd comparisons and for creating the blockedDate value.
+ */
+function toDateStringEastern(date: Date): string {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: COACH_TIMEZONE,
     year: "numeric",
@@ -48,6 +60,15 @@ function toDateString(date: Date): string {
   const mo = parts.find((p) => p.type === "month")?.value ?? "01";
   const d = parts.find((p) => p.type === "day")?.value ?? "01";
   return `${y}-${mo}-${d}`;
+}
+
+/**
+ * Create a Date object representing midnight UTC for a given YYYY-MM-DD string.
+ * MySQL DATE columns are stored/returned as midnight UTC, so we use this to
+ * create a blockedDate value that MySQL will store as the correct date.
+ */
+function dateStringToMidnightUTC(dateStr: string): Date {
+  return new Date(dateStr + "T00:00:00.000Z");
 }
 
 /**
@@ -69,48 +90,65 @@ async function insertBlocksForOccurrence(
   // For all-day events, iCal end is exclusive (next day midnight), so subtract 1ms
   const adjustedEnd = isAllDay ? new Date(endDate.getTime() - 1) : endDate;
 
-  const current = new Date(startDate);
-  current.setHours(0, 0, 0, 0);
+  // Start iterating from the Eastern-timezone date of the event start
+  // We use the Eastern date string to avoid UTC/local confusion
+  const startDateStr = toDateStringEastern(startDate);
+  const endDateStr = toDateStringEastern(adjustedEnd);
 
-  while (current <= adjustedEnd) {
-    const dateStr = toDateString(current);
+  // Build a list of dates to process (YYYY-MM-DD strings)
+  const datesToProcess: string[] = [];
+  const cursor = new Date(startDateStr + "T12:00:00.000Z"); // noon UTC to avoid DST edge cases
+  const endCursor = new Date(endDateStr + "T12:00:00.000Z");
 
-    if (dateStr >= windowStart && dateStr <= windowEnd) {
-      let dayStart: string | null = null;
-      let dayEnd: string | null = null;
+  while (cursor <= endCursor) {
+    datesToProcess.push(cursor.toISOString().substring(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
 
-      if (!isAllDay) {
-        const nextDay = new Date(current);
-        nextDay.setDate(nextDay.getDate() + 1);
+  for (const dateStr of datesToProcess) {
+    if (dateStr < windowStart || dateStr > windowEnd) continue;
 
-        const dayStartDt = current.getTime() > startDate.getTime() ? new Date(current) : startDate;
-        const dayEndDt = endDate < nextDay ? endDate : nextDay;
+    let dayStart: string | null = null;
+    let dayEnd: string | null = null;
 
-        dayStart = toTimeString(dayStartDt);
-        dayEnd = toTimeString(dayEndDt);
+    if (!isAllDay) {
+      // Determine the start/end times for this specific day
+      // If event starts before this day, use midnight Eastern as start
+      // If event ends after this day, use midnight Eastern as end
+      const dayStartMidnightUTC = new Date(dateStr + "T00:00:00.000Z");
+      const dayEndMidnightUTC = new Date(dateStr + "T00:00:00.000Z");
+      dayEndMidnightUTC.setUTCDate(dayEndMidnightUTC.getUTCDate() + 1);
 
-        // Skip zero-length blocks
-        if (dayStart === dayEnd) {
-          current.setDate(current.getDate() + 1);
-          continue;
-        }
-      }
+      // Use the actual event start/end, clamped to this day's Eastern midnight boundaries
+      // We compare by Eastern date string to determine if event starts/ends on this day
+      const eventStartDateStr = toDateStringEastern(startDate);
+      const eventEndDateStr = toDateStringEastern(endDate);
 
-      const blockDate = new Date(current);
-      await db.insert(blockedTimes).values({
-        title,
-        blockedDate: blockDate,
-        startTime: dayStart,
-        endTime: dayEnd,
-        isAllDay,
-        affectsPrivateLessons: true,
-        affects105Clinic: true,
-      });
+      const dayStartDt = eventStartDateStr === dateStr ? startDate : dayStartMidnightUTC;
+      const dayEndDt = eventEndDateStr === dateStr ? endDate : dayEndMidnightUTC;
 
-      blocksCreated++;
+      dayStart = toTimeString(dayStartDt);
+      dayEnd = toTimeString(dayEndDt);
+
+      // Skip zero-length blocks
+      if (dayStart === dayEnd) continue;
     }
 
-    current.setDate(current.getDate() + 1);
+    // Store blockedDate as midnight UTC for this date string
+    // MySQL DATE column stores/returns dates as midnight UTC
+    const blockDate = dateStringToMidnightUTC(dateStr);
+
+    await db.insert(blockedTimes).values({
+      title,
+      blockedDate: blockDate,
+      startTime: dayStart,
+      endTime: dayEnd,
+      isAllDay,
+      affectsPrivateLessons: true,
+      affects105Clinic: true,
+    });
+
+    blocksCreated++;
   }
 
   return blocksCreated;
@@ -150,17 +188,26 @@ export async function syncIcalCalendar(): Promise<{
 
     const now = new Date();
     const cutoff = new Date(now.getTime() + SYNC_DAYS_AHEAD * 24 * 60 * 60 * 1000);
-    const windowStart = toDateString(now);
-    const windowEnd = toDateString(cutoff);
+    const windowStart = toDateStringEastern(now);
+    const windowEnd = toDateStringEastern(cutoff);
 
     // 3. Delete all previously synced iCal blocks in the rolling window
+    // CRITICAL: MySQL DATE columns are returned by Drizzle as Date objects at midnight UTC.
+    // For example, the date 2026-03-18 comes back as new Date('2026-03-18T00:00:00.000Z').
+    // We must use toISOString().substring(0,10) to get "2026-03-18" — NOT toDateStringEastern()
+    // which would convert midnight UTC to Eastern time and return "2026-03-17" (wrong!).
     const existingBlocks = await db.select().from(blockedTimes);
     const icalBlockIds = existingBlocks
       .filter((b) => {
-        const dateStr = b.blockedDate instanceof Date ? toDateString(b.blockedDate) : String(b.blockedDate);
+        // Get the date string as stored in MySQL (UTC-based)
+        const dateStr = b.blockedDate instanceof Date
+          ? b.blockedDate.toISOString().substring(0, 10)
+          : String(b.blockedDate).substring(0, 10);
         return b.title.startsWith(ICAL_BLOCK_PREFIX) && dateStr >= windowStart && dateStr <= windowEnd;
       })
       .map((b) => b.id);
+
+    console.log(`[iCalSync] Deleting ${icalBlockIds.length} old iCal blocks in window ${windowStart}..${windowEnd}`);
 
     for (const id of icalBlockIds) {
       await db.delete(blockedTimes).where(eq(blockedTimes.id, id));

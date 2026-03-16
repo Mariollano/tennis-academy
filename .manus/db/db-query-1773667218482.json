@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, title, blockedDate, startTime, endTime FROM blocked_times WHERE title LIKE '[iCal]%' AND DATE(blockedDate) BETWEEN '2026-03-16' AND '2026-03-22' ORDER BY blockedDate, startTime;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, title, blockedDate, startTime, endTime FROM blocked_times WHERE title LIKE '[iCal]%' AND DATE(blockedDate) BETWEEN '2026-03-16' AND '2026-03-22' ORDER BY blockedDate, startTime;",
+  "rows": [
+    {
+      "id": "31160",
+      "title": "[iCal] Accountant zoom call at noon",
+      "blockedDate": "2026-03-16",
+      "startTime": "16:00:00",
+      "endTime": "17:00:00"
+    },
+    {
+      "id": "31186",
+      "title": "[iCal] Daniella",
+      "blockedDate": "2026-03-16",
+      "startTime": "22:45:00",
+      "endTime": "23:45:00"
+    },
+    {
+      "id": "31188",
+      "title": "[iCal] 105",
+      "blockedDate": "2026-03-18",
+      "startTime": "17:00:00",
+      "endTime": "18:30:00"
+    },
+    {
+      "id": "31173",
+      "title": "[iCal] Shaun and Alex",
+      "blockedDate": "2026-03-21",
+      "startTime": "19:30:00",
+      "endTime": "21:00:00"
+    },
+    {
+      "id": "31161",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-03-22",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tblockedDate\tstartTime\tendTime\n31160\t[iCal] Accountant zoom call at noon\t2026-03-16\t16:00:00\t17:00:00\n31186\t[iCal] Daniella\t2026-03-16\t22:45:00\t23:45:00\n31188\t[iCal] 105\t2026-03-18\t17:00:00\t18:30:00\n31173\t[iCal] Shaun and Alex\t2026-03-21\t19:30:00\t21:00:00\n31161\t[iCal] Maggie\t2026-03-22\t19:30:00\t20:00:00\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

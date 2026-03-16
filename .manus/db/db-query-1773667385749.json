@@ -1,0 +1,150 @@
+{
+  "query": "SELECT id, title, blockedDate, startTime, endTime FROM blocked_times LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT id, title, blockedDate, startTime, endTime FROM blocked_times LIMIT 20;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "tournament",
+      "blockedDate": "2026-03-07",
+      "startTime": "09:00:00",
+      "endTime": "15:00:00"
+    },
+    {
+      "id": "31159",
+      "title": "[iCal] Kathy appointment at 9:30",
+      "blockedDate": "2026-05-26",
+      "startTime": "12:00:00",
+      "endTime": "13:00:00"
+    },
+    {
+      "id": "31160",
+      "title": "[iCal] Accountant zoom call at noon",
+      "blockedDate": "2026-03-16",
+      "startTime": "16:00:00",
+      "endTime": "17:00:00"
+    },
+    {
+      "id": "31161",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-03-22",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31162",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-03-29",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31163",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-04-05",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31164",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-04-12",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31165",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-04-19",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31166",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-04-26",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31167",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-05-03",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31168",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-05-10",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31169",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-05-17",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31170",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-05-24",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31171",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-05-31",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31172",
+      "title": "[iCal] Maggie",
+      "blockedDate": "2026-06-07",
+      "startTime": "19:30:00",
+      "endTime": "20:00:00"
+    },
+    {
+      "id": "31173",
+      "title": "[iCal] Shaun and Alex",
+      "blockedDate": "2026-03-21",
+      "startTime": "19:30:00",
+      "endTime": "21:00:00"
+    },
+    {
+      "id": "31174",
+      "title": "[iCal] Shaun and Alex",
+      "blockedDate": "2026-03-28",
+      "startTime": "19:30:00",
+      "endTime": "21:00:00"
+    },
+    {
+      "id": "31175",
+      "title": "[iCal] Shaun and Alex",
+      "blockedDate": "2026-04-04",
+      "startTime": "19:30:00",
+      "endTime": "21:00:00"
+    },
+    {
+      "id": "31176",
+      "title": "[iCal] Shaun and Alex",
+      "blockedDate": "2026-04-11",
+      "startTime": "19:30:00",
+      "endTime": "21:00:00"
+    },
+    {
+      "id": "31177",
+      "title": "[iCal] Shaun and Alex",
+      "blockedDate": "2026-04-18",
+      "startTime": "19:30:00",
+      "endTime": "21:00:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tblockedDate\tstartTime\tendTime\n1\ttournament\t2026-03-07\t09:00:00\t15:00:00\n31159\t[iCal] Kathy appointment at 9:30\t2026-05-26\t12:00:00\t13:00:00\n31160\t[iCal] Accountant zoom call at noon\t2026-03-16\t16:00:00\t17:00:00\n31161\t[iCal] Maggie\t2026-03-22\t19:30:00\t20:00:00\n31162\t[iCal] Maggie\t2026-03-29\t19:30:00\t20:00:00\n31163\t[iCal] Maggie\t2026-04-05\t19:30:00\t20:00:00\n31164\t[iCal] Maggie\t2026-04-12\t19:30:00\t20:00:00\n31165\t[iCal] Maggie\t2026-04-19\t19:30:00\t20:00:00\n31166\t[iCal] Maggie\t2026-04-26\t19:30:00\t20:00:00\n31167\t[iCal] Maggie\t2026-05-03\t19:30:00\t20:00:00\n31168\t[iCal] Maggie\t2026-05-10\t19:30:00\t20:00:00\n31169\t[iCal] Maggie\t2026-05-17\t19:30:00\t20:00:00\n31170\t[iCal] Maggie\t2026-05-24\t19:30:00\t20:00:00\n31171\t[iCal] Maggie\t2026-05-31\t19:30:00\t20:00:00\n31172\t[iCal] Maggie\t2026-06-07\t19:30:00\t20:00:00\n31173\t[iCal] Shaun and Alex\t2026-03-21\t19:30:00\t21:00:00\n31174\t[iCal] Shaun and Alex\t2026-03-28\t19:30:00\t21:00:00\n31175\t[iCal] Shaun and Alex\t2026-04-04\t19:30:00\t21:00:00\n31176\t[iCal] Shaun and Alex\t2026-04-11\t19:30:00\t21:00:00\n31177\t[iCal] Shaun and Alex\t2026-04-18\t19:30:00\t21:00:00\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}
