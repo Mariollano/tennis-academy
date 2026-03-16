@@ -461,3 +461,14 @@
 - [x] Fix: blockedHours loop used <= endH causing over-blocking — now uses correct boundary logic
 - [x] Root cause #1: No iCal URL was ever saved in the DB (ical_sync_settings table empty)
 - [x] Root cause #2: webcal:// URLs silently fail because fetch() only supports http/https
+
+## iCal Sync 0 Blocks Bug (Mar 16, 2026)
+- [ ] Diagnose why 2017 events found but 0 blocks created
+- [ ] Fix date filtering / event type filtering in icalSync.ts
+- [ ] Verify blocked_times rows are created after fix
+
+## iCal Sync Partial Blocking Bug (Mar 16, 2026)
+- [x] Inspect which 14 blocks were created and which days are missing
+- [x] Fix: recurring events not being expanded (rrule events need date expansion)
+- [x] Rewrote icalSync.ts to expand recurring events using rrule library (141 future occurrences found)
+- [x] All 63 tests still passing after fix
