@@ -591,8 +591,8 @@ export default function BookingPage() {
     { date: sessionDate },
     { enabled: programType === "private_lesson" && sessionDate.length === 10 }
   );
-  const bookedHours = new Set(unavailableHours?.bookedHours ?? []);
-  const blockedHours = new Set(unavailableHours?.blockedHours ?? []);
+  const bookedSlots = new Set(unavailableHours?.bookedSlots ?? []);
+  const blockedSlots = new Set(unavailableHours?.blockedSlots ?? []);
   const allDayBlocked = unavailableHours?.allDayBlocked ?? false;
 
   const searchString = useSearch();
@@ -1248,15 +1248,18 @@ export default function BookingPage() {
                           <>
                             <p className="text-xs text-muted-foreground mb-2">Select your preferred lesson start time. Grayed-out slots are already booked or unavailable.</p>
                             <div className="grid grid-cols-4 gap-2 mt-1">
-                              {Array.from({ length: 14 }, (_, i) => {
-                                const hour24 = i + 6; // 6 AM to 7 PM
+                              {Array.from({ length: 28 }, (_, i) => {
+                                // 28 half-hour slots: 6:00 AM to 7:30 PM
+                                const totalMins = 6 * 60 + i * 30;
+                                const hour24 = Math.floor(totalMins / 60);
+                                const mins = totalMins % 60;
                                 const ampm = hour24 < 12 ? "AM" : "PM";
                                 const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-                                const label = `${hour12}:00 ${ampm}`;
-                                const value = `${String(hour24).padStart(2, "0")}:00`;
+                                const label = `${hour12}:${String(mins).padStart(2, "0")} ${ampm}`;
+                                const value = `${String(hour24).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
                                 const isSelected = timePreference === value;
-                                const isBooked = bookedHours.has(hour24);
-                                const isBlocked = blockedHours.has(hour24);
+                                const isBooked = bookedSlots.has(value);
+                                const isBlocked = blockedSlots.has(value);
                                 const isUnavailable = isBooked || isBlocked;
                                 return (
                                   <button
@@ -1281,7 +1284,7 @@ export default function BookingPage() {
                               })}
                             </div>
                             {timePreference && (
-                              <p className="text-xs text-green-700 mt-2">✓ Preferred start time: {(() => { const h = parseInt(timePreference); const ampm = h < 12 ? "AM" : "PM"; const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h; return `${h12}:00 ${ampm}`; })()}</p>
+                              <p className="text-xs text-green-700 mt-2">✓ Preferred start time: {(() => { const [h, m] = timePreference.split(':').map(Number); const ampm = h < 12 ? 'AM' : 'PM'; const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h; return `${h12}:${String(m).padStart(2,'0')} ${ampm}`; })()}</p>
                             )}
                           </>
                         )}

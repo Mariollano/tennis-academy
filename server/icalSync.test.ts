@@ -225,7 +225,7 @@ describe("iCal Sync Service", () => {
     // Reproduces the JUNIOR PROGRAM bug:
     // node-ical parses DTSTART;TZID=America/New_York:20241205T153000 as 2024-12-05T20:30:00Z (3:30 PM Eastern)
     // Old code: rrulestr('RRULE:FREQ=WEEKLY', { dtstart: eventStartUTC }) → occurrences at 20:30Z = 4:30 PM Eastern (WRONG)
-    // New code: convert dtstart to floating Eastern (15:30Z) → occurrences at 15:30Z floating → fromFloatingEastern → 19:30Z = 3:30 PM Eastern (CORRECT)
+    // New code: convert dtstart to floating Eastern (15:30Z) → occurrences at 15:30Z floating → floatingToRealUTC → 19:30Z = 3:30 PM Eastern (CORRECT)
     const eventStart = new Date("2024-12-05T20:30:00.000Z"); // 3:30 PM Eastern
     const eventEnd = new Date("2024-12-05T23:30:00.000Z");   // 6:30 PM Eastern
 

@@ -517,6 +517,15 @@
 - [x] Block 9:00–10:30 AM (hours 9 and 10) on Mon/Wed/Fri/Sun permanently
 - [x] Hardcoded in getUnavailableHours, independent of iCal sync
 
+## Booking Time Slots & iCal Timezone Bugs (Mar 17, 2026)
+- [x] Fix: booking time slots now show every 30 minutes (6:00 AM to 7:30 PM, 28 slots total)
+- [x] Fix: iCal sync now uses floatingToRealUTC() with getEasternOffsetMs() — server-TZ-independent, works in UTC
+- [x] Fix: getUnavailableHours now returns bookedSlots/blockedSlots as HH:MM strings (not integer hours)
+- [x] Fix: slotsInRange() generates 30-min slot strings from startTime to endTime
+- [x] Fix: permanent program rules (105 Clinic, Junior Program) also use slotsInRange()
+- [x] Verified: DB now shows correct Eastern times (09:00, 15:30, etc.) after re-sync
+- [x] All 68 tests passing
+
 ## iCal Sync Incorrect Blocks Bug (Mar 17, 2026)
 - [x] Identify which iCal events are causing 11 AM–2 PM to be blocked on Friday March 20 (not in Google Calendar)
 - [x] Confirmed: personal appointments DO block bookings (correct behavior per Mario)

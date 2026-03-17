@@ -1,33 +1,34 @@
 /**
  * iCal Sync Service
- * Fetches Google/Apple Calendar (.ics) events and creates blocked_times entries
- * so students cannot book during Coach Mario's appointments and lessons.
  *
- * Handles:
- *   - Single (non-recurring) events
- *   - Recurring events (RRULE) — expanded into individual occurrences
- *   - All-day events
- *   - Multi-day events
+ * Fetches Google/Apple Calendar (.ics) events and creates blocked_times entries.
  *
- * TIMEZONE NOTES:
- *   - All calendar events are in America/New_York timezone
- *   - blockedDate is stored as a MySQL DATE column (YYYY-MM-DD string)
- *   - startTime / endTime are stored as "HH:MM:SS" strings in Eastern time
- *   - The blockedDate value stored must match what MySQL DATE() returns
- *     (i.e., the Eastern-timezone date of the event, stored as a UTC midnight Date)
- *   - Cleanup uses toISOString().substring(0,10) to get the UTC date from
- *     the database-returned Date object (MySQL DATE columns come back as midnight UTC)
+ * TIMEZONE DESIGN (server runs in UTC):
+ * ─────────────────────────────────────
+ * The server process runs in UTC (Etc/Unknown). All timezone conversions use
+ * Intl.DateTimeFormat with timeZone: "America/New_York" — never server local time.
  *
- * RRULE TIMEZONE FIX:
- *   - node-ical converts DTSTART;TZID=America/New_York:... to UTC when parsing
- *   - The rrule library treats dtstart as "floating" — it generates occurrences at
- *     the same wall-clock time as dtstart, stored as UTC
- *   - Fix: convert event.start (UTC) to a "floating" Date whose UTC components
- *     equal the Eastern wall-clock time. Pass this as dtstart to rrulestr.
- *   - The occurrences returned are also "floating" — their UTC components equal
- *     the Eastern wall-clock time. Convert back to real UTC using fromFloatingEastern().
- *   - Window boundaries (now/cutoff) must also be converted to floating Eastern
- *     so the rrule.between() comparison works correctly.
+ * node-ical parses DTSTART;TZID=America/New_York:... into a real UTC Date.
+ * e.g. DTSTART:20241205T153000 Eastern → new Date("2024-12-05T20:30:00.000Z")
+ *
+ * The rrule library generates "floating" occurrences: the UTC components of the
+ * returned Date equal the Eastern wall-clock time of the original DTSTART.
+ * e.g. occurrence for 3:30 PM Eastern → Date("2026-03-19T15:30:00.000Z") [floating]
+ *
+ * To convert a floating occurrence back to real UTC:
+ *   realUTC = floating - easternOffsetMs(floating)
+ * where easternOffsetMs is computed by comparing UTC and Eastern formatted strings.
+ *
+ * This approach is server-timezone-independent (works in UTC or any other TZ).
+ *
+ * STORAGE:
+ * ─────────────────────────────────────
+ * blockedDate: MySQL DATE column → stored as midnight UTC Date object
+ *   e.g. 2026-03-18 → new Date("2026-03-18T00:00:00.000Z")
+ *   When reading back: use .toISOString().substring(0,10) NOT toDateStringEastern()
+ *
+ * startTime / endTime: "HH:MM:SS" strings in Eastern timezone
+ *   e.g. "09:00:00" = 9 AM Eastern
  */
 import ical, { VEvent } from "node-ical";
 import pkg from "rrule";
@@ -36,14 +37,13 @@ import { getDb } from "./db";
 import { icalSyncSettings, blockedTimes } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
-// How many days ahead to sync (90 days rolling window)
 const SYNC_DAYS_AHEAD = 90;
-// Prefix used to identify auto-synced blocks (so we can update/delete them safely)
 const ICAL_BLOCK_PREFIX = "[iCal]";
-// Timezone for Coach Mario's calendar — all times stored in this zone
 const COACH_TIMEZONE = "America/New_York";
 
-/** Format a Date as "HH:MM:SS" in the coach's Eastern timezone */
+// ── Timezone helpers ──────────────────────────────────────────────────────────
+
+/** Format a Date as "HH:MM:SS" in Eastern timezone. Works regardless of server TZ. */
 function toTimeString(date: Date): string {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: COACH_TIMEZONE,
@@ -56,10 +56,7 @@ function toTimeString(date: Date): string {
   return `${h}:${m}:00`;
 }
 
-/**
- * Format a Date as "YYYY-MM-DD" in the coach's Eastern timezone.
- * Used for windowStart/windowEnd comparisons and for creating the blockedDate value.
- */
+/** Format a Date as "YYYY-MM-DD" in Eastern timezone. */
 function toDateStringEastern(date: Date): string {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: COACH_TIMEZONE,
@@ -74,68 +71,55 @@ function toDateStringEastern(date: Date): string {
 }
 
 /**
- * Create a Date object representing midnight UTC for a given YYYY-MM-DD string.
- * MySQL DATE columns are stored/returned as midnight UTC, so we use this to
- * create a blockedDate value that MySQL will store as the correct date.
+ * Get the Eastern timezone offset in milliseconds for a given Date.
+ * Returns a negative number (e.g. -14400000 for EDT = UTC-4, -18000000 for EST = UTC-5).
+ *
+ * Method: format the same instant in UTC and Eastern, parse both as UTC strings,
+ * subtract to get the offset. This is server-TZ-independent.
  */
+function getEasternOffsetMs(date: Date): number {
+  const fmt = (tz: string) =>
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hour12: false,
+    }).format(date);
+
+  // Format as "MM/DD/YYYY, HH:MM:SS" then parse
+  const parseFormatted = (s: string): number => {
+    // "03/19/2026, 15:30:00" → parse as UTC
+    const [datePart, timePart] = s.split(", ");
+    const [mo, d, y] = datePart.split("/");
+    return new Date(`${y}-${mo}-${d}T${timePart}Z`).getTime();
+  };
+
+  const utcMs = parseFormatted(fmt("UTC"));
+  const etMs = parseFormatted(fmt(COACH_TIMEZONE));
+  return etMs - utcMs; // e.g. -14400000 for UTC-4
+}
+
+/**
+ * Convert a "floating" rrule occurrence Date to a real UTC Date.
+ *
+ * rrule generates occurrences where the UTC components equal the Eastern wall-clock time.
+ * e.g. floating = 2026-03-19T15:30:00.000Z means "3:30 PM Eastern on March 19"
+ *
+ * To get real UTC: realUTC = floating - easternOffset
+ * e.g. 15:30Z - (-4h) = 19:30Z = 3:30 PM Eastern ✓
+ */
+function floatingToRealUTC(floating: Date): Date {
+  const offset = getEasternOffsetMs(floating);
+  return new Date(floating.getTime() - offset);
+}
+
+/** Create a Date at midnight UTC for a YYYY-MM-DD string (for MySQL DATE columns). */
 function dateStringToMidnightUTC(dateStr: string): Date {
   return new Date(dateStr + "T00:00:00.000Z");
 }
 
-/**
- * Convert a real UTC Date to a "floating" Date whose UTC components equal
- * the Eastern wall-clock time of the input.
- *
- * Example: 2024-12-05T20:30:00Z (3:30 PM Eastern) → 2024-12-05T15:30:00Z (floating 15:30)
- *
- * This is used as dtstart for rrule so it generates occurrences at the correct
- * Eastern wall-clock time (as floating UTC).
- */
-function toFloatingEastern(utcDate: Date): Date {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: COACH_TIMEZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }).formatToParts(utcDate);
-  const y = parts.find((p) => p.type === "year")?.value ?? "2000";
-  const mo = parts.find((p) => p.type === "month")?.value ?? "01";
-  const d = parts.find((p) => p.type === "day")?.value ?? "01";
-  const h = parts.find((p) => p.type === "hour")?.value ?? "00";
-  const min = parts.find((p) => p.type === "minute")?.value ?? "00";
-  const sec = parts.find((p) => p.type === "second")?.value ?? "00";
-  return new Date(`${y}-${mo}-${d}T${h}:${min}:${sec}.000Z`);
-}
+// ── Block insertion ───────────────────────────────────────────────────────────
 
-/**
- * Convert a "floating" Eastern Date (from rrule occurrence) back to a real UTC Date.
- *
- * The rrule library returns occurrences as floating dates: the UTC components
- * of the returned Date equal the Eastern wall-clock time. For example,
- * 2026-03-19T15:30:00Z means "3:30 PM Eastern on March 19".
- *
- * We convert by extracting the UTC components and parsing them as Eastern local time.
- * Since the server runs in America/New_York, `new Date("2026-03-19T15:30:00")` (no Z)
- * is parsed as 3:30 PM Eastern = 2026-03-19T19:30:00Z.
- */
-function fromFloatingEastern(floatingDate: Date): Date {
-  const h = floatingDate.getUTCHours();
-  const min = floatingDate.getUTCMinutes();
-  const sec = floatingDate.getUTCSeconds();
-  const dateStr = floatingDate.toISOString().substring(0, 10);
-  // Parse as Eastern local time (server TZ = America/New_York)
-  const localStr = `${dateStr}T${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
-  return new Date(localStr);
-}
-
-/**
- * Given a single event occurrence (start + end + summary + isAllDay),
- * insert blocked_times rows for each day it spans that falls within the window.
- */
 async function insertBlocksForOccurrence(
   db: Awaited<ReturnType<typeof getDb>>,
   title: string,
@@ -148,102 +132,80 @@ async function insertBlocksForOccurrence(
   if (!db) return 0;
   let blocksCreated = 0;
 
-  // For all-day events, iCal end is exclusive (next day midnight), so subtract 1ms
+  // For all-day events, iCal end is exclusive (next day midnight)
   const adjustedEnd = isAllDay ? new Date(endDate.getTime() - 1) : endDate;
 
-  // Start iterating from the Eastern-timezone date of the event start
-  // We use the Eastern date string to avoid UTC/local confusion
   const startDateStr = toDateStringEastern(startDate);
   const endDateStr = toDateStringEastern(adjustedEnd);
 
-  // Build a list of dates to process (YYYY-MM-DD strings)
-  const datesToProcess: string[] = [];
-  const cursor = new Date(startDateStr + "T12:00:00.000Z"); // noon UTC to avoid DST edge cases
+  // Iterate over each Eastern-calendar day the event spans
+  const cursor = new Date(startDateStr + "T12:00:00.000Z");
   const endCursor = new Date(endDateStr + "T12:00:00.000Z");
 
   while (cursor <= endCursor) {
-    datesToProcess.push(cursor.toISOString().substring(0, 10));
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
+    const dateStr = cursor.toISOString().substring(0, 10);
+    if (dateStr >= windowStart && dateStr <= windowEnd) {
+      let dayStart: string | null = null;
+      let dayEnd: string | null = null;
 
-  for (const dateStr of datesToProcess) {
-    if (dateStr < windowStart || dateStr > windowEnd) continue;
+      if (!isAllDay) {
+        const eventStartDateStr = toDateStringEastern(startDate);
+        const eventEndDateStr = toDateStringEastern(endDate);
+        // Clamp to day boundaries (midnight Eastern = start of day)
+        const dayStartMidnight = new Date(dateStr + "T00:00:00.000Z");
+        const dayEndMidnight = new Date(dateStr + "T00:00:00.000Z");
+        dayEndMidnight.setUTCDate(dayEndMidnight.getUTCDate() + 1);
 
-    let dayStart: string | null = null;
-    let dayEnd: string | null = null;
+        const dayStartDt = eventStartDateStr === dateStr ? startDate : dayStartMidnight;
+        const dayEndDt = eventEndDateStr === dateStr ? endDate : dayEndMidnight;
 
-    if (!isAllDay) {
-      // Determine the start/end times for this specific day
-      // If event starts before this day, use midnight Eastern as start
-      // If event ends after this day, use midnight Eastern as end
-      const dayStartMidnightUTC = new Date(dateStr + "T00:00:00.000Z");
-      const dayEndMidnightUTC = new Date(dateStr + "T00:00:00.000Z");
-      dayEndMidnightUTC.setUTCDate(dayEndMidnightUTC.getUTCDate() + 1);
+        dayStart = toTimeString(dayStartDt);
+        dayEnd = toTimeString(dayEndDt);
+        if (dayStart === dayEnd) {
+          cursor.setUTCDate(cursor.getUTCDate() + 1);
+          continue;
+        }
+      }
 
-      // Use the actual event start/end, clamped to this day's Eastern midnight boundaries
-      // We compare by Eastern date string to determine if event starts/ends on this day
-      const eventStartDateStr = toDateStringEastern(startDate);
-      const eventEndDateStr = toDateStringEastern(endDate);
-
-      const dayStartDt = eventStartDateStr === dateStr ? startDate : dayStartMidnightUTC;
-      const dayEndDt = eventEndDateStr === dateStr ? endDate : dayEndMidnightUTC;
-
-      dayStart = toTimeString(dayStartDt);
-      dayEnd = toTimeString(dayEndDt);
-      // Skip zero-length blocks
-      if (dayStart === dayEnd) continue;
+      await db.insert(blockedTimes).values({
+        title,
+        blockedDate: dateStringToMidnightUTC(dateStr),
+        startTime: dayStart,
+        endTime: dayEnd,
+        isAllDay,
+        affectsPrivateLessons: true,
+        affects105Clinic: true,
+      });
+      blocksCreated++;
     }
-
-    // Store blockedDate as midnight UTC for this date string
-    // MySQL DATE column stores/returns dates as midnight UTC
-    const blockDate = dateStringToMidnightUTC(dateStr);
-
-    await db.insert(blockedTimes).values({
-      title,
-      blockedDate: blockDate,
-      startTime: dayStart,
-      endTime: dayEnd,
-      isAllDay,
-      affectsPrivateLessons: true,
-      affects105Clinic: true,
-    });
-
-    blocksCreated++;
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
   return blocksCreated;
 }
 
-/**
- * Main sync function — fetches the iCal URL, parses events,
- * removes old iCal-sourced blocks, and inserts fresh ones.
- */
+// ── Main sync ─────────────────────────────────────────────────────────────────
+
 export async function syncIcalCalendar(): Promise<{
   success: boolean;
   message: string;
   blocksCreated: number;
 }> {
-  // 1. Load settings
   const db = await getDb();
   if (!db) return { success: false, message: "Database not available", blocksCreated: 0 };
+
   const settings = await db.select().from(icalSyncSettings).limit(1);
   if (!settings.length || !settings[0].isEnabled) {
     return { success: false, message: "iCal sync not configured or disabled", blocksCreated: 0 };
   }
 
   let { icalUrl } = settings[0];
-
-  // Convert webcal:// and webcals:// to https:// — fetch() does not support these protocols
-  if (icalUrl.startsWith("webcal://")) {
-    icalUrl = "https://" + icalUrl.slice("webcal://".length);
-  } else if (icalUrl.startsWith("webcals://")) {
-    icalUrl = "https://" + icalUrl.slice("webcals://".length);
-  }
+  if (icalUrl.startsWith("webcal://")) icalUrl = "https://" + icalUrl.slice(9);
+  else if (icalUrl.startsWith("webcals://")) icalUrl = "https://" + icalUrl.slice(10);
 
   console.log(`[iCalSync] Fetching calendar from: ${icalUrl.substring(0, 60)}...`);
 
   try {
-    // 2. Fetch and parse the .ics feed
     const rawEvents = await ical.async.fromURL(icalUrl);
 
     const now = new Date();
@@ -251,15 +213,12 @@ export async function syncIcalCalendar(): Promise<{
     const windowStart = toDateStringEastern(now);
     const windowEnd = toDateStringEastern(cutoff);
 
-    // 3. Delete all previously synced iCal blocks in the rolling window
-    // CRITICAL: MySQL DATE columns are returned by Drizzle as Date objects at midnight UTC.
-    // For example, the date 2026-03-18 comes back as new Date('2026-03-18T00:00:00.000Z').
-    // We must use toISOString().substring(0,10) to get "2026-03-18" — NOT toDateStringEastern()
-    // which would convert midnight UTC to Eastern time and return "2026-03-17" (wrong!).
+    // Delete existing iCal blocks in the window
+    // IMPORTANT: blockedDate is stored as midnight UTC, so use .toISOString().substring(0,10)
+    // NOT toDateStringEastern() which would shift midnight UTC back one day in Eastern
     const existingBlocks = await db.select().from(blockedTimes);
     const icalBlockIds = existingBlocks
       .filter((b) => {
-        // Get the date string as stored in MySQL (UTC-based)
         const dateStr = b.blockedDate instanceof Date
           ? b.blockedDate.toISOString().substring(0, 10)
           : String(b.blockedDate).substring(0, 10);
@@ -268,25 +227,22 @@ export async function syncIcalCalendar(): Promise<{
       .map((b) => b.id);
 
     console.log(`[iCalSync] Deleting ${icalBlockIds.length} old iCal blocks in window ${windowStart}..${windowEnd}`);
-
     for (const id of icalBlockIds) {
       await db.delete(blockedTimes).where(eq(blockedTimes.id, id));
     }
 
-    // 4. Process all events — both single and recurring
     let blocksCreated = 0;
-    let totalEvents = 0;
     let totalOccurrences = 0;
 
-    // Floating Eastern window boundaries for rrule.between() comparisons
-    // rrule returns occurrences as "floating" dates where UTC components = Eastern wall-clock time
-    // So we must compare against floating boundaries too
-    const floatingNow = toFloatingEastern(now);
-    const floatingCutoff = toFloatingEastern(cutoff);
+    // Floating window boundaries for rrule.between()
+    // rrule compares against floating dates, so we need floating boundaries too
+    const easternOffsetNow = getEasternOffsetMs(now);
+    const easternOffsetCutoff = getEasternOffsetMs(cutoff);
+    const floatingNow = new Date(now.getTime() + easternOffsetNow);
+    const floatingCutoff = new Date(cutoff.getTime() + easternOffsetCutoff);
 
     for (const component of Object.values(rawEvents)) {
       if (!component || component.type !== "VEVENT") continue;
-      totalEvents++;
 
       const event = component as VEvent;
       const summary = (event.summary as string) || "Personal Appointment";
@@ -297,51 +253,46 @@ export async function syncIcalCalendar(): Promise<{
       if (event.rrule) {
         try {
           const rruleObj = event.rrule as any;
-          let rule: any;
-
-          // Convert event.start (UTC) to floating Eastern dtstart for rrule
-          // This ensures rrule generates occurrences at the correct Eastern wall-clock time
           const originalStart = event.start as Date;
-          const floatingDtstart = toFloatingEastern(originalStart);
+          const originalEnd = event.end as Date;
+          const durationMs = originalEnd && originalStart
+            ? originalEnd.getTime() - originalStart.getTime()
+            : 60 * 60 * 1000;
 
+          // Build floating dtstart: UTC components = Eastern wall-clock of originalStart
+          const easternOffset = getEasternOffsetMs(originalStart);
+          const floatingDtstart = new Date(originalStart.getTime() + easternOffset);
+
+          let rule: any;
           if (typeof rruleObj === "string") {
             rule = rrulestr(rruleObj, { dtstart: floatingDtstart });
           } else if (rruleObj.toString) {
             const rruleString = rruleObj.toString();
-            // Strip any DTSTART line from the rrule string since we're providing our own
+            // Strip any embedded DTSTART — we provide our own floating one
             const rruleOnly = rruleString.replace(/^DTSTART[^\n]*\n?/m, "").trim();
             rule = rrulestr(rruleOnly || rruleString, { dtstart: floatingDtstart });
           } else {
             continue;
           }
 
-          // Get all occurrences in our window using floating boundaries
           const occurrences: Date[] = rule.between(floatingNow, floatingCutoff, true);
 
-          // Get the duration of the event to compute end time for each occurrence
-          const originalEnd = event.end as Date;
-          const durationMs = originalEnd && originalStart
-            ? originalEnd.getTime() - originalStart.getTime()
-            : 60 * 60 * 1000; // default 1 hour
-
-          // Build set of exception dates (EXDATE) to skip cancelled occurrences
+          // Build exdate set (cancelled occurrences)
           const exdates = new Set<string>();
           if ((event as any).exdate) {
             const exdateVal = (event as any).exdate;
             const exdateList = Array.isArray(exdateVal) ? exdateVal : Object.values(exdateVal);
             for (const ex of exdateList) {
               const exDate = ex instanceof Date ? ex : new Date(ex);
-              exdates.add(exDate.toISOString().substring(0, 10));
+              exdates.add(toDateStringEastern(exDate));
             }
           }
 
           for (const floatingOcc of occurrences) {
-            // Convert floating occurrence back to real UTC
-            // floatingOcc UTC components = Eastern wall-clock time
-            const occStart = fromFloatingEastern(floatingOcc);
+            // Convert floating occurrence to real UTC
+            const occStart = floatingToRealUTC(floatingOcc);
             const occEnd = new Date(occStart.getTime() + durationMs);
 
-            // Skip cancelled occurrences (check by Eastern date)
             const occDateStr = toDateStringEastern(occStart);
             if (exdates.has(occDateStr)) continue;
 
@@ -350,19 +301,16 @@ export async function syncIcalCalendar(): Promise<{
               db, title, occStart, occEnd, isAllDay, windowStart, windowEnd
             );
           }
-        } catch (rruleErr) {
-          // If rrule expansion fails, fall through to treat as single event
-          console.warn(`[iCalSync] rrule expansion failed for "${summary}":`, (rruleErr as Error).message);
+        } catch (err) {
+          console.warn(`[iCalSync] rrule expansion failed for "${summary}":`, (err as Error).message);
         }
-        continue; // Don't also process as a single event
+        continue;
       }
 
-      // ── Single (non-recurring) events ───────────────────────────────────────
+      // ── Single events ────────────────────────────────────────────────────────
       const start = event.start as Date;
       const end = event.end as Date;
       if (!start || !end) continue;
-
-      // Skip events entirely outside our rolling window
       if (start > cutoff || end < now) continue;
 
       totalOccurrences++;
@@ -371,11 +319,10 @@ export async function syncIcalCalendar(): Promise<{
       );
     }
 
-    // 5. Update last sync timestamp
     await db.update(icalSyncSettings).set({
       lastSyncedAt: new Date(),
       lastSyncStatus: "success",
-      lastSyncMessage: `Synced ${blocksCreated} blocks from ${totalOccurrences} occurrences (${totalEvents} events)`,
+      lastSyncMessage: `Synced ${blocksCreated} blocks from ${totalOccurrences} occurrences`,
     }).where(eq(icalSyncSettings.id, settings[0].id));
 
     return {
@@ -386,20 +333,15 @@ export async function syncIcalCalendar(): Promise<{
   } catch (err: any) {
     const db2 = await getDb();
     if (db2) {
-      const settingsRow = await db2.select().from(icalSyncSettings).limit(1);
-      if (settingsRow.length) {
+      const s = await db2.select().from(icalSyncSettings).limit(1);
+      if (s.length) {
         await db2.update(icalSyncSettings).set({
           lastSyncedAt: new Date(),
           lastSyncStatus: "error",
           lastSyncMessage: err.message || "Unknown error",
-        }).where(eq(icalSyncSettings.id, settingsRow[0].id));
+        }).where(eq(icalSyncSettings.id, s[0].id));
       }
     }
-
-    return {
-      success: false,
-      message: err.message || "Failed to sync calendar",
-      blocksCreated: 0,
-    };
+    return { success: false, message: err.message || "Failed to sync calendar", blocksCreated: 0 };
   }
 }

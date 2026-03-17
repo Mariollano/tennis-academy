@@ -1422,74 +1422,63 @@ export const appRouter = router({
       }))
       .query(async ({ input }) => {
         const db = await getDb();
-        if (!db) return { bookedHours: [], blockedHours: [], allDayBlocked: false };
+        if (!db) return { bookedSlots: [], blockedSlots: [], allDayBlocked: false, bookedHours: [], blockedHours: [] };
 
-        // ✅ FIX #7: use DATE() SQL comparison to reliably match date column in MySQL
+        // Generate all 30-min slot strings between two "HH:MM:SS" times (exclusive of end)
+        // e.g. "09:00:00" to "10:30:00" → ["09:00", "09:30", "10:00"]
+        const slotsInRange = (startStr: string, endStr: string): string[] => {
+          const [sh, sm] = startStr.split(':').map(Number);
+          const [eh, em] = endStr.split(':').map(Number);
+          const result: string[] = [];
+          for (let mins = sh * 60 + sm; mins < eh * 60 + em; mins += 30) {
+            result.push(`${String(Math.floor(mins / 60)).padStart(2,'0')}:${String(mins % 60).padStart(2,'0')}`);
+          }
+          return result;
+        };
+
         // Get confirmed/pending private lesson bookings for this date
-        const existingBookings = await db.select({
-          sessionStartTime: bookings.sessionStartTime,
-        })
+        const existingBookings = await db.select({ sessionStartTime: bookings.sessionStartTime })
           .from(bookings)
           .where(and(
             sql`DATE(${bookings.sessionDate}) = ${input.date}`,
             sql`${bookings.status} IN ('pending', 'confirmed')`,
           ));
-
-        const bookedHours = existingBookings
+        const bookedSlots = existingBookings
           .filter(b => b.sessionStartTime)
-          .map(b => {
-            // sessionStartTime is "HH:MM:SS" — extract hour
-            const t = b.sessionStartTime as string;
-            return parseInt(t.split(':')[0], 10);
-          });
+          .map(b => { const [h, m] = (b.sessionStartTime as string).split(':'); return `${h}:${m}`; });
 
-        // Get admin-blocked times for this date that affect private lessons
+        // Get admin-blocked times for this date
         const blocks = await db.select().from(blockedTimes)
           .where(and(
             sql`DATE(${blockedTimes.blockedDate}) = ${input.date}`,
             eq(blockedTimes.affectsPrivateLessons, true),
           ));
-
         const allDayBlocked = blocks.some(b => b.isAllDay);
-        const blockedHours: number[] = [];
+        const blockedSlots: string[] = [];
         for (const block of blocks) {
-          if (block.isAllDay) continue; // handled by allDayBlocked flag
+          if (block.isAllDay) continue;
           if (block.startTime && block.endTime) {
-            const startH = parseInt((block.startTime as string).split(':')[0], 10);
-            const [endHour, endMin] = (block.endTime as string).split(':').map(Number);
-            // Block all hours that overlap: from startH up to (but not including) endHour
-            // unless the event ends exactly on the hour (e.g. 15:00), in which case
-            // endHour itself is NOT blocked (the lesson can start at 3 PM if event ends at 3:00 PM)
-            const effectiveEnd = endMin > 0 ? endHour : endHour - 1;
-            for (let h = startH; h <= effectiveEnd; h++) blockedHours.push(h);
+            blockedSlots.push(...slotsInRange(block.startTime as string, block.endTime as string));
           }
         }
 
-        // ── Permanent Junior Program rules (hardcoded, independent of iCal) ──
-        // Determine day of week for the requested date (0=Sun, 1=Mon … 6=Sat)
-        // Use UTC midnight so the day-of-week matches the Eastern calendar date
+        // Permanent program rules (hardcoded)
         const [y, mo, d] = input.date.split('-').map(Number);
         const dayOfWeek = new Date(Date.UTC(y, mo - 1, d)).getUTCDay();
-        const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5; // Mon–Fri
+        const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
         const isSunday = dayOfWeek === 0;
-        const isMonWedFriSun = [0, 1, 3, 5].includes(dayOfWeek); // Sun=0, Mon=1, Wed=3, Fri=5
+        const isMonWedFriSun = [0, 1, 3, 5].includes(dayOfWeek);
+        if (isMonWedFriSun) blockedSlots.push(...slotsInRange('09:00:00', '10:30:00')); // 105 Clinic
+        if (isWeekday) blockedSlots.push(...slotsInRange('15:30:00', '18:30:00'));       // Junior Mon–Fri
+        if (isSunday) blockedSlots.push(...slotsInRange('12:00:00', '15:00:00'));        // Junior Sunday
 
-        // 105 Clinic: Mon/Wed/Fri/Sun 9:00–10:30 AM → block hours 9 and 10
-        if (isMonWedFriSun) {
-          blockedHours.push(9, 10);
-        }
-
-        // Junior Program: Mon–Fri 3:30–6:30 PM → block hours 15, 16, 17, 18
-        if (isWeekday) {
-          for (let h = 15; h <= 18; h++) blockedHours.push(h);
-        }
-
-        // Junior Program: Sundays 12:00–3:00 PM → block hours 12, 13, 14
-        if (isSunday) {
-          for (let h = 12; h <= 14; h++) blockedHours.push(h);
-        }
-
-        return { bookedHours, blockedHours, allDayBlocked };
+        return {
+          bookedSlots: Array.from(new Set(bookedSlots)),
+          blockedSlots: Array.from(new Set(blockedSlots)),
+          allDayBlocked,
+          bookedHours: [], // legacy, unused
+          blockedHours: [], // legacy, unused
+        };
       }),
 
     // Public: get blocked dates (for student calendar)
