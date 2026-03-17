@@ -166,30 +166,41 @@ describe("iCal Sync Service", () => {
     expect(block.startTime).toBe("09:00:00");
     expect(block.endTime).toBe("10:30:00");
 
-    // blockedDate should be midnight UTC for 2026-03-18
+    // blockedDate should be noon UTC for 2026-03-18
+    // IMPORTANT: We use noon UTC (T12:00:00Z) NOT midnight UTC (T00:00:00Z).
+    // The MySQL connection TZ is Eastern (UTC-4/5). Midnight UTC = 8 PM Eastern
+    // (previous day), so MySQL would store the wrong date. Noon UTC = 8 AM Eastern,
+    // safely within the correct calendar day regardless of DST.
     expect(block.blockedDate).toBeInstanceOf(Date);
-    expect(block.blockedDate.toISOString()).toBe("2026-03-18T00:00:00.000Z");
+    expect(block.blockedDate.toISOString()).toBe("2026-03-18T12:00:00.000Z");
   });
 
-  it("cleanup correctly identifies blocks by UTC date string from MySQL DATE column", () => {
-    // MySQL DATE columns return midnight UTC Date objects
-    // e.g., the date 2026-03-18 comes back as new Date('2026-03-18T00:00:00.000Z')
-    // Converting this to Eastern time gives '2026-03-17' (8 PM Eastern = midnight UTC)
-    // We must use .toISOString().substring(0,10) to get '2026-03-18' correctly
+  it("MySQL DATE column timezone: midnight UTC is stored as previous day in Eastern TZ", () => {
+    // The MySQL connection TZ is Eastern (UTC-4 in EDT). When we insert a JS Date,
+    // MySQL converts it to Eastern before storing as DATE.
+    // midnight UTC (T00:00:00Z) = 8 PM Eastern the PREVIOUS day → stored as March 17!
+    // noon UTC (T12:00:00Z) = 8 AM Eastern → stored as March 18 ✓
+    // This is why we use noon UTC for blockedDate inserts.
 
-    const mysqlDateValue = new Date("2026-03-18T00:00:00.000Z");
+    // Simulate what MySQL returns for a DATE stored as noon UTC
+    // MySQL returns DATE columns as midnight in the connection timezone (Eastern)
+    // For stored date 2026-03-18: MySQL returns 2026-03-18T04:00:00.000Z (midnight Eastern)
+    const mysqlReturnedValue = new Date("2026-03-18T04:00:00.000Z"); // midnight Eastern = 4 AM UTC
 
-    // The WRONG way (old bug): toDateStringEastern converts midnight UTC → March 17 Eastern
+    // The WRONG way: toISOString().substring(0,10) gives '2026-03-18' but only because
+    // this is 4 AM UTC. If MySQL returned midnight UTC (T00:00:00Z), it would be wrong.
+    // We now use SQL DATE_FORMAT() for all comparisons to avoid this entirely.
+    const dateStr = mysqlReturnedValue.toISOString().substring(0, 10);
+    expect(dateStr).toBe("2026-03-18"); // 4 AM UTC → still March 18 in ISO
+
+    // Verify that midnight UTC would give the wrong date
+    const midnightUTC = new Date("2026-03-18T00:00:00.000Z");
     const wrongDateStr = new Intl.DateTimeFormat("en-US", {
       timeZone: "America/New_York",
       year: "numeric", month: "2-digit", day: "2-digit",
-    }).format(mysqlDateValue);
-    // This gives "03/17/2026" — one day off!
+    }).format(midnightUTC);
+    // midnight UTC = 8 PM Eastern March 17 → wrong!
     expect(wrongDateStr).toContain("03/17/2026");
-
-    // The CORRECT way: use UTC date string directly
-    const correctDateStr = mysqlDateValue.toISOString().substring(0, 10);
-    expect(correctDateStr).toBe("2026-03-18");
   });
 
   it("handles all-day events correctly", async () => {

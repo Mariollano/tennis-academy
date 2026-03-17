@@ -544,3 +544,12 @@
 - [x] Verified: Junior program now shows 15:30–18:30 (3:30–6:30 PM Eastern) on all weekdays ✓
 - [x] Verified: JUNIOR PROGRAM (Sunday) shows 12:00–15:00 (noon–3 PM Eastern) ✓
 - [x] All 68 tests passing after fix
+
+## iCal Sync Definitive Timezone Fix (Mar 17, 2026)
+- [x] ROOT CAUSE CONFIRMED: dateStringToMidnightUTC used midnight UTC (T00:00:00Z) but MySQL connection TZ is Eastern (UTC-4)
+- [x] midnight UTC = 8 PM Eastern (previous day) → MySQL stored 2026-03-19 instead of 2026-03-20
+- [x] FIX: Use noon UTC (T12:00:00Z) = 8 AM Eastern, safely within correct calendar day regardless of DST
+- [x] FIX: Deletion filter now uses SQL DATE_FORMAT() instead of JS toISOString() to avoid TZ issues
+- [x] FIX: Luxon used for rrule floating occurrence → real UTC conversion (DST-safe, server-TZ-independent)
+- [x] Verified: Audrey=2026-03-20 (Fri 8 AM) ✓, Carol=2026-03-21 (Sat noon) ✓, JUNIOR PROGRAM=15:30-18:30 ✓
+- [x] All 68 tests passing
