@@ -176,6 +176,28 @@ async function startServer() {
   // iCal calendar feed (private, token-protected)
   app.get("/api/calendar/:token/bookings.ics", handleIcalFeed);
 
+  // Temporary: timezone debug endpoint (remove after use)
+  app.get("/api/admin/tz-debug", (req, res) => {
+    const secret = req.headers["x-sync-secret"];
+    if (secret !== "tennis-sync-2026") return res.status(403).json({ error: "Forbidden" });
+    const testDate = new Date('2026-03-27T13:00:00.000Z');
+    const eastern = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(testDate);
+    const y = eastern.find(p => p.type === 'year')?.value;
+    const mo = eastern.find(p => p.type === 'month')?.value;
+    const d = eastern.find(p => p.type === 'day')?.value;
+    return res.json({
+      serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      serverLocalTime: new Date().toString(),
+      serverUTCTime: new Date().toISOString(),
+      testDateUTC: testDate.toISOString(),
+      testDateEasternParts: { y, mo, d },
+      testDateEasternString: `${y}-${mo}-${d}`,
+      nodeVersion: process.version,
+    });
+  });
+
   // Temporary: secret-key-protected sync trigger (remove after use)
   app.post("/api/admin/force-ical-sync", async (req, res) => {
     const secret = req.headers["x-sync-secret"];
