@@ -502,3 +502,13 @@
 - [x] Confirmed: NO color-based filtering exists — all events have color="none" and are processed equally
 - [x] Root cause of wrong times: stale DB data from pre-fix syncs; latest sync stores correct Eastern times
 - [x] Verified: 105 clinic = 09:00-10:30, Junior program = 15:30-18:30 (3:30-6:30 PM) ✓
+
+## Junior Program 3:30 PM Blocking Bug (Mar 17, 2026)
+- [x] Fix: Junior Program 3:30–6:30 PM — hardcoded permanent rule blocks hours 15–18 on all weekdays
+- [x] Verify: booking page shows 3 PM, 4 PM, 5 PM, 6 PM all blocked on weekdays for Junior Program
+- [x] Confirmed: booking page shows whole-hour slots only (no :30 intervals), 3 PM slot correctly blocked
+
+## Junior Program Permanent Blocking Rules (Mar 17, 2026)
+- [x] Block 3:30–6:30 PM (hours 15, 16, 17, 18) on ALL weekdays (Mon–Fri) permanently
+- [x] Block 12:00–3:00 PM (hours 12, 13, 14) on ALL Sundays permanently
+- [x] These rules are independent of iCal sync — hardcoded in getUnavailableHours

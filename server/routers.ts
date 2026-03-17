@@ -1465,6 +1465,24 @@ export const appRouter = router({
           }
         }
 
+        // ── Permanent Junior Program rules (hardcoded, independent of iCal) ──
+        // Determine day of week for the requested date (0=Sun, 1=Mon … 6=Sat)
+        // Use UTC midnight so the day-of-week matches the Eastern calendar date
+        const [y, mo, d] = input.date.split('-').map(Number);
+        const dayOfWeek = new Date(Date.UTC(y, mo - 1, d)).getUTCDay();
+        const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5; // Mon–Fri
+        const isSunday = dayOfWeek === 0;
+
+        if (isWeekday) {
+          // Block 3:30 PM – 6:30 PM → hours 15, 16, 17, 18
+          // (startH=15 because a lesson starting at 3 PM would overlap with 3:30 PM Junior Program)
+          for (let h = 15; h <= 18; h++) blockedHours.push(h);
+        }
+        if (isSunday) {
+          // Block 12:00 PM – 3:00 PM → hours 12, 13, 14
+          for (let h = 12; h <= 14; h++) blockedHours.push(h);
+        }
+
         return { bookedHours, blockedHours, allDayBlocked };
       }),
 
