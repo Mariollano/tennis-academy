@@ -517,6 +517,15 @@
 - [x] Block 9:00–10:30 AM (hours 9 and 10) on Mon/Wed/Fri/Sun permanently
 - [x] Hardcoded in getUnavailableHours, independent of iCal sync
 
+## iCal Timezone Still Wrong After Fix (Mar 17, 2026)
+- [x] Diagnosed: Carol stored on March 20 (should be March 21), Audrey stored on March 19 (should be March 20) — was stale DB data
+- [x] Confirmed via DEBUG-INSERT logs: insert was writing correct dates (Carol=2026-03-21, Audrey=2026-03-20)
+- [x] After full sync with new code: Carol=2026-03-21 (Sat) ✓, Audrey=2026-03-20 (Fri) ✓
+- [x] JUNIOR PROGRAM=15:30-18:30 ✓, 105 clinic=09:00-10:30 ✓
+- [x] Verified March 17-25 blocks match Google Calendar exactly
+- [x] Removed debug logging from icalSync.ts
+- [x] All 68 tests passing
+
 ## Booking Time Slots & iCal Timezone Bugs (Mar 17, 2026)
 - [x] Fix: booking time slots now show every 30 minutes (6:00 AM to 7:30 PM, 28 slots total)
 - [x] Fix: iCal sync now uses floatingToRealUTC() with getEasternOffsetMs() — server-TZ-independent, works in UTC
