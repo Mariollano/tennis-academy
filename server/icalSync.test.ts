@@ -221,6 +221,49 @@ describe("iCal Sync Service", () => {
     }
   });
 
+  it("recurring events use floating Eastern dtstart so occurrences have correct Eastern times", async () => {
+    // Reproduces the JUNIOR PROGRAM bug:
+    // node-ical parses DTSTART;TZID=America/New_York:20241205T153000 as 2024-12-05T20:30:00Z (3:30 PM Eastern)
+    // Old code: rrulestr('RRULE:FREQ=WEEKLY', { dtstart: eventStartUTC }) → occurrences at 20:30Z = 4:30 PM Eastern (WRONG)
+    // New code: convert dtstart to floating Eastern (15:30Z) → occurrences at 15:30Z floating → fromFloatingEastern → 19:30Z = 3:30 PM Eastern (CORRECT)
+    const eventStart = new Date("2024-12-05T20:30:00.000Z"); // 3:30 PM Eastern
+    const eventEnd = new Date("2024-12-05T23:30:00.000Z");   // 6:30 PM Eastern
+
+    const mockDb = createMockDb({ id: 1, icalUrl: "https://example.com/cal.ics", isEnabled: true });
+    vi.mocked(getDb).mockResolvedValue(mockDb as any);
+
+    // Create a mock recurring event with RRULE
+    const mockRrule = {
+      toString: () => "RRULE:FREQ=WEEKLY",
+    };
+
+    vi.mocked(ical.async.fromURL).mockResolvedValue({
+      "event-1": {
+        type: "VEVENT",
+        summary: "Junior program",
+        start: eventStart,
+        end: eventEnd,
+        datetype: "date-time",
+        rrule: mockRrule,
+      },
+    } as any);
+
+    await syncIcalCalendar();
+
+    const inserted = mockDb._insertedValues;
+    // Should have created at least one block
+    expect(inserted.length).toBeGreaterThan(0);
+
+    // All blocks should have startTime of 15:30:00 (3:30 PM Eastern), NOT 16:30:00 (4:30 PM Eastern)
+    for (const block of inserted) {
+      if (block.startTime !== null) {
+        // The start time should be 15:30 (3:30 PM Eastern), not 16:30 (4:30 PM Eastern)
+        expect(block.startTime).toBe("15:30:00");
+        expect(block.endTime).toBe("18:30:00");
+      }
+    }
+  });
+
   it("successfully syncs events and returns correct result shape", async () => {
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);

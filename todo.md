@@ -516,3 +516,13 @@
 ## 105 Clinic Permanent Blocking Rule (Mar 17, 2026)
 - [x] Block 9:00–10:30 AM (hours 9 and 10) on Mon/Wed/Fri/Sun permanently
 - [x] Hardcoded in getUnavailableHours, independent of iCal sync
+
+## iCal Sync Incorrect Blocks Bug (Mar 17, 2026)
+- [x] Identify which iCal events are causing 11 AM–2 PM to be blocked on Friday March 20 (not in Google Calendar)
+- [x] Confirmed: personal appointments DO block bookings (correct behavior per Mario)
+- [x] Fix: recurring events (JUNIOR PROGRAM) stored with UTC times (19:30) instead of Eastern (15:30) — rrule.between() returns UTC dates that need Eastern conversion
+- [x] Fix: use toFloatingEastern(event.start) as dtstart for rrulestr, then fromFloatingEastern() on each occurrence to get correct real UTC
+- [x] Added new vitest test: recurring events use floating Eastern dtstart so occurrences have correct Eastern times
+- [x] Verified: Junior program now shows 15:30–18:30 (3:30–6:30 PM Eastern) on all weekdays ✓
+- [x] Verified: JUNIOR PROGRAM (Sunday) shows 12:00–15:00 (noon–3 PM Eastern) ✓
+- [x] All 68 tests passing after fix
