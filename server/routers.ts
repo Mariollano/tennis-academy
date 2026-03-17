@@ -1472,14 +1472,20 @@ export const appRouter = router({
         const dayOfWeek = new Date(Date.UTC(y, mo - 1, d)).getUTCDay();
         const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5; // Mon–Fri
         const isSunday = dayOfWeek === 0;
+        const isMonWedFriSun = [0, 1, 3, 5].includes(dayOfWeek); // Sun=0, Mon=1, Wed=3, Fri=5
 
+        // 105 Clinic: Mon/Wed/Fri/Sun 9:00–10:30 AM → block hours 9 and 10
+        if (isMonWedFriSun) {
+          blockedHours.push(9, 10);
+        }
+
+        // Junior Program: Mon–Fri 3:30–6:30 PM → block hours 15, 16, 17, 18
         if (isWeekday) {
-          // Block 3:30 PM – 6:30 PM → hours 15, 16, 17, 18
-          // (startH=15 because a lesson starting at 3 PM would overlap with 3:30 PM Junior Program)
           for (let h = 15; h <= 18; h++) blockedHours.push(h);
         }
+
+        // Junior Program: Sundays 12:00–3:00 PM → block hours 12, 13, 14
         if (isSunday) {
-          // Block 12:00 PM – 3:00 PM → hours 12, 13, 14
           for (let h = 12; h <= 14; h++) blockedHours.push(h);
         }
 

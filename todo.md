@@ -512,3 +512,7 @@
 - [x] Block 3:30–6:30 PM (hours 15, 16, 17, 18) on ALL weekdays (Mon–Fri) permanently
 - [x] Block 12:00–3:00 PM (hours 12, 13, 14) on ALL Sundays permanently
 - [x] These rules are independent of iCal sync — hardcoded in getUnavailableHours
+
+## 105 Clinic Permanent Blocking Rule (Mar 17, 2026)
+- [x] Block 9:00–10:30 AM (hours 9 and 10) on Mon/Wed/Fri/Sun permanently
+- [x] Hardcoded in getUnavailableHours, independent of iCal sync
