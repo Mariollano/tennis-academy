@@ -1,0 +1,15 @@
+{
+  "query": "SELECT LEFT(icalUrl, 100) as url_preview, isEnabled, lastSyncMessage FROM ical_sync_settings LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT LEFT(icalUrl, 100) as url_preview, isEnabled, lastSyncMessage FROM ical_sync_settings LIMIT 1;",
+  "rows": [
+    {
+      "url_preview": "https://calendar.google.com/calendar/ical/ritennismario%40gmail.com/private-7529b1aa2fffb4b80f78b682",
+      "isEnabled": "1",
+      "lastSyncMessage": "Synced 157 blocks from 157 occurrences"
+    }
+  ],
+  "messages": [],
+  "stdout": "url_preview\tisEnabled\tlastSyncMessage\nhttps://calendar.google.com/calendar/ical/ritennismario%40gmail.com/private-7529b1aa2fffb4b80f78b682\t1\tSynced 157 blocks from 157 occurrences\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

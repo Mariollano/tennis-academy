@@ -1,0 +1,64 @@
+{
+  "query": "SELECT blockedDate, startTime, endTime, title FROM blocked_times WHERE blockedDate >= '2026-03-17' AND blockedDate <= '2026-03-20' ORDER BY blockedDate, startTime;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT blockedDate, startTime, endTime, title FROM blocked_times WHERE blockedDate >= '2026-03-17' AND blockedDate <= '2026-03-20' ORDER BY blockedDate, startTime;",
+  "rows": [
+    {
+      "blockedDate": "2026-03-17",
+      "startTime": "09:00:00",
+      "endTime": "10:00:00",
+      "title": "[iCal] Look at fidelity investing"
+    },
+    {
+      "blockedDate": "2026-03-18",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "title": "[iCal] 105"
+    },
+    {
+      "blockedDate": "2026-03-18",
+      "startTime": "14:15:00",
+      "endTime": "15:15:00",
+      "title": "[iCal] Ethan"
+    },
+    {
+      "blockedDate": "2026-03-19",
+      "startTime": "11:15:00",
+      "endTime": "14:00:00",
+      "title": "[iCal] Haircut"
+    },
+    {
+      "blockedDate": "2026-03-19",
+      "startTime": "14:15:00",
+      "endTime": "15:15:00",
+      "title": "[iCal] Ethan"
+    },
+    {
+      "blockedDate": "2026-03-19",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] Junior program"
+    },
+    {
+      "blockedDate": "2026-03-20",
+      "startTime": "08:00:00",
+      "endTime": "09:00:00",
+      "title": "[iCal] Audrey and Katie"
+    },
+    {
+      "blockedDate": "2026-03-20",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "title": "[iCal] 105"
+    },
+    {
+      "blockedDate": "2026-03-20",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    }
+  ],
+  "messages": [],
+  "stdout": "blockedDate\tstartTime\tendTime\ttitle\n2026-03-17\t09:00:00\t10:00:00\t[iCal] Look at fidelity investing\n2026-03-18\t09:00:00\t10:30:00\t[iCal] 105\n2026-03-18\t14:15:00\t15:15:00\t[iCal] Ethan\n2026-03-19\t11:15:00\t14:00:00\t[iCal] Haircut\n2026-03-19\t14:15:00\t15:15:00\t[iCal] Ethan\n2026-03-19\t15:30:00\t18:30:00\t[iCal] Junior program\n2026-03-20\t08:00:00\t09:00:00\t[iCal] Audrey and Katie\n2026-03-20\t09:00:00\t10:30:00\t[iCal] 105\n2026-03-20\t15:30:00\t18:30:00\t[iCal] JUNIOR PROGRAM\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

@@ -1,0 +1,130 @@
+{
+  "query": "SELECT blockedDate, startTime, endTime, title FROM blocked_times WHERE title LIKE '%JUNIOR%' OR title LIKE '%Junior%' ORDER BY blockedDate, startTime LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT blockedDate, startTime, endTime, title FROM blocked_times WHERE title LIKE '%JUNIOR%' OR title LIKE '%Junior%' ORDER BY blockedDate, startTime LIMIT 20;",
+  "rows": [
+    {
+      "blockedDate": "2026-03-19",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] Junior program"
+    },
+    {
+      "blockedDate": "2026-03-20",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-03-22",
+      "startTime": "12:00:00",
+      "endTime": "15:00:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-03-26",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] Junior program"
+    },
+    {
+      "blockedDate": "2026-03-27",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-03-29",
+      "startTime": "12:00:00",
+      "endTime": "15:00:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-04-02",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] Junior program"
+    },
+    {
+      "blockedDate": "2026-04-03",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-04-05",
+      "startTime": "12:00:00",
+      "endTime": "15:00:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-04-09",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] Junior program"
+    },
+    {
+      "blockedDate": "2026-04-10",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-04-12",
+      "startTime": "12:00:00",
+      "endTime": "15:00:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-04-16",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] Junior program"
+    },
+    {
+      "blockedDate": "2026-04-17",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-04-19",
+      "startTime": "12:00:00",
+      "endTime": "15:00:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-04-23",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] Junior program"
+    },
+    {
+      "blockedDate": "2026-04-24",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-04-26",
+      "startTime": "12:00:00",
+      "endTime": "15:00:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    },
+    {
+      "blockedDate": "2026-04-30",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] Junior program"
+    },
+    {
+      "blockedDate": "2026-05-01",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "title": "[iCal] JUNIOR PROGRAM"
+    }
+  ],
+  "messages": [],
+  "stdout": "blockedDate\tstartTime\tendTime\ttitle\n2026-03-19\t15:30:00\t18:30:00\t[iCal] Junior program\n2026-03-20\t15:30:00\t18:30:00\t[iCal] JUNIOR PROGRAM\n2026-03-22\t12:00:00\t15:00:00\t[iCal] JUNIOR PROGRAM\n2026-03-26\t15:30:00\t18:30:00\t[iCal] Junior program\n2026-03-27\t15:30:00\t18:30:00\t[iCal] JUNIOR PROGRAM\n2026-03-29\t12:00:00\t15:00:00\t[iCal] JUNIOR PROGRAM\n2026-04-02\t15:30:00\t18:30:00\t[iCal] Junior program\n2026-04-03\t15:30:00\t18:30:00\t[iCal] JUNIOR PROGRAM\n2026-04-05\t12:00:00\t15:00:00\t[iCal] JUNIOR PROGRAM\n2026-04-09\t15:30:00\t18:30:00\t[iCal] Junior program\n2026-04-10\t15:30:00\t18:30:00\t[iCal] JUNIOR PROGRAM\n2026-04-12\t12:00:00\t15:00:00\t[iCal] JUNIOR PROGRAM\n2026-04-16\t15:30:00\t18:30:00\t[iCal] Junior program\n2026-04-17\t15:30:00\t18:30:00\t[iCal] JUNIOR PROGRAM\n2026-04-19\t12:00:00\t15:00:00\t[iCal] JUNIOR PROGRAM\n2026-04-23\t15:30:00\t18:30:00\t[iCal] Junior program\n2026-04-24\t15:30:00\t18:30:00\t[iCal] JUNIOR PROGRAM\n2026-04-26\t12:00:00\t15:00:00\t[iCal] JUNIOR PROGRAM\n2026-04-30\t15:30:00\t18:30:00\t[iCal] Junior program\n2026-05-01\t15:30:00\t18:30:00\t[iCal] JUNIOR PROGRAM\n",
+  "stderr": "",
+  "execution_time_ms": 67
+}

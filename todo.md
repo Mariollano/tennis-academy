@@ -553,3 +553,13 @@
 - [x] FIX: Luxon used for rrule floating occurrence → real UTC conversion (DST-safe, server-TZ-independent)
 - [x] Verified: Audrey=2026-03-20 (Fri 8 AM) ✓, Carol=2026-03-21 (Sat noon) ✓, JUNIOR PROGRAM=15:30-18:30 ✓
 - [x] All 68 tests passing
+
+## Calendar Discrepancies vs Google Cal Screenshots (Mar 17, 2026)
+- [x] Compare DB blocks for Mar 17-20 precisely against Google Calendar screenshots
+- [x] Mar 17 (Tue): Look at fidelity investing 9-10AM ✅ (now fixed — was missing because event ended before sync ran)
+- [x] Mar 18 (Wed): 105 9-10:30AM ✅, Ethan 2:15-3:15PM ✅
+- [x] Mar 19 (Thu): Haircut 11:15AM-2PM ✅, Ethan 2:15-3:15PM ✅, Junior program 3:30-6:30PM ✅
+- [x] Mar 20 (Fri): Audrey and Katie 8-9AM ✅, 105 9-10:30AM ✅, JUNIOR PROGRAM 3:30-6:30PM ✅
+- [x] Note: "Let's gooo", "UP!!", "Come on!!", "Pick up Faye" are on a different Google Calendar (not in the synced iCal feed)
+- [x] Fix: changed single event filter from `end < now` to `end < startOfTodayEastern` so events earlier today are included
+- [x] Fix: changed recurring event floatingNow to use start-of-today so recurring events earlier today are not missed

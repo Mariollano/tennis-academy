@@ -195,6 +195,11 @@ export async function syncIcalCalendar(): Promise<{
     const windowStart = toDateStringEastern(now);
     const windowEnd = toDateStringEastern(cutoff);
 
+    // Start of today in Eastern time (for single event filter)
+    // We include events that started today even if they already ended,
+    // so the booking calendar correctly blocks those slots.
+    const startOfTodayEastern = DateTime.now().setZone(COACH_TIMEZONE).startOf('day').toJSDate();
+
     // Delete existing iCal blocks in the window using SQL DATE comparison
     // (avoids JS timezone issues when reading DATE columns back from MySQL)
     const { sql } = await import("drizzle-orm");
@@ -253,9 +258,11 @@ export async function syncIcalCalendar(): Promise<{
           );
 
           // Build floating window boundaries for rrule.between()
-          const nowDt = DateTime.fromJSDate(now, { zone: originalTz });
+          // Use start of today (not current time) so recurring events earlier
+          // today are not missed when the sync runs mid-day.
+          const nowDt = DateTime.fromJSDate(now, { zone: originalTz }).startOf('day');
           const cutoffDt = DateTime.fromJSDate(cutoff, { zone: originalTz });
-          const floatingNow = new Date(Date.UTC(nowDt.year, nowDt.month - 1, nowDt.day, nowDt.hour, nowDt.minute, nowDt.second));
+          const floatingNow = new Date(Date.UTC(nowDt.year, nowDt.month - 1, nowDt.day, 0, 0, 0));
           const floatingCutoff = new Date(Date.UTC(cutoffDt.year, cutoffDt.month - 1, cutoffDt.day, cutoffDt.hour, cutoffDt.minute, cutoffDt.second));
 
           // Build rrule with floating dtstart
@@ -309,7 +316,9 @@ export async function syncIcalCalendar(): Promise<{
       const start = event.start as Date;
       const end = event.end as Date;
       if (!start || !end) continue;
-      if (start > cutoff || end < now) continue;
+      // Skip events that ended before today (not just before now),
+      // so events that already ended earlier today are still included.
+      if (start > cutoff || end < startOfTodayEastern) continue;
 
       totalOccurrences++;
       blocksCreated += await insertBlocksForOccurrence(
