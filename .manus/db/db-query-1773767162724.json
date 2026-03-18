@@ -1,0 +1,40 @@
+{
+  "query": "SELECT b.id, b.status, b.sessionDate, b.sessionStartTime, b.sessionEndTime, b.notes,\n       u.name, u.email\nFROM bookings b\nLEFT JOIN users u ON b.userId = u.id\nWHERE b.sessionDate = '2026-03-18'\nAND b.status NOT IN ('cancelled')\nORDER BY b.sessionStartTime;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT b.id, b.status, b.sessionDate, b.sessionStartTime, b.sessionEndTime, b.notes,\n       u.name, u.email\nFROM bookings b\nLEFT JOIN users u ON b.userId = u.id\nWHERE b.sessionDate = '2026-03-18'\nAND b.status NOT IN ('cancelled')\nORDER BY b.sessionStartTime;",
+  "rows": [
+    {
+      "id": "660008",
+      "status": "confirmed",
+      "sessionDate": "2026-03-18",
+      "sessionStartTime": "06:00:00",
+      "sessionEndTime": "07:00:00",
+      "notes": "[Preferred time: 06:00]",
+      "name": "Coach Mario",
+      "email": "NULL"
+    },
+    {
+      "id": "720001",
+      "status": "confirmed",
+      "sessionDate": "2026-03-18",
+      "sessionStartTime": "13:00:00",
+      "sessionEndTime": "14:00:00",
+      "notes": "[Preferred time: 13:00]",
+      "name": "Coach Mario",
+      "email": "NULL"
+    },
+    {
+      "id": "750001",
+      "status": "confirmed",
+      "sessionDate": "2026-03-18",
+      "sessionStartTime": "14:30:00",
+      "sessionEndTime": "15:30:00",
+      "notes": "[Preferred time: 14:30] Tweener",
+      "name": "Coach Mario",
+      "email": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tsessionDate\tsessionStartTime\tsessionEndTime\tnotes\tname\temail\n660008\tconfirmed\t2026-03-18\t06:00:00\t07:00:00\t[Preferred time: 06:00]\tCoach Mario\tNULL\n720001\tconfirmed\t2026-03-18\t13:00:00\t14:00:00\t[Preferred time: 13:00]\tCoach Mario\tNULL\n750001\tconfirmed\t2026-03-18\t14:30:00\t15:30:00\t[Preferred time: 14:30] Tweener\tCoach Mario\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

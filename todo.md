@@ -563,3 +563,17 @@
 - [x] Note: "Let's gooo", "UP!!", "Come on!!", "Pick up Faye" are on a different Google Calendar (not in the synced iCal feed)
 - [x] Fix: changed single event filter from `end < now` to `end < startOfTodayEastern` so events earlier today are included
 - [x] Fix: changed recurring event floatingNow to use start-of-today so recurring events earlier today are not missed
+
+## Google Calendar Push (Write-back)
+- [ ] Research Google Calendar API OAuth2 approach for server-side event creation
+- [ ] Add Google Calendar API credentials (client ID, client secret, refresh token) to secrets
+- [ ] Implement createCalendarEvent() helper in server that writes to Mario's Google Calendar
+- [ ] Call createCalendarEvent() when a booking is confirmed (new booking + admin confirm action)
+- [ ] Call createCalendarEvent() when a manual booking is created by admin
+- [ ] Delete/update calendar event when booking is cancelled or rescheduled
+- [ ] Test end-to-end: confirm booking → event appears in Google Calendar
+
+## Slot Blocking Bug (Mar 19, 2026)
+- [x] Ethan 2:15-3:15 PM on Mar 18 not blocking any slots in the app — fixed by rounding event start DOWN to nearest 30-min boundary
+- [x] 10:00 AM correctly blocked (105 ends at 10:30, lesson at 10:00 runs to 11:00 which overlaps) — was correct
+- [x] Fix slot overlap logic to handle non-round-hour iCal event start/end times correctly

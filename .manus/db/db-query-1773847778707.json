@@ -1,0 +1,28 @@
+{
+  "query": "SELECT title, startTime, endTime, DATE_FORMAT(blockedDate, '%Y-%m-%d') as date\nFROM blocked_times\nWHERE DATE_FORMAT(blockedDate, '%Y-%m-%d') = '2026-03-18'\nORDER BY startTime;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user mUSTnZHSjH9Rc4V.ee5fccb85a53 --database kzZFsCRUb4iWMZR8LEwAKz --execute SELECT title, startTime, endTime, DATE_FORMAT(blockedDate, '%Y-%m-%d') as date\nFROM blocked_times\nWHERE DATE_FORMAT(blockedDate, '%Y-%m-%d') = '2026-03-18'\nORDER BY startTime;",
+  "rows": [
+    {
+      "title": "[iCal] 105",
+      "startTime": "09:00:00",
+      "endTime": "10:30:00",
+      "date": "2026-03-18"
+    },
+    {
+      "title": "[iCal] Ethan",
+      "startTime": "14:15:00",
+      "endTime": "15:15:00",
+      "date": "2026-03-18"
+    },
+    {
+      "title": "[iCal] JUNIOR PROGRAM",
+      "startTime": "15:30:00",
+      "endTime": "18:30:00",
+      "date": "2026-03-18"
+    }
+  ],
+  "messages": [],
+  "stdout": "title\tstartTime\tendTime\tdate\n[iCal] 105\t09:00:00\t10:30:00\t2026-03-18\n[iCal] Ethan\t14:15:00\t15:15:00\t2026-03-18\n[iCal] JUNIOR PROGRAM\t15:30:00\t18:30:00\t2026-03-18\n",
+  "stderr": "",
+  "execution_time_ms": 172
+}

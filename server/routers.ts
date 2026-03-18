@@ -1424,13 +1424,20 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) return { bookedSlots: [], blockedSlots: [], allDayBlocked: false, bookedHours: [], blockedHours: [] };
 
-        // Generate all 30-min slot strings between two "HH:MM:SS" times (exclusive of end)
-        // e.g. "09:00:00" to "10:30:00" → ["09:00", "09:30", "10:00"]
+        // Generate all displayed 30-min slot strings (at :00 and :30) that fall within a blocked range.
+        // Rounds event start DOWN to nearest 30-min boundary and iterates up to event end.
+        // This ensures non-round events like Ethan 14:15–15:15 correctly block 14:00 and 14:30.
+        // e.g. Ethan 14:15–15:15 → roundedStart=14:00 → blocks [14:00, 14:30]
+        // e.g. 105 09:00–10:30 → roundedStart=09:00 → blocks [09:00, 09:30, 10:00]
         const slotsInRange = (startStr: string, endStr: string): string[] => {
           const [sh, sm] = startStr.split(':').map(Number);
           const [eh, em] = endStr.split(':').map(Number);
+          const eventStart = sh * 60 + sm;
+          const eventEnd = eh * 60 + em;
+          // Round start DOWN to nearest 30-min boundary
+          const roundedStart = Math.floor(eventStart / 30) * 30;
           const result: string[] = [];
-          for (let mins = sh * 60 + sm; mins < eh * 60 + em; mins += 30) {
+          for (let mins = roundedStart; mins < eventEnd; mins += 30) {
             result.push(`${String(Math.floor(mins / 60)).padStart(2,'0')}:${String(mins % 60).padStart(2,'0')}`);
           }
           return result;
