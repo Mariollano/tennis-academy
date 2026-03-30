@@ -78,12 +78,21 @@ async function startServer() {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       const bookingId = session.metadata?.booking_id ? parseInt(session.metadata.booking_id) : null;
-      const userId = session.metadata?.user_id ? parseInt(session.metadata.user_id) : null;
-      if (bookingId && userId) {
+      // user_id may be "guest" for unauthenticated bookings — resolve from booking record
+      let userId = session.metadata?.user_id ? parseInt(session.metadata.user_id) : null;
+      if (isNaN(userId as number)) userId = null;
+      if (bookingId) {
         const db = await getDb();
         if (db) {
+          // If userId is missing (guest), look it up from the booking
+          if (!userId) {
+            const [bRow] = await db.select({ userId: bookings.userId }).from(bookings).where(eq(bookings.id, bookingId)).limit(1);
+            if (bRow) userId = bRow.userId;
+          }
           await db.update(bookings).set({ status: "confirmed", paidAt: new Date(), stripePaymentIntentId: session.payment_intent as string }).where(eq(bookings.id, bookingId));
-          await db.insert(payments).values({ bookingId, userId, amountCents: session.amount_total || 0, status: "succeeded", stripePaymentIntentId: session.payment_intent as string });
+          if (userId) {
+            await db.insert(payments).values({ bookingId, userId, amountCents: session.amount_total || 0, status: "succeeded", stripePaymentIntentId: session.payment_intent as string });
+          }
 
           // Notify Mario of the new booking
           try {

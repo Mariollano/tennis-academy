@@ -633,11 +633,14 @@ export default function BookingPage() {
       // After booking is created, immediately launch Stripe checkout
       if (variables.totalAmountCents > 0) {
         createCheckoutMutation.mutate({
-          bookingId: data.bookingId,  // ✅ FIX: use the actual booking ID so the webhook can confirm it
+          bookingId: data.bookingId,
           programName: config.title,
           amountCents: variables.totalAmountCents,
           origin: window.location.origin,
-          successPath: `/book/${programType}`, // ✅ FIX: redirect back to booking page so confirmation screen shows
+          successPath: `/book/${programType}`,
+          // Pass guest info so Stripe checkout works even when not logged in
+          guestEmail: variables.guestEmail || undefined,
+          guestName: variables.guestName || undefined,
         });
       } else {
         // Free / contact-for-pricing: just show confirmation

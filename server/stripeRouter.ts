@@ -9,19 +9,28 @@ import { eq } from "drizzle-orm";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2026-02-25.clover" });
 
 export const stripeRouter = router({
-  createCheckout: protectedProcedure
+  // Public so guests (not logged in) can also pay by card
+  createCheckout: publicProcedure
     .input(z.object({
       bookingId: z.number(),
       programName: z.string(),
       amountCents: z.number().min(50),
       origin: z.string(),
-      successPath: z.string().optional(), // ✅ FIX: allow caller to specify where Stripe redirects on success
+      successPath: z.string().optional(),
+      // Guest fields — used when no session cookie is present
+      guestEmail: z.string().email().optional(),
+      guestName: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      // Resolve customer identity: prefer logged-in user, fall back to guest fields
+      const customerEmail = ctx.user?.email || input.guestEmail || undefined;
+      const customerId = ctx.user?.id?.toString() || "guest";
+      const customerName = ctx.user?.name || input.guestName || "";
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
-        customer_email: ctx.user.email || undefined,
+        customer_email: customerEmail,
         allow_promotion_codes: true,
         line_items: [
           {
@@ -36,15 +45,13 @@ export const stripeRouter = router({
             quantity: 1,
           },
         ],
-        client_reference_id: ctx.user.id.toString(),
+        client_reference_id: customerId,
         metadata: {
-          user_id: ctx.user.id.toString(),
+          user_id: customerId,
           booking_id: input.bookingId.toString(),
-          customer_email: ctx.user.email || "",
-          customer_name: ctx.user.name || "",
+          customer_email: customerEmail || "",
+          customer_name: customerName,
         },
-        // ✅ FIX: redirect back to the booking page so the confirmation screen shows,
-        // falling back to /profile if no successPath is provided
         success_url: `${input.origin}${input.successPath || "/profile"}?payment=success`,
         cancel_url: `${input.origin}${input.successPath || "/profile"}?payment=cancelled`,
       });

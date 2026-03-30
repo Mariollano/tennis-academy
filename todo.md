@@ -577,3 +577,10 @@
 - [x] Ethan 2:15-3:15 PM on Mar 18 not blocking any slots in the app — fixed by rounding event start DOWN to nearest 30-min boundary
 - [x] 10:00 AM correctly blocked (105 ends at 10:30, lesson at 10:00 runs to 11:00 which overlaps) — was correct
 - [x] Fix slot overlap logic to handle non-round-hour iCal event start/end times correctly
+
+## Guest Booking Flow Audit (Mar 30, 2026)
+- [x] Audit full guest booking flow for all program types
+- [x] BUG FIXED: stripe.createCheckout was protectedProcedure — guests (not logged in) got auth error when trying to pay by card → changed to publicProcedure
+- [x] BUG FIXED: Stripe webhook handler failed silently for guests — parseInt('guest') = NaN, so booking was never confirmed after payment → now looks up userId from booking record when user_id metadata is not a number
+- [x] BUG FIXED: BookingPage now passes guestEmail/guestName to createCheckout so Stripe prefills customer info
+- [x] Guest flow verified: guest enters name/email → booking.create (publicProcedure) creates guest user + booking → stripe.createCheckout (now public) creates session → Stripe webhook confirms booking and records payment
