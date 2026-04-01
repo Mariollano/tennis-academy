@@ -591,3 +591,4 @@
 - [x] Update private lesson price from $120 to $125 everywhere (BookingPage, Home, Programs, QuickBook, routers.ts, newsletter.ts, voiceBooking.ts, newsletter-latest.html)
 - [x] Add Venmo, Zelle, Cash App to cash payment option label, description, reminder banner, confirmation message, and payment due badge
 - [x] Fix 105 Game booking page showing "No sessions scheduled yet" — generated 104 sessions for Apr-Sep 2026 (Mon/Wed/Fri cap 12, Sun cap 24, 9:00-10:30 AM)
+- [x] Fix 105 Clinic sessions showing wrong days (Tue/Sat appearing) — root cause was UTC timezone shift in seed script; fixed to use UTC day arithmetic; deleted and regenerated 105 sessions for Apr-Sep 2026 with correct Mon/Wed/Fri/Sun days
