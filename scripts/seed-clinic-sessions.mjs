@@ -1,5 +1,5 @@
 /**
- * Seed script: generate 105 Clinic sessions for April through September 2026
+ * Seed script: generate 105 Clinic sessions for April through December 2026
  * Days: Sunday(0), Monday(1), Wednesday(3), Friday(5)
  * Weekday cap: 12 spots | Sunday cap: 24 spots
  * Time: 9:00 AM – 10:30 AM
@@ -41,7 +41,7 @@ const END_TIME = "10:30:00";
 
 // Build dates using UTC to avoid local timezone day-shift
 const startYear = 2026, startMonth = 3, startDay = 1; // April 1 (month is 0-indexed)
-const endYear = 2026, endMonth = 8, endDay = 30;       // September 30
+const endYear = 2026, endMonth = 11, endDay = 31;      // December 31
 
 const toInsert = [];
 
