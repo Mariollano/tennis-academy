@@ -47,7 +47,7 @@ function buildProgramScheduleHtml(): string {
         </tr>
       </thead>
       <tbody>
-        <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Private Lesson (1-on-1)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">By appointment</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$120 / hr</td></tr>
+        <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Private Lesson (1-on-1)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">By appointment</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$125 / hr</td></tr>
         <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">105 Game Adult Clinic</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">See schedule</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$35 / 1.5 hr</td></tr>
         <tr style="background:#f9f9f9;"><td style="padding:8px 12px;border-bottom:1px solid #eee;">Junior Program – Daily</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$80 / day</td></tr>
         <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;">Junior Program – Weekly</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$350 / week</td></tr>
@@ -1860,7 +1860,7 @@ export const appRouter = router({
         const systemPrompt = input.mode === "mental_coaching"
           ? `You are Mario Llano, head coach and mental performance specialist at RI Tennis Academy in Rhode Island. You have deep expertise in the psychological aspects of tennis — fear elimination, confidence building, focus under pressure, pre-match routines, and mental resilience. You speak with warmth, authority, and genuine passion for helping players unlock their mental potential. Your signature philosophy is "Delete Fear" — helping players remove self-doubt and play freely. Provide thoughtful, practical mental coaching advice. Keep responses concise but impactful.`
           : `You are the AI assistant for RI Tennis Academy, coached by Mario Llano in Rhode Island. You help answer questions about:
-- Programs: Private lessons ($120/hr, 1-on-1 with Coach Mario), 105 Game adult clinic ($35/1.5hr), Junior programs (daily $80, weekly $350, 3:30-6:30 PM), Summer camp (daily $90, weekly $420, 9AM-2PM, after camp +$20 or $50 afternoon-only), Mental coaching
+- Programs: Private lessons ($125/hr, 1-on-1 with Coach Mario), 105 Game adult clinic ($35/1.5hr), Junior programs (daily $80, weekly $350, 3:30-6:30 PM), Summer camp (daily $90, weekly $420, 9AM-2PM, after camp +$20 or $50 afternoon-only), Mental coaching
 - Services: Tournament attendance ($50/hr + $25/hr travel, shareable), Racquet stringing ($35 Mario's string / $25 customer's string), Merchandise (sweatshirts $50, t-shirts $25)
 - Booking: Students can book online through the app and pay securely
 - SMS: Students can opt in to receive daily updates and motivational messages from Mario

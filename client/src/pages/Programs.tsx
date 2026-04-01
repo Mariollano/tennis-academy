@@ -19,7 +19,7 @@ const programs = [
     photoAlt: "Advanced player on court — private lesson",
     objectPosition: "center 15%",
     description: "One-on-one personalized coaching sessions with Coach Mario. Tailored to your specific needs — whether you're a beginner learning the fundamentals or an advanced player fine-tuning your game.",
-    pricing: [{ label: "Per Hour", price: "$120" }],
+    pricing: [{ label: "Per Hour", price: "$125" }],
     highlights: [
       "Personalized technique analysis",
       "Custom drill programs",
@@ -318,7 +318,7 @@ export default function Programs() {
           {/* Quick-pick buttons */}
           <div className="flex flex-wrap gap-2">
             {[
-              { label: "Private Lesson", href: "/book/private_lesson", price: "$120/hr" },
+              { label: "Private Lesson", href: "/book/private_lesson", price: "$125/hr" },
               { label: "105 Clinic", href: "/book/clinic_105", price: "$35" },
               { label: "Junior Program", href: "/book/junior_daily", price: "$80/day" },
               { label: "Summer Camp", href: "/book/summer_camp_daily", price: "$90/day" },
@@ -391,7 +391,7 @@ export default function Programs() {
               </thead>
               <tbody>
                 {[
-                  { name: "Private Lesson", price: "$120/hr", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/book/private_lesson", popular: false },
+                  { name: "Private Lesson", price: "$125/hr", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/book/private_lesson", popular: false },
                   { name: "105 Game Clinic", price: "$35/session", who: "Adults", schedule: "Mon/Wed/Fri/Sun 9–10:30 AM", size: "Up to 24", href: "/book/clinic_105", popular: true },
                   { name: "Junior Program", price: "$80/day · $350/wk", who: "Juniors", schedule: "3:30–6:30 PM", size: "Small group", href: "/book/junior_daily", popular: false },
                   { name: "Summer Camp", price: "$90/day · $420/wk", who: "All ages", schedule: "9 AM–2 PM daily", size: "Group", href: "/book/summer_camp_daily", popular: false },

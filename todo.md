@@ -584,3 +584,9 @@
 - [x] BUG FIXED: Stripe webhook handler failed silently for guests — parseInt('guest') = NaN, so booking was never confirmed after payment → now looks up userId from booking record when user_id metadata is not a number
 - [x] BUG FIXED: BookingPage now passes guestEmail/guestName to createCheckout so Stripe prefills customer info
 - [x] Guest flow verified: guest enters name/email → booking.create (publicProcedure) creates guest user + booking → stripe.createCheckout (now public) creates session → Stripe webhook confirms booking and records payment
+
+## Price & Payment Options Update (Apr 1, 2026)
+- [ ] Update private lesson price from $120 to $125 everywhere (pages, routers, Stripe, master prompt)
+- [ ] Add Venmo, Zelle, Cash App as payment options alongside cash in booking flow
+- [x] Update private lesson price from $120 to $125 everywhere (BookingPage, Home, Programs, QuickBook, routers.ts, newsletter.ts, voiceBooking.ts, newsletter-latest.html)
+- [x] Add Venmo, Zelle, Cash App to cash payment option label, description, reminder banner, confirmation message, and payment due badge

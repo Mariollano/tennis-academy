@@ -84,7 +84,7 @@ const programs = [
     icon: Trophy,
     title: "Private Lessons",
     desc: "One-on-one personalized coaching tailored to your skill level and goals.",
-    price: "$120/hour",
+    price: "$125/hour",
     badge: "All Levels",
     href: "/book/private_lesson",
     img: photos.heroAlt,
@@ -194,7 +194,7 @@ function InstallAppButton() {
 }
 
 const faqItems = [
-  { q: "What programs do you offer?", a: "We offer Private Lessons ($120/hr), 105 Game Adult Clinics ($35/session), Junior Programs (Mon–Fri, $80/day or $350/week), Summer Camp ($90/day or $420/week), and Mental Coaching. All programs are available for online booking." },
+  { q: "What programs do you offer?", a: "We offer Private Lessons ($125/hr), 105 Game Adult Clinics ($35/session), Junior Programs (Mon–Fri, $80/day or $350/week), Summer Camp ($90/day or $420/week), and Mental Coaching. All programs are available for online booking." },
   { q: "How do I book a session?", a: "Simply click 'Book Now' in the navigation, choose your program, pick an available date and time, and pay securely online. You'll receive instant email and SMS confirmation." },
   { q: "What is the 105 Game Clinic?", a: "The 105 Game Clinic is Coach Mario's signature adult group program. It runs on Mondays, Wednesdays, Fridays (12 spots) and Sundays (24 spots), 9:00–10:30 AM. It combines competitive drills, match play, and technique work in a fun group setting." },
   { q: "Do you offer beginner lessons?", a: "Absolutely! Coach Mario works with all skill levels, from complete beginners to competitive tournament players. Private lessons are the best starting point for beginners." },
@@ -514,7 +514,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              { label: "Private Lesson", price: "$120/hr", href: "/book/private_lesson", color: "bg-blue-600", emoji: "🎾", external: false },
+              { label: "Private Lesson", price: "$125/hr", href: "/book/private_lesson", color: "bg-blue-600", emoji: "🎾", external: false },
               { label: "105 Clinic", price: "$35", href: "/book/clinic_105", color: "bg-amber-500", emoji: "👥", external: false },
               { label: "Junior Program", price: "$80/day", href: "/book/junior_daily", color: "bg-green-600", emoji: "⭐", external: false },
               { label: "Summer Camp", price: "$90/day", href: "/book/summer_camp_daily", color: "bg-orange-500", emoji: "☀️", external: false },

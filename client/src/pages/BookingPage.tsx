@@ -97,8 +97,8 @@ const PROGRAM_CONFIG: Record<string, {
   private_lesson: {
     title: "Private Lesson",
     type: "private_lesson",
-    description: "One-on-one session with Coach Mario — $120/hour.",
-    pricing: [{ label: "$120 per hour", value: "per_hour", cents: 12000 }],
+    description: "One-on-one session with Coach Mario — $125/hour.",
+    pricing: [{ label: "$125 per hour", value: "per_hour", cents: 12500 }],
     timeInfo: "Flexible scheduling — contact Mario for available times.",
   },
   clinic_105: {
@@ -842,14 +842,14 @@ export default function BookingPage() {
                 {paymentStatus === "success"
                   ? <>Payment received! Your <strong className="text-foreground">{config.title}</strong> is confirmed. Check your email for details.</>
                   : (paymentMethod === "cash" || paymentMethod === "check")
-                  ? <>Your spot for <strong className="text-foreground">{config.title}</strong> is reserved! Please bring <strong>{paymentMethod === "check" ? "a check" : "cash"}</strong> to the lesson. A confirmation email has been sent.</>
+                  ? <>Your spot for <strong className="text-foreground">{config.title}</strong> is reserved! Please bring <strong>{paymentMethod === "check" ? "a check" : "cash, Venmo, Zelle, or Cash App"}</strong> to the lesson. A confirmation email has been sent.</>
                   : <>Your <strong className="text-foreground">{config.title}</strong> request is submitted. Mario will confirm shortly.</>
                 }
               </p>
               {(paymentMethod === "cash" || paymentMethod === "check") && (
                 <div className="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-800 font-semibold">
                   <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-                  Payment due at lesson: {paymentMethod === "check" ? "Check payable to RI Tennis Academy" : "Cash"}
+                  Payment due at lesson: {paymentMethod === "check" ? "Check payable to RI Tennis Academy" : "Cash / Venmo / Zelle / Cash App"}
                 </div>
               )}
               <p className="text-xs text-muted-foreground/70 mb-6">A confirmation email has been sent to your inbox.</p>
@@ -1429,7 +1429,7 @@ export default function BookingPage() {
                             {paymentMethod === "card" && <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />}
                           </button>
 
-                          {/* Pay Cash */}
+                          {/* Pay Cash / Venmo / Zelle / Cash App */}
                           <button
                             type="button"
                             onClick={() => setPaymentMethod("cash")}
@@ -1445,8 +1445,8 @@ export default function BookingPage() {
                               <span className="text-sm font-bold">$</span>
                             </div>
                             <div className="flex-1">
-                              <div className="font-semibold text-sm text-foreground">Pay Cash at Lesson</div>
-                              <div className="text-xs text-muted-foreground">Reserve your spot now — bring cash to the lesson</div>
+                              <div className="font-semibold text-sm text-foreground">Cash / Venmo / Zelle / Cash App</div>
+                              <div className="text-xs text-muted-foreground">Reserve your spot now — pay at the lesson with cash, Venmo, Zelle, or Cash App</div>
                             </div>
                             {paymentMethod === "cash" && <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />}
                           </button>
@@ -1480,7 +1480,7 @@ export default function BookingPage() {
                             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
                             <span>
                               Your spot will be <strong>reserved immediately</strong>. Please bring{" "}
-                              {paymentMethod === "check" ? "a check made out to RI Tennis Academy" : "cash"}{" "}
+                              {paymentMethod === "check" ? "a check made out to RI Tennis Academy" : "cash, Venmo, Zelle, or Cash App"}{" "}
                               for <strong>${(finalAmountCents / 100).toFixed(0)}</strong> to the lesson.
                             </span>
                           </div>
@@ -1501,7 +1501,7 @@ export default function BookingPage() {
                       ) : finalAmountCents > 0 && paymentMethod === "card" ? (
                         <><CreditCard className="w-4 h-4 mr-2" /> Book & Pay ${(finalAmountCents / 100).toFixed(0)}</>
                       ) : finalAmountCents > 0 && paymentMethod === "cash" ? (
-                        <><CheckCircle2 className="w-4 h-4 mr-2" /> Reserve Spot — Pay Cash at Lesson</>
+                        <><CheckCircle2 className="w-4 h-4 mr-2" /> Reserve Spot — Pay at Lesson</>
                       ) : finalAmountCents > 0 && paymentMethod === "check" ? (
                         <><CheckCircle2 className="w-4 h-4 mr-2" /> Reserve Spot — Pay by Check at Lesson</>
                       ) : (

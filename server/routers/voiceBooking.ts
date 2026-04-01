@@ -126,7 +126,7 @@ export const voiceBookingRouter = router({
 Today's date is ${todayStr}.
 
 Programs available:
-- private_lesson: Private 1-on-1 lesson with Coach Mario ($120/hr)
+- private_lesson: Private 1-on-1 lesson with Coach Mario ($125/hr)
 - clinic_105: 105 Game Adult Clinic (Mon/Wed/Fri/Sun, $35/1.5hr)
 - junior: Junior Program (Mon-Fri 3:30-6:30 PM, $80/day)
 - summer_camp: Summer Camp (Mon-Fri 9AM-2PM, $90/day)
