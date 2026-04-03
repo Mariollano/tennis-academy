@@ -356,6 +356,92 @@ export const appRouter = router({
           }
         }
 
+        // ─── Server-side availability guard for private lessons ───────────────
+        // This prevents double-bookings even when the iCal sync hasn't run yet
+        // or when a student bypasses the UI's disabled-slot check.
+        if (input.programType === "private_lesson" && input.sessionDate && input.sessionStartTime) {
+          const dateStr = input.sessionDate; // YYYY-MM-DD
+          const [sh, sm] = input.sessionStartTime.split(':').map(Number);
+          const lessonStartMins = sh * 60 + sm;
+          const lessonEndMins = lessonStartMins + 60; // private lessons are 1 hour
+
+          // Helper: does [aStart, aEnd) overlap [bStart, bEnd)?
+          const overlaps = (aStart: number, aEnd: number, bStart: number, bEnd: number) =>
+            aStart < bEnd && aEnd > bStart;
+
+          // 1. Check existing confirmed/pending bookings for the same date
+          const existingOnDate = await db.select({
+            sessionStartTime: bookings.sessionStartTime,
+            sessionEndTime: bookings.sessionEndTime,
+          }).from(bookings).where(and(
+            sql`DATE(${bookings.sessionDate}) = ${dateStr}`,
+            sql`${bookings.status} IN ('pending', 'confirmed')`,
+          ));
+          for (const existing of existingOnDate) {
+            if (!existing.sessionStartTime) continue;
+            const [exSh, exSm] = (existing.sessionStartTime as string).split(':').map(Number);
+            const exStart = exSh * 60 + exSm;
+            const exEnd = existing.sessionEndTime
+              ? (() => { const [eh, em] = (existing.sessionEndTime as string).split(':').map(Number); return eh * 60 + em; })()
+              : exStart + 60;
+            if (overlaps(lessonStartMins, lessonEndMins, exStart, exEnd)) {
+              throw new TRPCError({
+                code: "CONFLICT",
+                message: "Sorry, that time slot was just booked. Please choose a different time.",
+              });
+            }
+          }
+
+          // 2. Check admin-blocked times for the same date
+          const dateBlocks = await db.select({
+            startTime: blockedTimes.startTime,
+            endTime: blockedTimes.endTime,
+            isAllDay: blockedTimes.isAllDay,
+          }).from(blockedTimes).where(and(
+            sql`DATE(${blockedTimes.blockedDate}) = ${dateStr}`,
+            eq(blockedTimes.affectsPrivateLessons, true),
+          ));
+          for (const block of dateBlocks) {
+            if (block.isAllDay) {
+              throw new TRPCError({
+                code: "CONFLICT",
+                message: "That date is fully blocked. Please pick a different date.",
+              });
+            }
+            if (!block.startTime || !block.endTime) continue;
+            const [bSh, bSm] = (block.startTime as string).split(':').map(Number);
+            const [bEh, bEm] = (block.endTime as string).split(':').map(Number);
+            const bStart = bSh * 60 + bSm;
+            const bEnd = bEh * 60 + bEm;
+            if (overlaps(lessonStartMins, lessonEndMins, bStart, bEnd)) {
+              throw new TRPCError({
+                code: "CONFLICT",
+                message: "Sorry, that time is unavailable. Please choose a different time.",
+              });
+            }
+          }
+
+          // 3. Check permanent program rules (same logic as getUnavailableHours)
+          const [y, mo, d] = dateStr.split('-').map(Number);
+          const dayOfWeek = new Date(Date.UTC(y, mo - 1, d)).getUTCDay();
+          const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+          const isSunday = dayOfWeek === 0;
+          const isMonWedFriSun = [0, 1, 3, 5].includes(dayOfWeek);
+          // 105 Clinic: Mon/Wed/Fri/Sun 9:00–10:30 AM
+          if (isMonWedFriSun && overlaps(lessonStartMins, lessonEndMins, 9 * 60, 10 * 60 + 30)) {
+            throw new TRPCError({ code: "CONFLICT", message: "That time is reserved for the 105 Clinic. Please choose a different time." });
+          }
+          // Junior Program: weekdays 3:30–6:30 PM
+          if (isWeekday && overlaps(lessonStartMins, lessonEndMins, 15 * 60 + 30, 18 * 60 + 30)) {
+            throw new TRPCError({ code: "CONFLICT", message: "That time is reserved for the Junior Program. Please choose a different time." });
+          }
+          // Junior Sunday: 12:00–3:00 PM
+          if (isSunday && overlaps(lessonStartMins, lessonEndMins, 12 * 60, 15 * 60)) {
+            throw new TRPCError({ code: "CONFLICT", message: "That time is reserved for the Junior Program. Please choose a different time." });
+          }
+        }
+        // ─────────────────────────────────────────────────────────────────────────
+
         // If a schedule slot is selected, enforce capacity
         if (input.scheduleSlotId) {
           const slotRows = await db.select().from(scheduleSlots)

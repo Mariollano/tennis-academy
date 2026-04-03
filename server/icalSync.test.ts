@@ -140,9 +140,17 @@ describe("iCal Sync Service", () => {
   });
 
   it("stores correct Eastern time strings for a 9 AM Eastern event (UTC 13:00)", async () => {
-    // 105 clinic: 9:00-10:30 AM Eastern = 13:00-14:30 UTC
-    const eventStart = new Date("2026-03-18T13:00:00.000Z"); // 9 AM Eastern
-    const eventEnd = new Date("2026-03-18T14:30:00.000Z");   // 10:30 AM Eastern
+    // Use a date 7 days from now so it's always within the 90-day sync window
+    const now = new Date();
+    const futureDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const yyyy = futureDate.getUTCFullYear();
+    const mm = String(futureDate.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(futureDate.getUTCDate()).padStart(2, "0");
+    const futureDateStr = `${yyyy}-${mm}-${dd}`;
+
+    // 105 clinic: 9:00-10:30 AM Eastern = 13:00-14:30 UTC (EDT)
+    const eventStart = new Date(`${futureDateStr}T13:00:00.000Z`); // 9 AM Eastern
+    const eventEnd = new Date(`${futureDateStr}T14:30:00.000Z`);   // 10:30 AM Eastern
 
     const mockDb = createMockDb({ id: 1, icalUrl: "https://example.com/cal.ics", isEnabled: true });
     vi.mocked(getDb).mockResolvedValue(mockDb as any);
@@ -166,13 +174,13 @@ describe("iCal Sync Service", () => {
     expect(block.startTime).toBe("09:00:00");
     expect(block.endTime).toBe("10:30:00");
 
-    // blockedDate should be noon UTC for 2026-03-18
+    // blockedDate should be noon UTC for the future date
     // IMPORTANT: We use noon UTC (T12:00:00Z) NOT midnight UTC (T00:00:00Z).
     // The MySQL connection TZ is Eastern (UTC-4/5). Midnight UTC = 8 PM Eastern
     // (previous day), so MySQL would store the wrong date. Noon UTC = 8 AM Eastern,
     // safely within the correct calendar day regardless of DST.
     expect(block.blockedDate).toBeInstanceOf(Date);
-    expect(block.blockedDate.toISOString()).toBe("2026-03-18T12:00:00.000Z");
+    expect(block.blockedDate.toISOString()).toBe(`${futureDateStr}T12:00:00.000Z`);
   });
 
   it("MySQL DATE column timezone: midnight UTC is stored as previous day in Eastern TZ", () => {
