@@ -597,3 +597,5 @@
 - [x] Private lesson calendar: show blocked/unavailable dates highlighted in red so students don't pick them
 - [x] Private lesson booking: make time slot section more visually prominent after date selection
 - [x] Private lesson: add 30-min / 1-hour duration selector, update pricing, fix slot blocking to cover full duration
+- [x] Fix bare domain redirect: ritennisacademy.com (no www, no https) → https://ritennisacademy.com/
+- [x] Build Spring & Summer program landing page at /spring-summer with contact/signup form, program pillars, pricing, and flexibility emphasis

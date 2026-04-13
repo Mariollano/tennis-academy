@@ -32,6 +32,7 @@ import VoiceBooking from "./components/VoiceBooking";
 import Announcements from "./pages/Announcements";
 import NewsletterArchive from "./pages/NewsletterArchive";
 import NewsletterView from "./pages/NewsletterView";
+import SpringSummerProgram from "./pages/SpringSummerProgram";
 
 // Scroll to top on every route change
 function ScrollToTop() {
@@ -56,9 +57,11 @@ function ReferralCapture() {
 }
 
 function Router() {
+  const [location] = useLocation();
+  const isLandingPage = location === "/spring-summer";
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Navbar />
+      {!isLandingPage && <Navbar />}
       <main className="flex-1 pb-16 md:pb-0">
         <Switch>
           <Route path="/" component={Home} />
@@ -80,19 +83,20 @@ function Router() {
           <Route path="/announcements" component={Announcements} />
           <Route path="/newsletter" component={NewsletterArchive} />
           <Route path="/newsletter/:slug" component={NewsletterView} />
+          <Route path="/spring-summer" component={SpringSummerProgram} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
       </main>
-      <Footer />
-      <ChatBot />
-      <FloatingContact />
-      <QuickBook />
+      {!isLandingPage && <Footer />}
+      {!isLandingPage && <ChatBot />}
+      {!isLandingPage && <FloatingContact />}
+      {!isLandingPage && <QuickBook />}
       <InstallPrompt />
-      <MobileBottomBar />
-      <WelcomeModal />
-      <VoiceBooking />
+      {!isLandingPage && <MobileBottomBar />}
+      {!isLandingPage && <WelcomeModal />}
+      {!isLandingPage && <VoiceBooking />}
       <ReferralCapture />
       <ScrollToTop />
     </div>

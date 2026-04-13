@@ -47,14 +47,26 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
-  // ─── www → no-www canonical redirect ─────────────────────────────────────
-  // Ensures login URLs are always consistent (no-www) regardless of how user arrives
+  // ─── Canonical redirect: bare domain + www → https://ritennisacademy.com ──
+  // Handles: http://ritennisacademy.com, http://www.ritennisacademy.com,
+  //          https://www.ritennisacademy.com  → all redirect to https://ritennisacademy.com
   app.use((req, res, next) => {
-    const host = req.headers.host || "";
-    if (host.startsWith("www.")) {
+    const host = (req.headers.host || "").toLowerCase().replace(/:.*$/, ""); // strip port
+    const proto = (req.headers["x-forwarded-proto"] as string || "https").split(",")[0].trim();
+    const isRiTennis = host === "ritennisacademy.com" || host === "www.ritennisacademy.com";
+    if (isRiTennis) {
+      // Redirect www → no-www
+      if (host.startsWith("www.")) {
+        return res.redirect(301, `https://ritennisacademy.com${req.url}`);
+      }
+      // Redirect http → https
+      if (proto !== "https") {
+        return res.redirect(301, `https://ritennisacademy.com${req.url}`);
+      }
+    } else if (host.startsWith("www.")) {
+      // Generic www → no-www for other domains
       const newHost = host.slice(4);
-      const proto = req.headers["x-forwarded-proto"] || "https";
-      return res.redirect(301, `${proto}://${newHost}${req.url}`);
+      return res.redirect(301, `https://${newHost}${req.url}`);
     }
     next();
   });

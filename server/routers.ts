@@ -10,7 +10,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "./_core/llm";
 import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
-import { sendBookingConfirmation, sendBookingCancelled, sendBookingReminder, sendBookingReservedCash, sendBookingConfirmed, sendOwnerNewBookingAlert, isEmailConfigured } from "./email";
+import { sendEmail, sendBookingConfirmation, sendBookingCancelled, sendBookingReminder, sendBookingReservedCash, sendBookingConfirmed, sendOwnerNewBookingAlert, isEmailConfigured } from "./email";
 import { maybeRewardReferrer } from "./referral";
 import { postAnnouncement, getAnnouncements, markAnnouncementRead, getUnreadCount, deleteAnnouncement } from "./announcements";
 
@@ -1983,6 +1983,45 @@ Be friendly, helpful, and knowledgeable. Keep answers concise.`;
         return { content };
       }),
   }),
+
+  // ─── Program Inquiry (Spring/Summer Landing Page) ───────────────────────────────────
+  programInquiry: router({
+    submit: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        phone: z.string().optional(),
+        childName: z.string().optional(),
+        childAge: z.string().optional(),
+        program: z.enum(["spring", "summer", "both"]),
+        message: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Forward inquiry to Mario's email
+        const programLabel = input.program === "both" ? "Spring & Summer" : input.program === "spring" ? "Spring" : "Summer";
+        const body = `
+          <h2 style="color:#0a2240">New ${programLabel} Program Inquiry</h2>
+          <table style="font-size:14px;border-collapse:collapse;width:100%">
+            <tr><td style="padding:6px 12px;font-weight:bold;background:#f5f5f5">Name</td><td style="padding:6px 12px">${input.name}</td></tr>
+            <tr><td style="padding:6px 12px;font-weight:bold;background:#f5f5f5">Email</td><td style="padding:6px 12px">${input.email}</td></tr>
+            <tr><td style="padding:6px 12px;font-weight:bold;background:#f5f5f5">Phone</td><td style="padding:6px 12px">${input.phone || "—"}</td></tr>
+            <tr><td style="padding:6px 12px;font-weight:bold;background:#f5f5f5">Child's Name</td><td style="padding:6px 12px">${input.childName || "—"}</td></tr>
+            <tr><td style="padding:6px 12px;font-weight:bold;background:#f5f5f5">Child's Age</td><td style="padding:6px 12px">${input.childAge || "—"}</td></tr>
+            <tr><td style="padding:6px 12px;font-weight:bold;background:#f5f5f5">Program Interest</td><td style="padding:6px 12px">${programLabel}</td></tr>
+            <tr><td style="padding:6px 12px;font-weight:bold;background:#f5f5f5">Message</td><td style="padding:6px 12px">${input.message || "—"}</td></tr>
+          </table>
+        `;
+        await sendEmail({
+          to: "RItennismario@gmail.com",
+          toName: "Coach Mario",
+          subject: `New ${programLabel} Inquiry from ${input.name}`,
+          html: body,
+          text: `New ${programLabel} Program Inquiry\nName: ${input.name}\nEmail: ${input.email}\nPhone: ${input.phone || "-"}\nChild: ${input.childName || "-"} (age ${input.childAge || "-"})\nMessage: ${input.message || "-"}`,
+        });
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
+
