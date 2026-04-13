@@ -363,7 +363,10 @@ export const appRouter = router({
           const dateStr = input.sessionDate; // YYYY-MM-DD
           const [sh, sm] = input.sessionStartTime.split(':').map(Number);
           const lessonStartMins = sh * 60 + sm;
-          const lessonEndMins = lessonStartMins + 60; // private lessons are 1 hour
+          // Use the submitted end time if provided; otherwise default to 1 hour
+          const lessonEndMins = input.sessionEndTime
+            ? (() => { const [eh, em] = input.sessionEndTime.split(':').map(Number); return eh * 60 + em; })()
+            : lessonStartMins + 60;
 
           // Helper: does [aStart, aEnd) overlap [bStart, bEnd)?
           const overlaps = (aStart: number, aEnd: number, bStart: number, bEnd: number) =>
@@ -1530,15 +1533,29 @@ export const appRouter = router({
         };
 
         // Get confirmed/pending private lesson bookings for this date
-        const existingBookings = await db.select({ sessionStartTime: bookings.sessionStartTime })
+        const existingBookings = await db.select({
+          sessionStartTime: bookings.sessionStartTime,
+          sessionEndTime: bookings.sessionEndTime,
+        })
           .from(bookings)
           .where(and(
             sql`DATE(${bookings.sessionDate}) = ${input.date}`,
             sql`${bookings.status} IN ('pending', 'confirmed')`,
           ));
-        const bookedSlots = existingBookings
-          .filter(b => b.sessionStartTime)
-          .map(b => { const [h, m] = (b.sessionStartTime as string).split(':'); return `${h}:${m}`; });
+        // Block all 30-min slots covered by each existing booking (using its actual end time)
+        const bookedSlots: string[] = [];
+        for (const b of existingBookings) {
+          if (!b.sessionStartTime) continue;
+          const startStr = (b.sessionStartTime as string).slice(0, 5); // HH:MM
+          const endStr = b.sessionEndTime
+            ? (b.sessionEndTime as string).slice(0, 5)
+            : (() => {
+                const [sh, sm] = startStr.split(':').map(Number);
+                const endMins = sh * 60 + sm + 60; // default 1 hour if no end time stored
+                return `${String(Math.floor(endMins / 60)).padStart(2,'0')}:${String(endMins % 60).padStart(2,'0')}`;
+              })();
+          bookedSlots.push(...slotsInRange(startStr, endStr));
+        }
 
         // Get admin-blocked times for this date
         const blocks = await db.select().from(blockedTimes)

@@ -599,6 +599,7 @@ export default function BookingPage() {
   } | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
   const [timePreference, setTimePreference] = useState(urlTime);
+  const [lessonDuration, setLessonDuration] = useState<30 | 60>(60); // minutes
   // Sync timePreference and sessionDate when URL params change (e.g. voice booking redirect)
   useEffect(() => {
     if (urlTime && urlTime !== timePreference) {
@@ -689,7 +690,10 @@ export default function BookingPage() {
   });
 
   const selectedPrice = config.pricing.find((p) => p.value === selectedPricing);
-  const baseCents = selectedPrice?.cents || 0;
+  // For private lessons, price is duration-dependent: $65 for 30 min, $125 for 1 hour
+  const baseCents = programType === "private_lesson"
+    ? (lessonDuration === 30 ? 6500 : 12500)
+    : (selectedPrice?.cents || 0);
   const effectiveJuniorDays = programType === "junior_daily" && juniorSelectedDates.length > 0 ? juniorSelectedDates.length : juniorDays;
   const totalCents = (programType === "junior_daily" ? baseCents * effectiveJuniorDays : baseCents) + (afterCamp ? 2000 : 0);
 
@@ -756,8 +760,11 @@ export default function BookingPage() {
           const parts = timePreference.split(":");
           const h = parseInt(parts[0]);
           const m = parseInt(parts[1] || "0");
-          const endH = (h + 1) % 24;
-          return `${String(endH).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
+          const durationMins = programType === "private_lesson" ? lessonDuration : 60;
+          const totalEndMins = h * 60 + m + durationMins;
+          const endH = Math.floor(totalEndMins / 60) % 24;
+          const endM = totalEndMins % 60;
+          return `${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}:00`;
         })() : undefined;
     const guestFields = {
       guestName: guestName.trim(),
@@ -1276,6 +1283,39 @@ export default function BookingPage() {
                       </div>
                     )}
 
+                    {/* Duration selector — private lesson only */}
+                    {programType === "private_lesson" && (
+                      <div>
+                        <Label className="text-sm font-semibold">Lesson Duration</Label>
+                        <div className="grid grid-cols-2 gap-3 mt-2">
+                          <button
+                            type="button"
+                            onClick={() => { setLessonDuration(30); setTimePreference(""); }}
+                            className={`p-3 rounded-xl border-2 text-left transition-all ${
+                              lessonDuration === 30
+                                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                : "border-border hover:border-primary/40"
+                            }`}
+                          >
+                            <div className="font-semibold text-sm">30 Minutes</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">$65 — Quick tune-up</div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setLessonDuration(60); setTimePreference(""); }}
+                            className={`p-3 rounded-xl border-2 text-left transition-all ${
+                              lessonDuration === 60
+                                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                : "border-border hover:border-primary/40"
+                            }`}
+                          >
+                            <div className="font-semibold text-sm">1 Hour</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">$125 — Full session</div>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Time Preference — private lesson only */}
                     {programType === "private_lesson" && sessionDate && (
                       <div className="border-2 border-primary/30 rounded-xl p-4 bg-primary/5">
@@ -1301,8 +1341,31 @@ export default function BookingPage() {
                                 const label = `${hour12}:${String(mins).padStart(2, "0")} ${ampm}`;
                                 const value = `${String(hour24).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
                                 const isSelected = timePreference === value;
-                                const isBooked = bookedSlots.has(value);
-                                const isBlocked = blockedSlots.has(value);
+                                // A slot is unavailable if it falls within any booked/blocked range
+                                // For the START time picker, we also need to check if selecting this slot
+                                // would cause the lesson (of chosen duration) to overlap a booked/blocked slot.
+                                // Simple approach: check if this slot OR any slot within [value, value+duration) is booked/blocked.
+                                const slotMins = hour24 * 60 + mins;
+                                const wouldOverlapBooked = (() => {
+                                  for (let m2 = slotMins; m2 < slotMins + lessonDuration; m2 += 30) {
+                                    const h2 = Math.floor(m2 / 60);
+                                    const mm2 = m2 % 60;
+                                    const key = `${String(h2).padStart(2,'0')}:${String(mm2).padStart(2,'0')}`;
+                                    if (bookedSlots.has(key)) return true;
+                                  }
+                                  return false;
+                                })();
+                                const wouldOverlapBlocked = (() => {
+                                  for (let m2 = slotMins; m2 < slotMins + lessonDuration; m2 += 30) {
+                                    const h2 = Math.floor(m2 / 60);
+                                    const mm2 = m2 % 60;
+                                    const key = `${String(h2).padStart(2,'0')}:${String(mm2).padStart(2,'0')}`;
+                                    if (blockedSlots.has(key)) return true;
+                                  }
+                                  return false;
+                                })();
+                                const isBooked = wouldOverlapBooked;
+                                const isBlocked = !wouldOverlapBooked && wouldOverlapBlocked;
                                 const isUnavailable = isBooked || isBlocked;
                                 return (
                                   <button
@@ -1323,13 +1386,13 @@ export default function BookingPage() {
                                   >
                                     <span className="block">{label}</span>
                                     {isBooked && <span className="block text-[10px] leading-tight text-red-500 font-semibold">Booked</span>}
-                                    {isBlocked && !isBooked && <span className="block text-[10px] leading-tight text-orange-500 font-semibold">Blocked</span>}
+                                    {isBlocked && <span className="block text-[10px] leading-tight text-orange-500 font-semibold">Blocked</span>}
                                   </button>
                                 );
                               })}
                             </div>
                             {timePreference && (
-                              <p className="text-xs text-green-700 mt-2">✓ Preferred start time: {(() => { const [h, m] = timePreference.split(':').map(Number); const ampm = h < 12 ? 'AM' : 'PM'; const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h; return `${h12}:${String(m).padStart(2,'0')} ${ampm}`; })()}</p>
+                              <p className="text-xs text-green-700 mt-2">✓ Start time: {(() => { const [h, m] = timePreference.split(':').map(Number); const ampm = h < 12 ? 'AM' : 'PM'; const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h; const endMins = h * 60 + m + lessonDuration; const endH = Math.floor(endMins / 60); const endM = endMins % 60; const endAmpm = endH < 12 ? 'AM' : 'PM'; const endH12 = endH === 0 ? 12 : endH > 12 ? endH - 12 : endH; return `${h12}:${String(m).padStart(2,'0')} ${ampm} – ${endH12}:${String(endM).padStart(2,'0')} ${endAmpm}`; })()}</p>
                             )}
                           </>
                         )}
