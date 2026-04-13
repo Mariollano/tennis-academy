@@ -266,6 +266,27 @@ function AvailabilityPanelInner({
     { enabled: true }
   );
 
+  // Fetch blocked dates for the 90-day window so we can highlight them on the calendar
+  const { data: blockedDatesData } = trpc.schedule.getBlockedDates.useQuery(
+    { from: fromDate, to: toDate },
+    { enabled: programType === "private_lesson" }
+  );
+
+  // Build a set of all-day-blocked date strings for the private lesson calendar
+  const allDayBlockedSet = new Set<string>();
+  const partialBlockedSet = new Set<string>();
+  if (blockedDatesData) {
+    for (const block of blockedDatesData) {
+      const raw = block.blockedDate as any;
+      const d = typeof raw === "string" ? raw.slice(0, 10) : `${new Date(raw).getUTCFullYear()}-${String(new Date(raw).getUTCMonth()+1).padStart(2,'0')}-${String(new Date(raw).getUTCDate()).padStart(2,'0')}`;
+      if (block.isAllDay) allDayBlockedSet.add(d);
+      else partialBlockedSet.add(d);
+    }
+  }
+  // Also add permanent program rule dates as partial blocks:
+  // 105 Clinic blocks Mon/Wed/Fri/Sun 9–10:30 AM; Junior blocks weekdays 3:30–6:30 PM and Sunday 12–3 PM
+  // (these are always blocked, so every date has some partial block — we only flag all-day blocks from DB)
+
   const isSupported = true; // guard above ensures this is always true here
 
   // Private lessons are flexible — no fixed slots, just let the user pick any future date
@@ -275,9 +296,9 @@ function AvailabilityPanelInner({
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <CalendarIcon className="w-4 h-4 text-primary" />
-            Pick a Preferred Date
+            Pick a Date
           </CardTitle>
-          <p className="text-xs text-muted-foreground">Private lessons are scheduled directly with Coach Mario. Choose your preferred date below and he'll confirm availability.</p>
+          <p className="text-xs text-muted-foreground">Select your preferred date. Dates marked in red are fully blocked by Coach Mario.</p>
         </CardHeader>
         <CardContent className="p-3 pt-0">
           <div className="flex justify-center">
@@ -288,20 +309,36 @@ function AvailabilityPanelInner({
                 setSelectedDay(day);
                 if (day) {
                   const dateStr = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`;
-                  onSelectSlot(0, dateStr); // 0 = no fixed slot (private lesson)
+                  onSelectSlot(0, dateStr);
                 }
               }}
               disabled={(date) => {
                 const today = new Date();
                 today.setHours(0,0,0,0);
-                return date < today;
+                if (date < today) return true;
+                const iso = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                return allDayBlockedSet.has(iso);
+              }}
+              modifiers={{
+                allDayBlocked: (date) => {
+                  const iso = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                  return allDayBlockedSet.has(iso);
+                },
+              }}
+              modifiersClassNames={{
+                allDayBlocked: "bg-red-100 text-red-400 line-through opacity-60",
               }}
               className="w-full"
             />
           </div>
+          {/* Legend */}
+          <div className="flex items-center gap-4 justify-center mt-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-primary inline-block" /> Selected</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block" /> Fully blocked</span>
+          </div>
           {selectedDay && (
-            <p className="text-center text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg py-2 px-3 mt-2">
-              ✓ Preferred date set to {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}. Mario will confirm your time.
+            <p className="text-center text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg py-2 px-3 mt-3">
+              ✓ Date selected: {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}. Now pick your preferred start time below.
             </p>
           )}
         </CardContent>
@@ -1241,15 +1278,18 @@ export default function BookingPage() {
 
                     {/* Time Preference — private lesson only */}
                     {programType === "private_lesson" && sessionDate && (
-                      <div>
-                        <Label className="text-sm font-semibold">Preferred Start Time</Label>
+                      <div className="border-2 border-primary/30 rounded-xl p-4 bg-primary/5">
+                        <Label className="text-sm font-semibold text-primary flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          Choose Your Start Time
+                        </Label>
                         {allDayBlocked ? (
                           <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                             This date is fully blocked by Coach Mario. Please pick a different date.
                           </div>
                         ) : (
                           <>
-                            <p className="text-xs text-muted-foreground mb-2">Select your preferred lesson start time. Grayed-out slots are already booked or unavailable.</p>
+                            <p className="text-xs text-muted-foreground mt-1 mb-3">Tap a time to select it. <span className="text-red-500 font-medium">Red = already booked</span> · <span className="text-orange-500 font-medium">Orange = blocked</span> · <span className="text-green-600 font-medium">Green = available</span></p>
                             <div className="grid grid-cols-4 gap-2 mt-1">
                               {Array.from({ length: 28 }, (_, i) => {
                                 // 28 half-hour slots: 6:00 AM to 7:30 PM
@@ -1272,11 +1312,13 @@ export default function BookingPage() {
                                     onClick={() => !isUnavailable && setTimePreference(value)}
                                     title={isBooked ? "Already booked" : isBlocked ? "Unavailable" : label}
                                     className={`py-2 px-1 rounded-lg border-2 text-center text-xs font-medium transition-all relative ${
-                                      isUnavailable
-                                        ? "border-muted bg-muted text-muted-foreground cursor-not-allowed opacity-50"
-                                        : isSelected
-                                          ? "border-primary bg-primary text-primary-foreground shadow-md"
-                                          : "border-border bg-card hover:border-primary/60 hover:bg-primary/5 text-foreground"
+                                      isBooked
+                                        ? "border-red-200 bg-red-50 text-red-400 cursor-not-allowed opacity-70"
+                                        : isBlocked
+                                          ? "border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed opacity-70"
+                                          : isSelected
+                                            ? "border-primary bg-primary text-primary-foreground shadow-md ring-2 ring-primary/30"
+                                            : "border-green-300 bg-green-50 hover:border-green-500 hover:bg-green-100 text-green-800"
                                     }`}
                                   >
                                     <span className="block">{label}</span>
