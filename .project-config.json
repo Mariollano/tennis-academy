@@ -1,0 +1,50 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "server",
+    "db",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://mUSTnZHSjH9Rc4V.ee5fccb85a53:5QQg6Ip4z4b2bjZd9YOX@gateway04.us-east-1.prod.aws.tidbcloud.com:4000/kzZFsCRUb4iWMZR8LEwAKz?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": null,
+  "git_remote": {
+    "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz",
+    "access_key_id": "ASIAZV3A2ECZGKY2MQEE",
+    "secret_access_key": "7SH1o9tiqDf+7lwg74g4RD8KoTo5h0B3Awu8v4d/",
+    "session_token": "IQoJb3JpZ2luX2VjENz//////////wEaCXVzLWVhc3QtMSJHMEUCIQD/qOI9BcGwiYfUoXk/06Iw9tSsx6sSIcivcFyJk526pgIgDDTLfQtdPQ69aqgSz7nugvPojyME+hl5EGAJ880fVZEq/wMIpP//////////ARAEGgw2NjUzODYwOTg4NjYiDO1EjjtS7pZvJic8CSrTA5fsXngFxZGgHqxBjzVC4SdxvG9iWVFNGMPDhYtSxCFhz6nQXRPLX3b4MGzCiuzksjKlE8GBDkO2DZmJ79QRBGyXLYbICTiShxhSVrqaoHh/8bdD/fmVDgDXdNg6u2jwMSg6r/pOd/9VZt0IzLmKRQJntjQ9rlFMUboiDkJSen63qzajwMXDRJyG6CSZt3kNDqKMfwiXtYSB5rIWhJabU2er/JNsuXGZVCPxVKzsMhvYLacWsF0hq1r1sQCMJtCyesiKAMoF4mArYQARmEC6qWJqY4rVzreyJqbaNjDp2idNUu2cwk8VaD0YoSvZJXQBbmY2KYrMut004FUvJBgSFzCxM3mDRVRcv1WAcWVFkfKyhc9e2OmReNHAVCGzJ02EYNyCQJFguOlIyC02uanqB5EDBVAovwtAh53HFf2zcIw4/9S8NXEtWKxwwPkWjGBV7HBoADgN9CGm9hzPwHipNW5E2UKgIyLiabWsUSKMuLV/YIvz0LleHwqrOPftZBfkJMGCk/l2a7V5/CSfyKkcVOUjsCD1AgtCZeaahyXiOQQhR/UP3saItgK9sZxJlKQ0vd9xficPxskRE+hYK3HUZIRZfl0Xiu0CdndlFNI1MqwYnBhqMJ/HptAGOp0B+qN0/zuCYaR0t+HrOIXEyeB0Tq3BQ+f+++znIAyB7KhezstJjFyK057mVRK2bUD9JsRtti0LxmmLsiaSm72ewNU4FKdfyeomVM3ywMg/qH5vq+3LjY479/o9rLHAOYrckFKXazv9mzNzOhR4HoDaPsPguApNgROUOeui5FABYemd2XuLMpEM3DIhYdOOddNZuZHfdGE6h9KxMAEKtw==",
+    "expiration": "2026-05-17T23:16:47.000Z"
+  },
+  "name": "tennis-academy",
+  "path": "/home/ubuntu/tennis-academy",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "jWkenAa4y9N5PJDGU58JZk",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "EMAIL_APP_PASSWORD": "mgzatnlgwbjoxdfi",
+    "EMAIL_USER": "ritennismario@gmail.com",
+    "JWT_SECRET": "Je7EMbmQDkxeDGBLejPNmC",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Mario Llano",
+    "OWNER_OPEN_ID": "CXhdcctKRsifRuwsJQYmmb",
+    "RESEND_API_KEY": "re_SWHuzgur_G3yQwfNEBEsxTBgSqNqijsv2",
+    "STRIPE_SECRET_KEY": "sk_test_51T5kuMGqNizWQ5DESKOs94zIBrTzi8ESqdFU2vRWrsp6brCZFj9SmfmFruCFqdPErHavqVnmyGZXO8xzWRg0PyvK00gxkw5yPo",
+    "STRIPE_WEBHOOK_SECRET": "whsec_5P638EmRMuLXX3U8C8FeYFLN7SlXflpH",
+    "TWILIO_ACCOUNT_SID": "AC1987d13be48c274d2e6c35062b94f9e6",
+    "TWILIO_AUTH_TOKEN": "863e1484c0b8a14aa98cc9afafcc7630",
+    "TWILIO_PHONE_NUMBER": "+14012891427",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "4119bc59-c4d2-4daf-9821-821896ee6e94",
+    "VITE_APP_ID": "kzZFsCRUb4iWMZR8LEwAKz",
+    "VITE_APP_LOGO": "https://files.manuscdn.com/user_upload_by_module/web_dev_logo/310519663342968318/KzbCcxqUEutaqtKh.png",
+    "VITE_APP_TITLE": "Tennis Academy Pro",
+    "VITE_FRONTEND_FORGE_API_KEY": "7QopKBVFg8kj7LcNpAMKZY",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im",
+    "VITE_STRIPE_PUBLISHABLE_KEY": "pk_test_51T5kuMGqNizWQ5DEUMg2F7tU9g3ahqcN9XwOI2AZOtjrDTW5vCnIwaWIv2e5khHewDSXOi8f8VgEfFtdbd6IbQpo00YdaEKnH3"
+  },
+  "template_id": "web-db-user",
+  "test_command": "pnpm test"
+}

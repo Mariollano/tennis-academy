@@ -151,6 +151,13 @@ async function startServer() {
                 const smsMsg = `Hi ${b.studentName || "there"}! 🎾 Payment confirmed! Your ${b.programName || "session"}${shortDateStr ? " on " + shortDateStr : ""} is CONFIRMED. See you on the court! Questions? Call/text 401-965-5873. Reply STOP to unsubscribe.`;
                 sendSms(b.studentPhone, smsMsg).catch(() => {});
               }
+
+              // Send instant SMS alert to Coach Mario when card payment is confirmed
+              if (isTwilioConfigured()) {
+                const marioPhone = "4019655873";
+                const marioMsg = `💳 PAYMENT CONFIRMED! ${b.studentName || "Unknown"} paid $${amountDollars} for ${b.programName || b.programType || "Session"}${shortDateStr ? " on " + shortDateStr : ""}. Phone: ${b.studentPhone || "N/A"} Email: ${b.studentEmail || "N/A"}`;
+                sendSms(marioPhone, marioMsg).catch(() => {});
+              }
             }
           } catch (notifyErr) {
             console.warn("[Webhook] Failed to send owner notification:", notifyErr);

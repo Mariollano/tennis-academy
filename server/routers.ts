@@ -579,6 +579,18 @@ export const appRouter = router({
           await sendSms(notifyPhone!, msg).catch(() => {}); // non-blocking
         }
 
+        // Send instant SMS alert to Coach Mario for every new booking
+        if (isTwilioConfigured()) {
+          const marioPhone = "4019655873";
+          const smsDateStr = input.sessionDate
+            ? new Date(input.sessionDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+            : "";
+          const smsTimePart = timeStr ? ` at ${timeStr}` : "";
+          const paymentInfo = input.paymentMethod === "cash" ? "(paying cash)" : input.paymentMethod === "check" ? "(paying by check)" : "(card/online)";
+          const marioMsg = `🎾 NEW BOOKING! ${notifyName} signed up for ${programLabel}${smsDateStr ? " on " + smsDateStr : ""}${smsTimePart}. ${paymentInfo} Phone: ${notifyPhone || "N/A"} Email: ${notifyEmail || "N/A"}`;
+          sendSms(marioPhone, marioMsg).catch(() => {});
+        }
+
         // Check if this is the user's first booking and reward the referrer if applicable
         maybeRewardReferrer(resolvedUserId).catch(() => {});
 
