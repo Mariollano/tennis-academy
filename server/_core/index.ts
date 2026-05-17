@@ -378,8 +378,8 @@ async function startServer() {
     console.log(`Server running on http://localhost:${port}/`);
     // Start the reminder scheduler after server is up
     startReminderScheduler();
-    // Start the iCal sync scheduler — runs every 30 minutes
-    const ICAL_SYNC_INTERVAL_MS = 30 * 60 * 1000;
+    // Start the iCal sync scheduler — runs every 5 minutes
+    const ICAL_SYNC_INTERVAL_MS = 5 * 60 * 1000;
     setTimeout(async () => {
       console.log("[iCalSync] Running initial sync...");
       const result = await syncIcalCalendar();

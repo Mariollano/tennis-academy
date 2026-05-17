@@ -600,4 +600,6 @@
 - [x] Fix bare domain redirect: ritennisacademy.com (no www, no https) → https://ritennisacademy.com/
 - [x] Build Spring & Summer program landing page at /spring-summer with contact/signup form, program pillars, pricing, and flexibility emphasis
 - [x] Send instant SMS to Coach Mario (401-965-5873) when any student books any session (private lesson, clinic, program)
-- [ ] Add new 105 Game evening sessions: Mon/Wed/Fri 6:30–8:00 PM through Dec 31, 2026
+- [x] Add 105 Game evening sessions: Mon/Wed/Fri 6:30–8:00 PM through Dec 31, 2026
+- [x] Reduce iCal sync interval from 30 minutes to 5 minutes
+- [ ] Guide DNS fix for ritennisacademy.com → point to Manus app
