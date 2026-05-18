@@ -603,3 +603,5 @@
 - [x] Add 105 Game evening sessions: Mon/Wed/Fri 6:30–8:00 PM through Dec 31, 2026
 - [x] Reduce iCal sync interval from 30 minutes to 5 minutes
 - [ ] Guide DNS fix for ritennisacademy.com → point to Manus app
+- [x] Evening sessions same price as morning ($35) — confirmed, no DB change needed
+- [x] Add evening session time slot (6:30–8:00 PM Mon/Wed/Fri) to Programs page
