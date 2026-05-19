@@ -3,7 +3,7 @@
  * Runs every minute to check for pending scheduled reminders and fires them.
  * Called from server startup (server/_core/server.ts or index.ts).
  */
-import { getDb } from "./db";
+import { getDb, resetDb } from "./db";
 import { scheduledReminders, bookings, users, programs } from "../drizzle/schema";
 import { eq, lte, and } from "drizzle-orm";
 import { sendBookingReminder, isEmailConfigured } from "./email";
@@ -32,8 +32,9 @@ export async function processScheduledReminders(): Promise<void> {
       .from(scheduledReminders)
       .where(and(eq(scheduledReminders.status, "pending"), lte(scheduledReminders.sendAt, now)));
   } catch (err: any) {
-    // Transient DB connection error (ECONNRESET) — skip this cycle, will retry next interval
+    // Transient DB connection error (ECONNRESET) — reset connection and skip this cycle
     if (err?.cause?.code === "ECONNRESET" || err?.message?.includes("ECONNRESET")) {
+      resetDb(); // Force fresh connection on next attempt
       return; // Silent skip — not a real error
     }
     console.error("[ReminderScheduler] DB query error:", err?.message);

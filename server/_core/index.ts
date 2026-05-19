@@ -358,6 +358,14 @@ async function startServer() {
     createExpressMiddleware({
       router: appRouter,
       createContext,
+      onError: ({ error, path }) => {
+        // Log DB connection errors but don't let them surface as HTML
+        if (error?.cause && (error.cause as any)?.code === 'ECONNRESET') {
+          console.warn(`[tRPC] DB connection reset on ${path} — client will retry`);
+        } else if (error?.message?.includes('ECONNRESET') || error?.message?.includes('Failed query')) {
+          console.warn(`[tRPC] DB query error on ${path}:`, error.message);
+        }
+      },
     })
   );
   // development mode uses Vite, production mode uses static files

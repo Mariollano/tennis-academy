@@ -8,7 +8,25 @@ import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Retry up to 2 times on transient errors (DB connection resets, network blips)
+      retry: (failureCount, error) => {
+        if (failureCount >= 2) return false;
+        // Don't retry auth errors
+        if (error instanceof TRPCClientError) {
+          if (error.message === UNAUTHED_ERR_MSG) return false;
+          // Retry on JSON parse errors (HTML response from DB reset) or INTERNAL_SERVER_ERROR
+          if (error.data?.code === 'INTERNAL_SERVER_ERROR') return true;
+          if (error.message?.includes('is not valid JSON')) return true;
+        }
+        return false;
+      },
+      retryDelay: 1000, // Wait 1 second before retrying
+    },
+  },
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;

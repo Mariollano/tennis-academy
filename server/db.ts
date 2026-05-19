@@ -5,6 +5,12 @@ import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
+// Reset the cached DB instance so the next call to getDb() creates a fresh connection.
+// Call this when an ECONNRESET or similar transient error is detected.
+export function resetDb() {
+  _db = null;
+}
+
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
