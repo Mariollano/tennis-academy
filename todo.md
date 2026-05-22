@@ -606,3 +606,4 @@
 - [x] Evening sessions same price as morning ($35) — confirmed, no DB change needed
 - [x] Add evening session time slot (6:30–8:00 PM Mon/Wed/Fri) to Programs page
 - [x] Show participant list to students after booking a 105 Game session (who else is signed up for that slot)
+- [x] Fix payment flow: changed window.open to window.location.href to avoid popup blocker issues on mobile/desktop

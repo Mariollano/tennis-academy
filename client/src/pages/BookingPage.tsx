@@ -716,7 +716,8 @@ export default function BookingPage() {
     onSuccess: (data) => {
       if (data.url) {
         toast.success("Redirecting to secure payment...");
-        window.open(data.url, "_blank");
+        // Use same-tab redirect to avoid popup blockers on mobile and desktop
+        window.location.href = data.url;
       }
     },
     onError: (err) => toast.error(err.message || "Payment setup failed. Please try again."),
