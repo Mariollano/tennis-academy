@@ -556,6 +556,70 @@ function NewsletterOptIn({ userId }: { userId: number }) {
   );
 }
 
+// ── 105 Game Participant List (shown on confirmation screen) ────────────────────
+function ClinicParticipantList({ slotId }: { slotId: number }) {
+  const { data, isLoading } = trpc.schedule.getSessionParticipants.useQuery(
+    { scheduleSlotId: slotId },
+    { refetchOnWindowFocus: false }
+  );
+
+  if (isLoading) {
+    return (
+      <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10">
+        <CardContent className="pt-5 pb-5 flex items-center justify-center gap-2 text-muted-foreground text-sm">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading your session crew...
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const participants = data?.participants ?? [];
+  const total = data?.total ?? 0;
+
+  return (
+    <Card className="border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-blue-50/30 dark:from-primary/10 dark:to-blue-950/20">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Users className="w-4 h-4 text-primary" />
+          Who's On Court With You 🎾
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {total <= 1
+            ? "You're the first one in! More players will join soon."
+            : `${total} player${total !== 1 ? 's' : ''} signed up for this session, including you.`}
+        </p>
+      </CardHeader>
+      <CardContent>
+        {participants.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {participants.map((p, i) => (
+              <div
+                key={i}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border ${
+                  p.isMe
+                    ? 'bg-accent text-accent-foreground border-accent/60'
+                    : 'bg-primary/10 text-primary border-primary/20'
+                }`}
+              >
+                <span className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold">
+                  {p.firstName[0]?.toUpperCase()}
+                </span>
+                {p.firstName}{p.isMe ? ' (You)' : ''}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground text-center py-2">No participants yet — you're the first! 🏆</p>
+        )}
+        <p className="text-xs text-muted-foreground/60 mt-3 text-center">
+          First names only shown to protect privacy.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function BookingPage() {
   const params = useParams<{ programType: string }>();
   const programType = params.programType || "private_lesson";
@@ -912,6 +976,11 @@ export default function BookingPage() {
               </div>
             </div>
           </Card>
+
+          {/* 105 Game Participant List — shown only for clinic_105 bookings */}
+          {programType === "clinic_105" && selectedSlotId && (
+            <ClinicParticipantList slotId={selectedSlotId} />
+          )}
 
           {/* Refer a Friend Card */}
           <Card className="border-2 border-green-400/50 bg-gradient-to-br from-green-50/50 to-emerald-50/30 dark:from-green-950/30 dark:to-emerald-950/20">

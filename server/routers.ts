@@ -1774,6 +1774,30 @@ export const appRouter = router({
           ))
           .orderBy(sessionWaitlist.createdAt);
       }),
+    // Public: get participant list for a 105 Game session slot (first name only for privacy)
+    getSessionParticipants: publicProcedure
+      .input(z.object({ scheduleSlotId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) return { participants: [], total: 0 };
+        const rows = await db.select({
+          name: users.name,
+          isMe: ctx.user ? sql<number>`CASE WHEN ${bookings.userId} = ${ctx.user.id} THEN 1 ELSE 0 END` : sql<number>`0`,
+        })
+          .from(bookings)
+          .leftJoin(users, eq(bookings.userId, users.id))
+          .where(and(
+            eq(bookings.scheduleSlotId, input.scheduleSlotId),
+            sql`${bookings.status} IN ('pending', 'confirmed')`,
+          ))
+          .orderBy(bookings.createdAt);
+        // Return first name only for privacy
+        const participants = rows.map(r => ({
+          firstName: (r.name || 'Player').split(' ')[0],
+          isMe: Number(r.isMe) === 1,
+        }));
+        return { participants, total: participants.length };
+      }),
   }),
 
   // ─── Mental Coaching Resources ───────────────────────────────────────────────
