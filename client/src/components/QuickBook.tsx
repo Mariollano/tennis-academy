@@ -6,7 +6,7 @@ const programs = [
   { label: "Private Lesson", href: "/book/private_lesson", price: "$125/hr", icon: Trophy, color: "bg-blue-600" },
   { label: "105 Clinic", href: "/book/clinic_105", price: "$35", icon: Users, color: "bg-amber-500" },
   { label: "Junior Program", href: "/book/junior_daily", price: "$80/day", icon: Star, color: "bg-green-600" },
-  { label: "Summer Camp", href: "/book/summer_camp_daily", price: "$90/day", icon: Sun, color: "bg-orange-500" },
+  { label: "Summer Camp", href: "/book/summer_camp_daily", price: "$99/day", icon: Sun, color: "bg-orange-500" },
   { label: "Mental Coaching", href: "/mental-coaching", price: "Contact", icon: Brain, color: "bg-purple-600" },
 ];
 

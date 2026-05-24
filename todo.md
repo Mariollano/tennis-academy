@@ -607,3 +607,7 @@
 - [x] Add evening session time slot (6:30–8:00 PM Mon/Wed/Fri) to Programs page
 - [x] Show participant list to students after booking a 105 Game session (who else is signed up for that slot)
 - [x] Fix payment flow: changed window.open to window.location.href to avoid popup blocker issues on mobile/desktop
+- [ ] Fix Summer Program pricing: half-day (9AM-2PM) = $99/day, full-day = $125/day, after-camp add-on (2:30-5PM) = $20/day
+- [x] Fix Summer Camp: $99 half-day (9-2), +$26 after-camp (full day = $125), remove weekly packages
+- [x] Add Bring a Friend / Sibling discount: $89/day for summer camp
+- [x] Fix all price references in Programs, Home, QuickBook, FAQ

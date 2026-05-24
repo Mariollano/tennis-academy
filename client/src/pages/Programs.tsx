@@ -94,23 +94,23 @@ const programs = [
     photoAlt: "Coach Mario with summer camp students",
     description: "The ultimate summer tennis experience. Morning camp runs 9 AM–2 PM covering technique, training, matchplay, mental coaching, and fitness. Add the After Camp program for extended afternoon supervision.",
     pricing: [
-      { label: "Daily (9 AM–2 PM)", price: "$90" },
-      { label: "Weekly Package (5 days)", price: "$420" },
-      { label: "After Camp Add-on (2:30–5 PM)", price: "+$20/day" },
-      { label: "Afternoon Only (no morning)", price: "$50/day" },
+      { label: "Half-Day (9 AM–2 PM)", price: "$99/day" },
+      { label: "Full Day (9 AM–5 PM)", price: "$125/day" },
+      { label: "After Camp Add-on (2:30–5 PM)", price: "+$26/day" },
+      { label: "Bring a Friend / Sibling", price: "$89/day" },
     ],
     highlights: [
       "9 AM – 2 PM main program",
       "Technique, matchplay & fitness",
       "Mental coaching included",
-      "After Camp: 2:30–5 PM (+$20/day)",
-      "Weekly package: all 5 days same week",
+      "After Camp: 2:30–5 PM (+$26/day)",
+      "Bring a Friend / Sibling: $89/day",
     ],
     bookHref: "/book/summer_camp_daily",
     bookLabel: "Book Summer Camp",
     popular: false,
     bestValue: true,
-    note: "Weekly package requires all 5 days to be used within the same calendar week.",
+    note: "Full day (9 AM–5 PM) = $99 + $26 After Camp add-on = $125 total.",
   },
   {
     id: "mental_coaching",
@@ -323,7 +323,7 @@ export default function Programs() {
               { label: "Private Lesson", href: "/book/private_lesson", price: "$125/hr" },
               { label: "105 Clinic", href: "/book/clinic_105", price: "$35" },
               { label: "Junior Program", href: "/book/junior_daily", price: "$80/day" },
-              { label: "Summer Camp", href: "/book/summer_camp_daily", price: "$90/day" },
+              { label: "Summer Camp", href: "/book/summer_camp_daily", price: "$99/day" },
             ].map(({ label, href, price }) => (
               <Link key={href} href={href}>
                 <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-primary-foreground text-sm font-medium transition-all hover:scale-105">
@@ -396,7 +396,7 @@ export default function Programs() {
                   { name: "Private Lesson", price: "$125/hr", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/book/private_lesson", popular: false },
                   { name: "105 Game Clinic", price: "$35/session", who: "Adults", schedule: "Mon/Wed/Fri/Sun 9–10:30 AM", size: "Up to 24", href: "/book/clinic_105", popular: true },
                   { name: "Junior Program", price: "$80/day · $350/wk", who: "Juniors", schedule: "3:30–6:30 PM", size: "Small group", href: "/book/junior_daily", popular: false },
-                  { name: "Summer Camp", price: "$90/day · $420/wk", who: "All ages", schedule: "9 AM–2 PM daily", size: "Group", href: "/book/summer_camp_daily", popular: false },
+                  { name: "Summer Camp", price: "$99/day · $125 full day", who: "All ages", schedule: "9 AM–2 PM daily", size: "Group", href: "/book/summer_camp_daily", popular: false },
                   { name: "Mental Coaching", price: "Contact Mario", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/mental-coaching", popular: false },
                 ].map((row, i) => (
                   <tr key={row.name} className={`border-t border-border ${i % 2 === 0 ? 'bg-card' : 'bg-muted/20'} ${row.popular ? 'ring-1 ring-inset ring-accent/40' : ''}`}>

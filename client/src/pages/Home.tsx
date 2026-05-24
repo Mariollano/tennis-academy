@@ -114,7 +114,7 @@ const programs = [
     icon: Sun,
     title: "Summer Camp",
     desc: "Technique, matchplay, fitness & mental coaching. 9 AM–2 PM daily.",
-    price: "From $90/day",
+    price: "From $89/day",
     badge: "Summer",
     href: "/book/summer_camp_daily",
     img: photos.group,
@@ -194,7 +194,7 @@ function InstallAppButton() {
 }
 
 const faqItems = [
-  { q: "What programs do you offer?", a: "We offer Private Lessons ($125/hr), 105 Game Adult Clinics ($35/session), Junior Programs (Mon–Fri, $80/day or $350/week), Summer Camp ($90/day or $420/week), and Mental Coaching. All programs are available for online booking." },
+  { q: "What programs do you offer?", a: "We offer Private Lessons ($125/hr), 105 Game Adult Clinics ($35/session), Junior Programs (Mon–Fri, $80/day or $350/week), Summer Camp ($99/day half-day · $125 full day · $89 with a friend/sibling), and Mental Coaching. All programs are available for online booking." },
   { q: "How do I book a session?", a: "Simply click 'Book Now' in the navigation, choose your program, pick an available date and time, and pay securely online. You'll receive instant email and SMS confirmation." },
   { q: "What is the 105 Game Clinic?", a: "The 105 Game Clinic is Coach Mario's signature adult group program. It runs on Mondays, Wednesdays, Fridays (12 spots) and Sundays (24 spots), 9:00–10:30 AM. It combines competitive drills, match play, and technique work in a fun group setting." },
   { q: "Do you offer beginner lessons?", a: "Absolutely! Coach Mario works with all skill levels, from complete beginners to competitive tournament players. Private lessons are the best starting point for beginners." },
@@ -517,7 +517,7 @@ export default function Home() {
               { label: "Private Lesson", price: "$125/hr", href: "/book/private_lesson", color: "bg-blue-600", emoji: "🎾", external: false },
               { label: "105 Clinic", price: "$35", href: "/book/clinic_105", color: "bg-amber-500", emoji: "👥", external: false },
               { label: "Junior Program", price: "$80/day", href: "/book/junior_daily", color: "bg-green-600", emoji: "⭐", external: false },
-              { label: "Summer Camp", price: "$90/day", href: "/book/summer_camp_daily", color: "bg-orange-500", emoji: "☀️", external: false },
+              { label: "Summer Camp", price: "$99/day", href: "/book/summer_camp_daily", color: "bg-orange-500", emoji: "☀️", external: false },
               { label: "Mental Coaching", price: "Contact", href: "/mental-coaching", color: "bg-purple-600", emoji: "🧠", external: false },
               { label: "Newsletter", price: "Latest Issue", href: "/api/newsletter/latest", color: "bg-[#1a3a8f]", emoji: "📰", external: true },
             ].map(({ label, price, href, color, emoji, external }) => (

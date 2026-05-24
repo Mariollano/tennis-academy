@@ -125,23 +125,22 @@ const PROGRAM_CONFIG: Record<string, {
   summer_camp_daily: {
     title: "Summer Camp — Daily",
     type: "summer_camp_daily",
-    description: "Single day summer camp session.",
+    description: "Single day summer camp session. Half-day 9 AM–2 PM. Add After Camp for full day through 5 PM.",
     pricing: [
-      { label: "$90 per day (9 AM–2 PM)", value: "daily", cents: 9000 },
-      { label: "+ $20 After Camp add-on (2:30–5 PM)", value: "after_camp", cents: 2000 },
+      { label: "$99 per day (9 AM–2 PM)", value: "daily", cents: 9900 },
+      { label: "Bring a Friend / Sibling — $89 per day (9 AM–2 PM)", value: "friend_sibling", cents: 8900 },
     ],
     timeInfo: "9:00 AM – 2:00 PM (After Camp: 2:30–5 PM)",
   },
   summer_camp_weekly: {
-    title: "Summer Camp — Weekly Package",
-    type: "summer_camp_weekly",
-    description: "Full week summer camp (all 5 days must be in the same week).",
+    title: "Summer Camp — Daily",
+    type: "summer_camp_daily",
+    description: "Single day summer camp session. Half-day 9 AM–2 PM. Add After Camp for full day through 5 PM.",
     pricing: [
-      { label: "$420 per week (Mon–Fri, same week)", value: "weekly", cents: 42000 },
-      { label: "+ $20/day After Camp add-on (2:30–5 PM)", value: "after_camp_daily", cents: 2000 },
+      { label: "$99 per day (9 AM–2 PM)", value: "daily", cents: 9900 },
+      { label: "Bring a Friend / Sibling — $89 per day (9 AM–2 PM)", value: "friend_sibling", cents: 8900 },
     ],
-    timeInfo: "9:00 AM – 2:00 PM, Monday–Friday",
-    note: "Weekly package requires all 5 days to be used within the same calendar week. Days cannot be split across different weeks.",
+    timeInfo: "9:00 AM – 2:00 PM (After Camp: 2:30–5 PM)",
   },
   mental_coaching: {
     title: "Mental Coaching Session",
@@ -760,7 +759,7 @@ export default function BookingPage() {
     ? (lessonDuration === 30 ? 6500 : 12500)
     : (selectedPrice?.cents || 0);
   const effectiveJuniorDays = programType === "junior_daily" && juniorSelectedDates.length > 0 ? juniorSelectedDates.length : juniorDays;
-  const totalCents = (programType === "junior_daily" ? baseCents * effectiveJuniorDays : baseCents) + (afterCamp ? 2000 : 0);
+  const totalCents = (programType === "junior_daily" ? baseCents * effectiveJuniorDays : baseCents) + (afterCamp ? 2600 : 0);
 
   // Promo code validation query - placed after totalCents is declared
   const validatePromoQuery = trpc.promoCodes.validate.useQuery(
@@ -1320,6 +1319,11 @@ export default function BookingPage() {
                             ))}
                           </SelectContent>
                         </Select>
+                        {selectedPricing === "friend_sibling" && (
+                          <p className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 mt-2">
+                            🎾 <strong>Bring a Friend / Sibling Discount</strong> — $89/day instead of $99. Both participants must register separately using this option.
+                          </p>
+                        )}
                       </div>
                     )}
 
@@ -1510,7 +1514,7 @@ export default function BookingPage() {
                         />
                         <div>
                           <Label htmlFor="afterCamp" className="font-semibold cursor-pointer">
-                            Add After Camp Program (+$20{programType === "summer_camp_weekly" ? "/day" : ""})
+                            Add After Camp Program (+$26 · Full Day 9 AM–5 PM)
                           </Label>
                           <p className="text-sm text-muted-foreground mt-0.5">
                             Extended afternoon supervision from 2:30 PM – 5:00 PM
@@ -1715,7 +1719,7 @@ export default function BookingPage() {
                   {afterCamp && (
                     <div className="flex justify-between text-sm py-1">
                       <span className="text-muted-foreground">After Camp add-on</span>
-                      <span className="font-medium">+$20</span>
+                      <span className="font-medium">+$26</span>
                     </div>
                   )}
                   {promoData?.valid && (
