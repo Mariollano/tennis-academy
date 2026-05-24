@@ -555,8 +555,8 @@ function NewsletterOptIn({ userId }: { userId: number }) {
   );
 }
 
-// ── 105 Game Participant List (shown on confirmation screen) ────────────────────
-function ClinicParticipantList({ slotId }: { slotId: number }) {
+// ── 105 Game Participant List (shown before booking and on confirmation screen) ────────────────────
+function ClinicParticipantList({ slotId, preBooking }: { slotId: number; preBooking?: boolean }) {
   const { data, isLoading } = trpc.schedule.getSessionParticipants.useQuery(
     { scheduleSlotId: slotId },
     { refetchOnWindowFocus: false }
@@ -584,9 +584,13 @@ function ClinicParticipantList({ slotId }: { slotId: number }) {
           Who's On Court With You 🎾
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          {total <= 1
-            ? "You're the first one in! More players will join soon."
-            : `${total} player${total !== 1 ? 's' : ''} signed up for this session, including you.`}
+          {preBooking
+            ? (total === 0
+              ? "No one has signed up yet — be the first!"
+              : `${total} player${total !== 1 ? 's' : ''} already signed up for this session.`)
+            : (total <= 1
+              ? "You're the first one in! More players will join soon."
+              : `${total} player${total !== 1 ? 's' : ''} signed up for this session, including you.`)}
         </p>
       </CardHeader>
       <CardContent>
@@ -1237,6 +1241,13 @@ export default function BookingPage() {
                   if (times) setSelectedSlotTimes(times);
                 }}
               />
+            </div>
+          )}
+
+          {/* Participant list — shown when a 105 Game slot is selected (before booking) */}
+          {programType === "clinic_105" && selectedSlotId && selectedSlotId > 0 && (
+            <div className="lg:col-span-3 mb-2">
+              <ClinicParticipantList slotId={selectedSlotId} preBooking />
             </div>
           )}
 

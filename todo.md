@@ -611,3 +611,4 @@
 - [x] Fix Summer Camp: $99 half-day (9-2), +$26 after-camp (full day = $125), remove weekly packages
 - [x] Add Bring a Friend / Sibling discount: $89/day for summer camp
 - [x] Fix all price references in Programs, Home, QuickBook, FAQ
+- [x] Show participant list on 105 Game session detail/booking page BEFORE booking (slot selection area)
