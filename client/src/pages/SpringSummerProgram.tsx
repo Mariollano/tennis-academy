@@ -151,7 +151,7 @@ export default function SpringSummerProgram() {
 
             {/* Quick facts */}
             <div className="flex flex-wrap gap-4 text-white/80 text-sm">
-              <div className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-[#4a9c5d]" /> 3:30 – 6:30 PM Daily</div>
+              <div className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-[#4a9c5d]" /> Spring: 3:30 – 6:30 PM · Summer: 9 AM – 2 PM (or until 5 PM)</div>
               <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-[#4a9c5d]" /> Saint Andrews School, Barrington</div>
               <div className="flex items-center gap-1.5"><Users className="w-4 h-4 text-[#4a9c5d]" /> Ages 8–18</div>
             </div>
@@ -163,7 +163,8 @@ export default function SpringSummerProgram() {
               <h3 className="font-bold text-lg mb-4 text-[#f59e0b]">Why RI Tennis Academy?</h3>
               {[
                 "No weekly commitment — come when you can",
-                "Pay by the hour ($30) or 3-hour block ($75)",
+                "Spring: $30/hr or $75 for 3 hrs (3:30–6:30 PM)",
+                "Summer: $99/day (9 AM–2 PM) or $125/day (until 5 PM)",
                 "Expert coaching from Coach Mario Llano",
                 "Small groups for personalized attention",
                 "Mental performance training included",
@@ -271,6 +272,7 @@ export default function SpringSummerProgram() {
               </div>
               <div className="space-y-3 text-white/80 text-sm">
                 <div className="flex items-center gap-2"><CalendarDays className="w-4 h-4 text-[#4a9c5d] shrink-0" /> Every day, 3:30 PM – 6:30 PM</div>
+                <div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-[#4a9c5d] shrink-0" /> $30/hr or $75 for the full 3-hour session</div>
                 <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#4a9c5d] shrink-0" /> Saint Andrews School, Barrington, RI</div>
                 <div className="flex items-center gap-2"><Users className="w-4 h-4 text-[#4a9c5d] shrink-0" /> Ages 8–18</div>
                 <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-[#4a9c5d] shrink-0" /> No commitment — come when you can</div>
@@ -285,12 +287,14 @@ export default function SpringSummerProgram() {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-xl">Summer Program</h3>
-                  <span className="text-[#f59e0b] text-sm font-semibold">June 22 – August 21, 2025</span>
+                  <span className="text-[#f59e0b] text-sm font-semibold">June 22 – August 21, 2026</span>
                 </div>
               </div>
               <div className="space-y-3 text-white/80 text-sm">
                 <div className="flex items-center gap-2"><CalendarDays className="w-4 h-4 text-[#f59e0b] shrink-0" /> June 22 – August 21</div>
-                <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#f59e0b] shrink-0" /> 3:30 PM – 6:30 PM daily</div>
+                <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#f59e0b] shrink-0" /> 9:00 AM – 2:00 PM (half-day)</div>
+                <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#f59e0b] shrink-0" /> Optional: stay until 5:00 PM (full day)</div>
+                <div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-[#f59e0b] shrink-0" /> $99/day half-day · $125/day full day · $30/hr</div>
                 <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#f59e0b] shrink-0" /> Saint Andrews School, Barrington, RI</div>
                 <div className="flex items-center gap-2"><Heart className="w-4 h-4 text-[#f59e0b] shrink-0" /> Ages 8–18 welcome</div>
               </div>
@@ -303,21 +307,54 @@ export default function SpringSummerProgram() {
           {/* Pricing */}
           <div className="mt-10 bg-white rounded-2xl p-8">
             <h3 className="text-[#0a2240] font-bold text-xl mb-6 text-center">Simple, Flexible Pricing</h3>
-            <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto">
-              <div className="border-2 border-[#4a9c5d] rounded-xl p-6 text-center">
-                <DollarSign className="w-8 h-8 text-[#4a9c5d] mx-auto mb-2" />
-                <div className="text-3xl font-extrabold text-[#0a2240]">$30</div>
-                <div className="text-gray-500 text-sm mt-1">per hour</div>
-                <div className="text-xs text-gray-400 mt-2">Perfect for a quick session</div>
+
+            {/* Spring Pricing */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">🌱</span>
+                <span className="font-bold text-[#0a2240] text-base">Spring Program</span>
+                <span className="text-xs text-gray-400">(3:30 – 6:30 PM)</span>
               </div>
-              <div className="border-2 border-[#f59e0b] rounded-xl p-6 text-center relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#f59e0b] text-white text-xs font-bold px-3 py-0.5 rounded-full">BEST VALUE</div>
-                <DollarSign className="w-8 h-8 text-[#f59e0b] mx-auto mb-2" />
-                <div className="text-3xl font-extrabold text-[#0a2240]">$75</div>
-                <div className="text-gray-500 text-sm mt-1">for 3 hours</div>
-                <div className="text-xs text-gray-400 mt-2">Full afternoon session</div>
+              <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+                <div className="border-2 border-[#4a9c5d] rounded-xl p-5 text-center">
+                  <div className="text-3xl font-extrabold text-[#0a2240]">$30</div>
+                  <div className="text-gray-500 text-sm mt-1">per hour</div>
+                </div>
+                <div className="border-2 border-[#4a9c5d] rounded-xl p-5 text-center relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#4a9c5d] text-white text-xs font-bold px-3 py-0.5 rounded-full">BEST VALUE</div>
+                  <div className="text-3xl font-extrabold text-[#0a2240]">$75</div>
+                  <div className="text-gray-500 text-sm mt-1">for 3 hours</div>
+                  <div className="text-xs text-gray-400 mt-1">Full 3:30–6:30 PM session</div>
+                </div>
               </div>
             </div>
+
+            {/* Summer Pricing */}
+            <div className="border-t border-gray-100 pt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">☀️</span>
+                <span className="font-bold text-[#0a2240] text-base">Summer Program</span>
+                <span className="text-xs text-gray-400">(June 22 – Aug 21)</span>
+              </div>
+              <div className="grid sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                <div className="border-2 border-[#f59e0b] rounded-xl p-5 text-center">
+                  <div className="text-2xl font-extrabold text-[#0a2240]">$30</div>
+                  <div className="text-gray-500 text-sm mt-1">per hour</div>
+                </div>
+                <div className="border-2 border-[#f59e0b] rounded-xl p-5 text-center">
+                  <div className="text-2xl font-extrabold text-[#0a2240]">$99</div>
+                  <div className="text-gray-500 text-sm mt-1">half-day</div>
+                  <div className="text-xs text-gray-400 mt-1">9:00 AM – 2:00 PM</div>
+                </div>
+                <div className="border-2 border-[#f59e0b] rounded-xl p-5 text-center relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#f59e0b] text-white text-xs font-bold px-3 py-0.5 rounded-full">FULL DAY</div>
+                  <div className="text-2xl font-extrabold text-[#0a2240]">$125</div>
+                  <div className="text-gray-500 text-sm mt-1">full day</div>
+                  <div className="text-xs text-gray-400 mt-1">9:00 AM – 5:00 PM</div>
+                </div>
+              </div>
+            </div>
+
             <p className="text-center text-gray-500 text-sm mt-6">
               No registration fees. No weekly minimums. Just show up and play.
             </p>
