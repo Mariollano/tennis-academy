@@ -229,6 +229,15 @@ export async function syncIcalCalendar(): Promise<{
       const title = `${ICAL_BLOCK_PREFIX} ${summary}`;
       const isAllDay = (event as any).datetype === "date";
 
+      // Skip events that are RI Tennis Academy programs (105 clinic, junior, etc.)
+      // to prevent self-blocking — these are already managed as schedule slots.
+      const summaryLower = summary.toLowerCase();
+      const isOwnProgram = [
+        "105", "clinic", "junior", "ri tennis", "ritennismario",
+        "private lesson", "summer camp", "tennis academy", "coach mario",
+      ].some(kw => summaryLower.includes(kw));
+      if (isOwnProgram) continue;
+
       // ── Recurring events ────────────────────────────────────────────────────
       if (event.rrule) {
         try {

@@ -985,7 +985,56 @@ export const appRouter = router({
           ))
           .orderBy(scheduleSlots.slotDate, scheduleSlots.startTime)
           .limit(60);
-        return slots.map(s => {
+        // Fetch blocked times in the window that affect the 105 clinic
+        const blockedInWindow = await db.select({
+          blockedDate: blockedTimes.blockedDate,
+          startTime: blockedTimes.startTime,
+          endTime: blockedTimes.endTime,
+          isAllDay: blockedTimes.isAllDay,
+          affects105Clinic: blockedTimes.affects105Clinic,
+        }).from(blockedTimes).where(
+          and(
+            sql`DATE_FORMAT(${blockedTimes.blockedDate}, '%Y-%m-%d') >= ${fromStr}`,
+            sql`DATE_FORMAT(${blockedTimes.blockedDate}, '%Y-%m-%d') <= ${toStr}`,
+            eq(blockedTimes.affects105Clinic, true)
+          )
+        );
+
+        // Build a map: dateStr -> array of blocked intervals in minutes
+        const blocksByDate: Record<string, Array<{ start: number; end: number; isAllDay: boolean }>> = {};
+        for (const b of blockedInWindow) {
+          const raw = b.blockedDate as any;
+          const dateStr = typeof raw === "string" ? raw.slice(0, 10)
+            : `${new Date(raw).getUTCFullYear()}-${String(new Date(raw).getUTCMonth()+1).padStart(2,'0')}-${String(new Date(raw).getUTCDate()).padStart(2,'0')}`;
+          if (!blocksByDate[dateStr]) blocksByDate[dateStr] = [];
+          if (b.isAllDay) {
+            blocksByDate[dateStr].push({ start: 0, end: 24 * 60, isAllDay: true });
+          } else if (b.startTime && b.endTime) {
+            const [sh, sm] = (b.startTime as string).split(':').map(Number);
+            const [eh, em] = (b.endTime as string).split(':').map(Number);
+            blocksByDate[dateStr].push({ start: sh * 60 + sm, end: eh * 60 + em, isAllDay: false });
+          }
+        }
+
+        // Filter out slots that overlap any block on that date
+        const filteredSlots = slots.filter(s => {
+          const raw = s.slot.slotDate as any;
+          const dateStr = typeof raw === "string" ? raw.slice(0, 10)
+            : `${new Date(raw).getUTCFullYear()}-${String(new Date(raw).getUTCMonth()+1).padStart(2,'0')}-${String(new Date(raw).getUTCDate()).padStart(2,'0')}`;
+          const dayBlocks = blocksByDate[dateStr];
+          if (!dayBlocks || dayBlocks.length === 0) return true;
+          const [ssh, ssm] = (s.slot.startTime as string).split(':').map(Number);
+          const [seh, sem] = (s.slot.endTime as string).split(':').map(Number);
+          const slotStart = ssh * 60 + ssm;
+          const slotEnd = seh * 60 + sem;
+          for (const blk of dayBlocks) {
+            if (blk.isAllDay) return false;
+            if (slotStart < blk.end && slotEnd > blk.start) return false;
+          }
+          return true;
+        });
+
+        return filteredSlots.map(s => {
           const realCount = Number(s.activeBookings ?? 0);
           const spotsLeft = Math.max(0, s.slot.maxParticipants - realCount);
           return {
