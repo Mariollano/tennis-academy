@@ -1374,7 +1374,7 @@ export const appRouter = router({
         slotDate: z.string(),
         startTime: z.string(),
         endTime: z.string(),
-        maxParticipants: z.number().default(12),
+        maxParticipants: z.number().default(8),
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -1427,8 +1427,8 @@ export const appRouter = router({
         programId: z.number(),
         fromDate: z.string(),
         toDate: z.string(),
-        weekdayCap: z.number().default(12),   // Mon/Wed/Fri
-        sundayCap: z.number().default(24),
+        weekdayCap: z.number().default(8),    // Mon/Wed/Fri
+        sundayCap: z.number().default(8),
         startTime: z.string().default("09:00:00"),
         endTime: z.string().default("10:30:00"),
       }))
