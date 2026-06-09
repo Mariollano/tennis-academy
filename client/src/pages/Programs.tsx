@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Users, Star, Sun, Brain, Clock, DollarSign, CheckCircle, MapPin, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Trophy, Users, Star, Sun, Brain, Clock, DollarSign, CheckCircle, MapPin, ArrowRight, ChevronDown, ChevronUp, Swords } from "lucide-react";
 
 const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
 
@@ -138,6 +138,31 @@ const programs = [
     bestValue: false,
   },
   {
+    id: "doubles_league",
+    icon: Swords,
+    title: "Doubles League",
+    subtitle: "Tue & Thu 5:30–7 PM · Sat 9–11 AM",
+    category: "doubles",
+    badge: "New",
+    accentColor: "from-cyan-500 to-blue-700",
+    photo: `${CDN}/IMG_2867_fa17ab01.jpg`,
+    photoAlt: "Doubles play on court",
+    description: "Competitive doubles play open to all skill levels. Sign up solo — Coach Mario pairs you with a partner and sets the teams. $15 per 2-hour session, no partner needed!",
+    pricing: [{ label: "Per 2-hour session", price: "$15" }],
+    highlights: [
+      "Tue & Thu: 5:30 – 7:00 PM",
+      "Saturday: 9:00 – 11:00 AM",
+      "All skill levels welcome",
+      "No partner needed — Mario assigns teams",
+      "Unlimited players per session",
+      "Pay by card, cash, or check",
+    ],
+    bookHref: "/doubles-league",
+    bookLabel: "Sign Up for Doubles",
+    popular: true,
+    bestValue: false,
+  },
+  {
     id: "tournament_attendance",
     icon: MapPin,
     title: "Tournament Attendance",
@@ -171,6 +196,7 @@ const programs = [
 const categories = [
   { id: "all", label: "All Programs" },
   { id: "adult", label: "Adults" },
+  { id: "doubles", label: "Doubles" },
   { id: "junior", label: "Juniors" },
   { id: "summer", label: "Summer" },
   { id: "mental", label: "Mental" },
@@ -322,6 +348,7 @@ export default function Programs() {
             {[
               { label: "Private Lesson", href: "/book/private_lesson", price: "$125/hr" },
               { label: "105 Clinic", href: "/book/clinic_105", price: "$35" },
+              { label: "Doubles League", href: "/doubles-league", price: "$15" },
               { label: "Junior Program", href: "/book/junior_daily", price: "$80/day" },
               { label: "Summer Camp", href: "/book/summer_camp_daily", price: "$99/day" },
             ].map(({ label, href, price }) => (
@@ -395,6 +422,7 @@ export default function Programs() {
                 {[
                   { name: "Private Lesson", price: "$125/hr", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/book/private_lesson", popular: false },
                   { name: "105 Game Clinic", price: "$35/session", who: "Adults", schedule: "Mon/Wed/Fri/Sun 9–10:30 AM", size: "Up to 24", href: "/book/clinic_105", popular: true },
+                  { name: "Doubles League", price: "$15/session", who: "All levels", schedule: "Tue/Thu 5:30–7 PM · Sat 9–11 AM", size: "Unlimited", href: "/doubles-league", popular: true },
                   { name: "Junior Program", price: "$80/day · $350/wk", who: "Juniors", schedule: "3:30–6:30 PM", size: "Small group", href: "/book/junior_daily", popular: false },
                   { name: "Summer Camp", price: "$99/day · $125 full day", who: "All ages", schedule: "9 AM–2 PM daily", size: "Group", href: "/book/summer_camp_daily", popular: false },
                   { name: "Mental Coaching", price: "Contact Mario", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/mental-coaching", popular: false },
