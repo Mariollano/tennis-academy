@@ -516,6 +516,7 @@ export default function Home() {
             {[
               { label: "Private Lesson", price: "$125/hr", href: "/book/private_lesson", color: "bg-blue-600", emoji: "🎾", external: false },
               { label: "105 Clinic", price: "$35", href: "/book/clinic_105", color: "bg-amber-500", emoji: "👥", external: false },
+              { label: "Doubles League", price: "$15", href: "/doubles-league", color: "bg-cyan-600", emoji: "🎾", external: false },
               { label: "Junior Program", price: "$80/day", href: "/book/junior_daily", color: "bg-green-600", emoji: "⭐", external: false },
               { label: "Summer Camp", price: "$99/day", href: "/book/summer_camp_daily", color: "bg-orange-500", emoji: "☀️", external: false },
               { label: "Mental Coaching", price: "Contact", href: "/mental-coaching", color: "bg-purple-600", emoji: "🧠", external: false },
