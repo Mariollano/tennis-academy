@@ -385,3 +385,46 @@ export const icalSyncSettings = mysqlTable("ical_sync_settings", {
 });
 export type IcalSyncSettings = typeof icalSyncSettings.$inferSelect;
 export type InsertIcalSyncSettings = typeof icalSyncSettings.$inferInsert;
+
+// ─── Doubles League Sessions ─────────────────────────────────────────────────
+// Recurring sessions: Tue/Thu 5:30-7 PM, Sat 9-11 AM
+export const doublesLeagueSessions = mysqlTable("doubles_league_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionDate: date("sessionDate").notNull(),
+  startTime: time("startTime").notNull(),  // e.g. '17:30:00'
+  endTime: time("endTime").notNull(),      // e.g. '19:00:00'
+  dayOfWeek: mysqlEnum("dayOfWeek", ["tuesday", "thursday", "saturday"]).notNull(),
+  priceInCents: int("priceInCents").notNull().default(1500), // $15
+  isActive: boolean("isActive").default(true).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type DoublesLeagueSession = typeof doublesLeagueSessions.$inferSelect;
+export type InsertDoublesLeagueSession = typeof doublesLeagueSessions.$inferInsert;
+
+// ─── Doubles League Signups ───────────────────────────────────────────────────
+// Players sign up for a session; Coach Mario assigns doubles partners
+export const doublesLeagueSignups = mysqlTable("doubles_league_signups", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull(),
+  // Player info (no account required)
+  playerName: varchar("playerName", { length: 200 }).notNull(),
+  playerEmail: varchar("playerEmail", { length: 320 }).notNull(),
+  playerPhone: varchar("playerPhone", { length: 20 }),
+  // Optional: linked user account
+  userId: int("userId"),
+  // Payment
+  status: mysqlEnum("status", ["pending", "paid", "cancelled"]).default("pending").notNull(),
+  paymentMethod: mysqlEnum("paymentMethod", ["card", "cash", "check"]).default("card"),
+  stripeSessionId: varchar("stripeSessionId", { length: 255 }),
+  paidAt: timestamp("paidAt"),
+  // Coach Mario assigns doubles partner
+  partnerId: int("partnerId"),  // references another doublesLeagueSignups.id
+  courtNumber: int("courtNumber"),
+  matchNotes: text("matchNotes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type DoublesLeagueSignup = typeof doublesLeagueSignups.$inferSelect;
+export type InsertDoublesLeagueSignup = typeof doublesLeagueSignups.$inferInsert;

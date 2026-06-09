@@ -603,6 +603,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="promos" onClick={() => setActiveTab("promos")}><Tag className="w-4 h-4 mr-1.5" />Promo Codes</TabsTrigger>
             <TabsTrigger value="roster" onClick={() => setActiveTab("roster")}><Users className="w-4 h-4 mr-1.5" />Roster</TabsTrigger>
             <TabsTrigger value="calendar" onClick={() => setActiveTab("calendar")}><Calendar className="w-4 h-4 mr-1.5" />Calendar Sync</TabsTrigger>
+            <TabsTrigger value="doubles" onClick={() => setActiveTab("doubles")}><Trophy className="w-4 h-4 mr-1.5" />Doubles League</TabsTrigger>
           </TabsList>
 
           {/* Today Tab */}
@@ -1041,6 +1042,10 @@ export default function AdminDashboard() {
           <TabsContent value="calendar">
             <CalendarSyncTab />
           </TabsContent>
+          {/* Doubles League Tab */}
+          <TabsContent value="doubles">
+            <DoublesLeagueTab />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
@@ -1245,6 +1250,219 @@ function RosterTab() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Doubles League Tab Component ───────────────────────────────────────────
+function DoublesLeagueTab() {
+  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
+
+  const { data: sessions = [], isLoading: sessionsLoading, refetch: refetchSessions } = trpc.doublesLeague.adminListSessions.useQuery();
+  const { data: signups = [], isLoading: signupsLoading, refetch: refetchSignups } = trpc.doublesLeague.adminGetSignups.useQuery(
+    { sessionId: selectedSessionId! },
+    { enabled: selectedSessionId !== null }
+  );
+
+  const generateMutation = trpc.doublesLeague.generateSessions.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Generated ${data.created} sessions (${data.skipped} already existed)`);
+      refetchSessions();
+    },
+    onError: (e) => toast.error(e.message || "Failed to generate sessions"),
+  });
+
+  const assignPartnerMutation = trpc.doublesLeague.adminAssignPartner.useMutation({
+    onSuccess: () => { toast.success("Partner assignment saved!"); refetchSignups(); },
+    onError: (e) => toast.error(e.message || "Failed to save assignment"),
+  });
+
+  const markPaidMutation = trpc.doublesLeague.adminMarkPaid.useMutation({
+    onSuccess: () => { toast.success("Marked as paid!"); refetchSignups(); },
+    onError: (e) => toast.error(e.message || "Failed to mark paid"),
+  });
+
+  const cancelSignupMutation = trpc.doublesLeague.adminCancelSignup.useMutation({
+    onSuccess: () => { toast.success("Signup cancelled."); refetchSignups(); },
+    onError: (e) => toast.error(e.message || "Failed to cancel signup"),
+  });
+
+  const selectedSession = sessions.find(s => s.id === selectedSessionId);
+
+  const statusColors: Record<string, string> = {
+    pending: "bg-amber-100 text-amber-800",
+    paid: "bg-green-100 text-green-800",
+    cancelled: "bg-red-100 text-red-800",
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header with generate button */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-lg font-bold">Doubles League Management</h2>
+          <p className="text-sm text-muted-foreground">View signups, assign partners, and manage sessions</p>
+        </div>
+        <Button
+          onClick={() => generateMutation.mutate({ weeksAhead: 8 })}
+          disabled={generateMutation.isPending}
+          className="gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          {generateMutation.isPending ? "Generating..." : "Generate Next 8 Weeks"}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Sessions List */}
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Sessions</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {sessionsLoading ? (
+                <div className="p-4 space-y-2">
+                  {[1,2,3].map(i => <div key={i} className="h-14 bg-muted animate-pulse rounded-lg" />)}
+                </div>
+              ) : sessions.length === 0 ? (
+                <div className="p-6 text-center text-muted-foreground text-sm">
+                  No sessions yet. Click "Generate" to create the next 8 weeks.
+                </div>
+              ) : (
+                <div className="divide-y divide-border max-h-[500px] overflow-y-auto">
+                  {sessions.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => setSelectedSessionId(s.id)}
+                      className={`w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors ${
+                        selectedSessionId === s.id ? "bg-primary/5 border-l-2 border-primary" : ""
+                      }`}
+                    >
+                      <div className="font-medium text-sm">{s.displayDate}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
+                        <span>{s.displayTime}</span>
+                        <Badge className="text-[10px] bg-blue-100 text-blue-800">{s.signupCount} players</Badge>
+                        {!s.isActive && <Badge className="text-[10px] bg-red-100 text-red-800">Inactive</Badge>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Signups for selected session */}
+        <div className="lg:col-span-2">
+          {!selectedSessionId ? (
+            <Card>
+              <CardContent className="py-16 text-center text-muted-foreground">
+                <Trophy className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                <p>Select a session to view signups</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center justify-between">
+                  <span>{selectedSession?.displayDate} · {selectedSession?.displayTime}</span>
+                  <Badge className="bg-blue-100 text-blue-800">{signups.filter(s => s.status !== 'cancelled').length} players</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {signupsLoading ? (
+                  <div className="space-y-3">
+                    {[1,2,3].map(i => <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />)}
+                  </div>
+                ) : signups.length === 0 ? (
+                  <div className="text-center py-10 text-muted-foreground">
+                    <Users className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">No signups yet for this session.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {signups.map((signup, idx) => (
+                      <div key={signup.id} className={`border rounded-xl p-4 ${
+                        signup.status === 'cancelled' ? 'opacity-50 bg-muted/30' : 'bg-card'
+                      }`}>
+                        <div className="flex items-start justify-between gap-3 flex-wrap">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold flex items-center justify-center">
+                              {idx + 1}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-sm">{signup.playerName}</div>
+                              <div className="text-xs text-muted-foreground">{signup.playerEmail}</div>
+                              {signup.playerPhone && <div className="text-xs text-muted-foreground">{signup.playerPhone}</div>}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge className={`text-xs ${statusColors[signup.status] || 'bg-gray-100 text-gray-800'}`}>
+                              {signup.status}
+                            </Badge>
+                            {signup.paymentMethod && (
+                              <Badge className="text-xs bg-gray-100 text-gray-700">
+                                {signup.paymentMethod}
+                              </Badge>
+                            )}
+                            {signup.courtNumber && (
+                              <Badge className="text-xs bg-purple-100 text-purple-800">
+                                Court {signup.courtNumber}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Partner assignment */}
+                        {signup.status !== 'cancelled' && (
+                          <div className="mt-3 pt-3 border-t border-border/50 flex flex-wrap gap-2 items-center">
+                            <span className="text-xs text-muted-foreground">Court:</span>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={20}
+                              placeholder="#"
+                              defaultValue={signup.courtNumber ?? ""}
+                              className="w-16 h-7 text-xs"
+                              onBlur={e => {
+                                const val = parseInt(e.target.value);
+                                if (!isNaN(val) && val !== signup.courtNumber) {
+                                  assignPartnerMutation.mutate({ signupId: signup.id, partnerId: signup.partnerId ?? null, courtNumber: val });
+                                }
+                              }}
+                            />
+                            {signup.status === 'pending' && signup.paymentMethod !== 'card' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs gap-1"
+                                onClick={() => markPaidMutation.mutate({ signupId: signup.id, paymentMethod: signup.paymentMethod as 'cash' | 'check' || 'cash' })}
+                                disabled={markPaidMutation.isPending}
+                              >
+                                <CheckCircle className="w-3 h-3" /> Mark Paid
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
+                              onClick={() => { if (confirm(`Cancel ${signup.playerName}'s signup?`)) cancelSignupMutation.mutate({ signupId: signup.id }); }}
+                              disabled={cancelSignupMutation.isPending}
+                            >
+                              <XCircle className="w-3 h-3" /> Cancel
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

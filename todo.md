@@ -612,3 +612,24 @@
 - [x] Add Bring a Friend / Sibling discount: $89/day for summer camp
 - [x] Fix all price references in Programs, Home, QuickBook, FAQ
 - [x] Show participant list on 105 Game session detail/booking page BEFORE booking (slot selection area)
+
+## Doubles League
+- [ ] Add doubles_league_sessions and doubles_league_signups tables to schema
+- [ ] Add backend procedures: list sessions, sign up, get signups, admin match-making
+- [ ] Build DoublesLeague public signup page at /doubles-league
+- [ ] Show who's signed up per session (first names)
+- [ ] Stripe payment ($15/session) on signup
+- [ ] Admin panel: view signups per session, assign doubles partners
+- [ ] Add Doubles League to main navigation
+- [ ] Generate recurring slots (Tue/Thu 5:30-7 PM, Sat 9-11 AM) for next 8 weeks
+
+## Doubles League Feature (Session — Jun 9, 2026)
+- [x] Database schema: doubles_league_sessions + doubles_league_signups tables (drizzle/schema.ts)
+- [x] Backend router: server/routers/doublesLeague.ts — listSessions, getSignups, signUp (Stripe + cash/check), generateSessions, adminListSessions, adminGetSignups, adminMarkPaid, adminCancelSignup, adminAssignPartner
+- [x] Stripe webhook handler: checkout.session.completed for doubles_league type
+- [x] Frontend: /doubles-league public page — hero, How It Works, sessions list, sign-up form, success screen
+- [x] Admin: Doubles League tab in AdminDashboard — session list, signup details, Mark Paid, Cancel, court assignment, Generate button
+- [x] Navigation: "Doubles League" added to Navbar
+- [x] Route: /doubles-league registered in App.tsx
+- [x] Initial sessions seeded: Tue/Thu 5:30–7 PM, Sat 9–11 AM through Aug 2026
+- [x] Date formatting fix: normalizeDate() handles MySQL Date objects returning as Date vs string

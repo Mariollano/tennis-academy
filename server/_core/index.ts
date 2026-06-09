@@ -13,7 +13,7 @@ import { serveStatic, setupVite } from "./vite";
 import Stripe from "stripe";
 import multer from "multer";
 import { getDb } from "../db";
-import { bookings, payments, programs, users } from "../../drizzle/schema";
+import { bookings, payments, programs, users, doublesLeagueSignups } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { notifyOwner } from "./notification";
 import { startReminderScheduler } from "../reminderScheduler";
@@ -89,6 +89,34 @@ async function startServer() {
     }
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // ── Doubles League payment ────────────────────────────────────────────
+      if (session.metadata?.type === "doubles_league") {
+        const signupId = session.metadata?.signup_id ? parseInt(session.metadata.signup_id) : null;
+        if (signupId) {
+          const db = await getDb();
+          if (db) {
+            await db.update(doublesLeagueSignups)
+              .set({ status: "paid", paidAt: new Date() })
+              .where(eq(doublesLeagueSignups.id, signupId));
+            console.log(`[Webhook] Doubles league signup ${signupId} marked as paid`);
+
+            // Notify Mario
+            try {
+              const playerName = session.metadata?.player_name || "Unknown";
+              const playerEmail = session.metadata?.player_email || "N/A";
+              const sessionDate = session.metadata?.session_date || "";
+              const amountDollars = ((session.amount_total || 0) / 100).toFixed(2);
+              await notifyOwner({
+                title: `💳 Doubles League Payment Confirmed`,
+                content: `Player: ${playerName}\nEmail: ${playerEmail}\nDate: ${sessionDate}\nAmount: $${amountDollars}`,
+              });
+            } catch {}
+          }
+        }
+        return res.json({ received: true });
+      }
+
       const bookingId = session.metadata?.booking_id ? parseInt(session.metadata.booking_id) : null;
       // user_id may be "guest" for unauthenticated bookings — resolve from booking record
       let userId = session.metadata?.user_id ? parseInt(session.metadata.user_id) : null;

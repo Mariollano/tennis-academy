@@ -33,6 +33,7 @@ import Announcements from "./pages/Announcements";
 import NewsletterArchive from "./pages/NewsletterArchive";
 import NewsletterView from "./pages/NewsletterView";
 import SpringSummerProgram from "./pages/SpringSummerProgram";
+import DoublesLeague from "./pages/DoublesLeague";
 
 // Scroll to top on every route change
 function ScrollToTop() {
@@ -84,6 +85,7 @@ function Router() {
           <Route path="/newsletter" component={NewsletterArchive} />
           <Route path="/newsletter/:slug" component={NewsletterView} />
           <Route path="/spring-summer" component={SpringSummerProgram} />
+          <Route path="/doubles-league" component={DoublesLeague} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />

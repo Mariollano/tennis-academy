@@ -12,6 +12,7 @@ const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFs
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/programs", label: "Programs" },
+  { href: "/doubles-league", label: "Doubles League" },
   { href: "/schedule", label: "My Schedule" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/social", label: "Media" },

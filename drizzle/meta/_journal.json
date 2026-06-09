@@ -141,6 +141,13 @@
       "when": 1773577854307,
       "tag": "0019_tranquil_next_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1781000573850,
+      "tag": "0020_opposite_radioactive_man",
+      "breakpoints": true
     }
   ]
 }
