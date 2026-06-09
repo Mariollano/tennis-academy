@@ -7,7 +7,7 @@ import {
   Calendar, MessageSquare, Play, Zap, Download,
   MapPin, Phone, Mail, ArrowRight, CheckCircle,
   Clock, DollarSign, Shield, Award, TrendingUp, Mic,
-  Lightbulb, RefreshCw
+  Lightbulb, RefreshCw, Swords
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -129,6 +129,16 @@ const programs = [
     href: "/mental-coaching",
     img: photos.highFive,
     color: "from-purple-600 to-violet-800",
+  },
+  {
+    icon: Swords,
+    title: "Doubles League",
+    desc: "Competitive doubles play — sign up solo, Coach Mario assigns your partner and sets the teams.",
+    price: "$15/session",
+    badge: "New",
+    href: "/doubles-league",
+    img: photos.smile,
+    color: "from-cyan-500 to-blue-700",
   },
 ];
 
