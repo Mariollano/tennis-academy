@@ -475,13 +475,7 @@ export default function Profile() {
                         ))}
                       </div>
                     )}
-                    {/* Total spent */}
-                    {totalSpent > 0 && (
-                      <div className="bg-white/10 rounded-xl p-3 mb-4 flex items-center justify-between">
-                        <span className="text-xs text-primary-foreground/60">Total Invested</span>
-                        <span className="font-extrabold text-accent text-lg" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>${(totalSpent / 100).toFixed(0)}</span>
-                      </div>
-                    )}
+                    {/* Total spent hidden — customers prefer not to see this */}
                     <Link href="/programs">
                       <button className="w-full py-2 rounded-xl bg-accent text-accent-foreground font-bold text-xs hover:brightness-105 transition-all">
                         Book Another Session
@@ -594,11 +588,7 @@ export default function Profile() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 ml-13 sm:ml-0">
-                          {(booking.totalAmountCents || 0) > 0 && (
-                            <span className="font-bold text-primary text-sm">
-                              ${((booking.totalAmountCents || 0) / 100).toFixed(0)}
-                            </span>
-                          )}
+                          {/* Per-booking amount hidden — customers prefer not to see this */}
                           <Badge className={`text-xs flex items-center gap-1 capitalize ${statusColors[booking.status] || "bg-muted text-muted-foreground"}`}>
                             {statusIcons[booking.status]}
                             {booking.status}
