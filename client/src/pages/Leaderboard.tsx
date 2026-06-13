@@ -145,6 +145,7 @@ export default function Leaderboard() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-foreground">{player.name}</span>
+                        <span className="text-base" title="Program member">❤️</span>
                         {user?.id === player.userId && (
                           <span className="text-xs bg-[#1a3a8f] text-white px-2 py-0.5 rounded-full">You</span>
                         )}

@@ -961,6 +961,7 @@ export default function BookingPage() {
                 <CheckCircle className="w-10 h-10 text-green-500" />
                 <div className="absolute inset-0 rounded-full border-4 border-green-200 animate-ping opacity-30" />
               </div>
+              <div className="text-4xl mb-2 animate-bounce">❤️</div>
               <h2 className="text-3xl font-extrabold text-foreground mb-2" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
                 {paymentStatus === "success" ? "YOU'RE BOOKED!" : (paymentMethod === "cash" || paymentMethod === "check") ? "SPOT RESERVED!" : "REQUEST SENT!"}
               </h2>
