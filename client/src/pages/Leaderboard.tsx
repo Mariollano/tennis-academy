@@ -204,6 +204,16 @@ export default function Leaderboard() {
             </Button>
           </Link>
         </div>
+
+        {/* Availability note */}
+        <div className="mt-6 flex items-start gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 text-sm">
+          <span className="text-xl shrink-0">💬</span>
+          <p className="text-amber-900 dark:text-amber-200 leading-relaxed">
+            <strong>Don't see availability?</strong> Sessions may show as full online, but additional spots are often available. Text Coach Mario directly at{" "}
+            <a href="sms:4019655873" className="font-bold underline underline-offset-2 hover:text-amber-700 transition-colors">(401) 965-5873</a>{" "}
+            and he'll get you in.
+          </p>
+        </div>
       </div>
     </div>
   );
