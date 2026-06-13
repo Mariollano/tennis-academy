@@ -59,9 +59,9 @@ function generateSessionDates(weeksAhead: number): Array<{ date: string; dayOfWe
   while (cursor <= end) {
     const dow = cursor.getDay(); // 0=Sun, 2=Tue, 4=Thu, 6=Sat
     if (dow === 2) {
-      sessions.push({ date: cursor.toISOString().slice(0, 10), dayOfWeek: "tuesday", startTime: "17:30:00", endTime: "19:00:00" });
+      sessions.push({ date: cursor.toISOString().slice(0, 10), dayOfWeek: "tuesday", startTime: "18:30:00", endTime: "20:00:00" });
     } else if (dow === 4) {
-      sessions.push({ date: cursor.toISOString().slice(0, 10), dayOfWeek: "thursday", startTime: "17:30:00", endTime: "19:00:00" });
+      sessions.push({ date: cursor.toISOString().slice(0, 10), dayOfWeek: "thursday", startTime: "18:30:00", endTime: "20:00:00" });
     } else if (dow === 6) {
       sessions.push({ date: cursor.toISOString().slice(0, 10), dayOfWeek: "saturday", startTime: "09:00:00", endTime: "11:00:00" });
     }

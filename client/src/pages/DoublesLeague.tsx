@@ -153,7 +153,7 @@ export default function DoublesLeague() {
           <div className="flex flex-wrap justify-center gap-4 text-sm">
             <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2">
               <Calendar className="w-4 h-4 text-[#ccff00]" />
-              <span>Tue &amp; Thu 5:30–7 PM · Sat 9–11 AM</span>
+              <span>Tue &amp; Thu 6:30–8 PM · Sat 9–11 AM</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2">
               <DollarSign className="w-4 h-4 text-[#ccff00]" />
