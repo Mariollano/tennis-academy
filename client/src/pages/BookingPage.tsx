@@ -632,6 +632,14 @@ function ClinicParticipantList({ slotId, preBooking }: { slotId: number; preBook
         <p className="text-xs text-muted-foreground/60 mt-3 text-center">
           First names only shown to protect privacy.
         </p>
+        <div className="mt-4 flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-xs">
+          <span className="text-base shrink-0">💬</span>
+          <p className="text-amber-900 dark:text-amber-200 leading-relaxed">
+            <strong>Session showing as full?</strong> More spots are often available — text Coach Mario at{" "}
+            <a href="sms:4019655873" className="font-bold underline underline-offset-2">(401) 965-5873</a>{" "}
+            and he'll get you in.
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
