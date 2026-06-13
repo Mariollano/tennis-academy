@@ -622,7 +622,7 @@ function ClinicParticipantList({ slotId, preBooking }: { slotId: number; preBook
                 <span className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold">
                   {p.firstName[0]?.toUpperCase()}
                 </span>
-                {p.firstName}{p.isMe ? ' (You)' : ''}
+                {p.firstName}{p.isMe ? ' (You)' : ''} ❤️
               </div>
             ))}
           </div>
