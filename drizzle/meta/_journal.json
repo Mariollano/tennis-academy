@@ -148,6 +148,13 @@
       "when": 1781000573850,
       "tag": "0020_opposite_radioactive_man",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1781787771842,
+      "tag": "0021_outstanding_carnage",
+      "breakpoints": true
     }
   ]
 }

@@ -80,6 +80,7 @@ export interface BookingConfirmationData {
   sessionTime?: string;
   pricingOption?: string;
   bookingId: number;
+  cancelLink?: string;
 }
 
 // ─── HTML helpers ──────────────────────────────────────────────────────────
@@ -168,6 +169,19 @@ function buildSummaryTable(data: BookingConfirmationData, statusHtml: string): s
     </table>`;
 }
 
+function buildCancelBlock(cancelLink?: string): string {
+  if (!cancelLink) return "";
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px;border-top:1px solid #eee;padding-top:16px;">
+    <tr>
+      <td style="font-size:13px;color:#888;text-align:center;">
+        Need to cancel? <a href="${cancelLink}" style="color:#dc2626;font-weight:bold;">Cancel this booking</a>
+        <br><span style="font-size:11px;">This link is unique to your booking. Refunds for card payments: contact Coach Mario.</span>
+      </td>
+    </tr>
+  </table>`;
+}
+
 const contactBlock = `
   <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #eee;padding-top:20px;margin-top:8px;">
     <tr>
@@ -196,7 +210,8 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
         Coach Mario will review your request and confirm your spot shortly.
         If you have any questions in the meantime, feel free to contact us directly.
       </p>
-      ${contactBlock}`;
+      ${contactBlock}
+      ${buildCancelBlock(data.cancelLink)}`;
 
     const text = `Hi ${data.toName || "there"},\n\nYour booking request has been received and is pending confirmation from Coach Mario.\n\nProgram: ${data.programLabel}\n${data.sessionDate ? `Date: ${data.sessionDate}\n` : ""}${data.sessionTime ? `Time: ${data.sessionTime}\n` : ""}Booking #: ${data.bookingId}\nStatus: Pending Confirmation\n\nYou will receive a separate email once your spot is confirmed.\n\nQuestions? Email ritennismario@gmail.com or call 401-965-5873.\n\n— RI Tennis Academy`;
 
@@ -306,7 +321,8 @@ export async function sendBookingReservedCash(data: BookingConfirmationData & { 
         Please arrive 5–10 minutes early and bring your racquet and water. If you need to cancel or reschedule,
         please contact Coach Mario at least 24 hours in advance.
       </p>
-      ${contactBlock}`;
+      ${contactBlock}
+      ${buildCancelBlock(data.cancelLink)}`;
 
     const text = `Hi ${data.toName || "there"},\n\nYour spot has been reserved with RI Tennis Academy!\n\nProgram: ${data.programLabel}\n${data.sessionDate ? `Date: ${data.sessionDate}\n` : ""}${data.sessionTime ? `Time: ${data.sessionTime}\n` : ""}Booking #: ${data.bookingId}\nStatus: Spot Reserved\nPayment: ${payLabel} due at lesson\n\nPlease arrive 5–10 minutes early. To cancel or reschedule, contact Coach Mario at least 24 hours in advance.\nQuestions? Email ritennismario@gmail.com or call 401-965-5873.\n\n— RI Tennis Academy`;
 
@@ -341,7 +357,8 @@ export async function sendBookingConfirmed(data: BookingConfirmationData): Promi
         Please arrive 5–10 minutes early and bring your racquet and water. If you need to reschedule or have any questions,
         contact Coach Mario directly.
       </p>
-      ${contactBlock}`;
+      ${contactBlock}
+      ${buildCancelBlock(data.cancelLink)}`;
 
     const text = `Hi ${data.toName || "there"},\n\nGreat news — Coach Mario has confirmed your booking!\n\nProgram: ${data.programLabel}\n${data.sessionDate ? `Date: ${data.sessionDate}\n` : ""}${data.sessionTime ? `Time: ${data.sessionTime}\n` : ""}Booking #: ${data.bookingId}\nStatus: Confirmed\n\nPlease arrive 5–10 minutes early. Questions? Email ritennismario@gmail.com or call 401-965-5873.\n\n— RI Tennis Academy`;
 

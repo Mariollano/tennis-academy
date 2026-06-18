@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { randomBytes } from "crypto";
 import { stripeRouter } from "./stripeRouter";
 import { promoCodeRouter } from "./promoCodeRouter";
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
@@ -236,6 +237,74 @@ export const appRouter = router({
             .set({ currentParticipants: sql`GREATEST(currentParticipants - 1, 0)` })
             .where(eq(scheduleSlots.id, booking.scheduleSlotId));
         }
+        return { success: true };
+      }),
+
+    // Public: cancel a booking by token (for guest bookers who got a cancel link in their email)
+    cancelByToken: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const [booking] = await db.select().from(bookings).where(eq(bookings.cancelToken, input.token)).limit(1);
+        if (!booking) throw new TRPCError({ code: "NOT_FOUND", message: "Invalid or expired cancellation link." });
+        if (booking.status === "cancelled") throw new TRPCError({ code: "BAD_REQUEST", message: "This booking has already been cancelled." });
+        if (booking.status === "completed") throw new TRPCError({ code: "BAD_REQUEST", message: "Completed bookings cannot be cancelled." });
+        await db.update(bookings).set({ status: "cancelled", updatedAt: new Date() }).where(eq(bookings.id, booking.id));
+        if (booking.scheduleSlotId) {
+          await db.update(scheduleSlots)
+            .set({ currentParticipants: sql`GREATEST(currentParticipants - 1, 0)` })
+            .where(eq(scheduleSlots.id, booking.scheduleSlotId));
+        }
+        // Fetch program name for the response
+        const [prog] = await db.select({ name: programs.name }).from(programs).where(eq(programs.id, booking.programId)).limit(1);
+        return { success: true, programName: prog?.name || "your booking" };
+      }),
+
+    // Public: look up booking info by token (for the cancel page to show details before confirming)
+    getByToken: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const rows = await db.select({
+          id: bookings.id,
+          status: bookings.status,
+          sessionDate: bookings.sessionDate,
+          sessionStartTime: bookings.sessionStartTime,
+          sessionEndTime: bookings.sessionEndTime,
+          programName: programs.name,
+        })
+          .from(bookings)
+          .leftJoin(programs, eq(bookings.programId, programs.id))
+          .where(eq(bookings.cancelToken, input.token))
+          .limit(1);
+        if (!rows[0]) throw new TRPCError({ code: "NOT_FOUND", message: "Invalid or expired cancellation link." });
+        const b = rows[0];
+        const sessionDate = b.sessionDate
+          ? new Date(b.sessionDate).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+          : undefined;
+        const sessionTime = b.sessionStartTime && b.sessionEndTime
+          ? `${formatTime12h(b.sessionStartTime)} – ${formatTime12h(b.sessionEndTime)}`
+          : undefined;
+        return { id: b.id, status: b.status, programName: b.programName, sessionDate, sessionTime };
+      }),
+
+    // Admin: hard-delete a booking record (for removing duplicate/test/guest entries)
+    deleteBooking: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const [existing] = await db.select().from(bookings).where(eq(bookings.id, input.id)).limit(1);
+        if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Booking not found." });
+        // Decrement slot counter if booking was active
+        if (existing.scheduleSlotId && ["pending", "confirmed"].includes(existing.status)) {
+          await db.update(scheduleSlots)
+            .set({ currentParticipants: sql`GREATEST(currentParticipants - 1, 0)`, updatedAt: new Date() })
+            .where(eq(scheduleSlots.id, existing.scheduleSlotId));
+        }
+        await db.delete(bookings).where(eq(bookings.id, input.id));
         return { success: true };
       }),
 
@@ -494,8 +563,16 @@ export const appRouter = router({
           paymentMethod: input.paymentMethod,
           // Cash/check bookings are immediately confirmed (spot reserved); card bookings stay pending until payment
           status: (input.paymentMethod === "cash" || input.paymentMethod === "check") ? "confirmed" : "pending",
+          cancelToken: randomBytes(32).toString("hex"),
         });
         const newBookingId = Number((bookingInsertResult as any).insertId) || 0;
+        // Fetch the generated cancelToken so we can include it in emails
+        const newBookingRow = newBookingId
+          ? await db.select({ cancelToken: bookings.cancelToken }).from(bookings).where(eq(bookings.id, newBookingId)).limit(1).then(r => r[0])
+          : null;
+        const cancelLink = newBookingRow?.cancelToken
+          ? `https://tennispromario.com/cancel-booking?token=${newBookingRow.cancelToken}`
+          : undefined;
 
         // Increment participant count on the slot
         if (input.scheduleSlotId) {
@@ -542,6 +619,7 @@ export const appRouter = router({
               sessionTime: timeStr,
               bookingId: newBookingId,
               paymentMethod: input.paymentMethod as "cash" | "check",
+              cancelLink,
             }).catch(() => {});
           } else {
             sendBookingConfirmation({
@@ -551,6 +629,7 @@ export const appRouter = router({
               sessionDate: dateStr,
               sessionTime: timeStr,
               bookingId: newBookingId,
+              cancelLink,
             }).catch(() => {}); // non-blocking
           }
         }

@@ -115,6 +115,7 @@ export const bookings = mysqlTable("bookings", {
   paymentMethod: mysqlEnum("paymentMethod", ["card", "cash", "check"]).default("card"),
   paidAt: timestamp("paidAt"),
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  cancelToken: varchar("cancelToken", { length: 64 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

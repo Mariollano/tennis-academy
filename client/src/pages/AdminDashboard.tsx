@@ -351,6 +351,11 @@ export default function AdminDashboard() {
     onError: () => toast.error("Failed to confirm booking."),
   });
 
+  const deleteBookingMutation = trpc.user.deleteBooking.useMutation({
+    onSuccess: () => { toast.success("Booking deleted permanently."); refetchBookings(); },
+    onError: () => toast.error("Failed to delete booking."),
+  });
+
   const cancelNowMutation = trpc.booking.cancelNow.useMutation({
     onSuccess: () => { toast.success("Booking cancelled. Student notified via email & SMS."); refetchBookings(); },
     onError: () => toast.error("Failed to cancel booking."),
@@ -733,6 +738,12 @@ export default function AdminDashboard() {
                                   disabled={cancelNowMutation.isPending}>
                                   <XCircle className="w-3 h-3 mr-1" /> Cancel
                                 </Button>
+                                <Button size="sm" variant="outline" className="border-red-500 text-red-700 hover:bg-red-100 h-7 text-xs px-2"
+                                  onClick={() => { if (confirm("Permanently delete this booking? This cannot be undone.")) deleteBookingMutation.mutate({ id: item.booking.id }); }}
+                                  disabled={deleteBookingMutation.isPending}
+                                  title="Permanently delete this booking">
+                                  <Trash2 className="w-3 h-3 mr-1" /> Delete
+                                </Button>
                               </>
                             )}
                             {item.booking.status === "confirmed" && (
@@ -751,6 +762,12 @@ export default function AdminDashboard() {
                                   onClick={() => cancelNowMutation.mutate({ id: item.booking.id })}
                                   disabled={cancelNowMutation.isPending}>
                                   <XCircle className="w-3 h-3 mr-1" /> Cancel
+                                </Button>
+                                <Button size="sm" variant="outline" className="border-red-500 text-red-700 hover:bg-red-100 h-7 text-xs px-2"
+                                  onClick={() => { if (confirm("Permanently delete this booking? This cannot be undone.")) deleteBookingMutation.mutate({ id: item.booking.id }); }}
+                                  disabled={deleteBookingMutation.isPending}
+                                  title="Permanently delete this booking">
+                                  <Trash2 className="w-3 h-3 mr-1" /> Delete
                                 </Button>
                               </>
                             )}
