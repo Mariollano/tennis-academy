@@ -112,14 +112,14 @@ const PROGRAM_CONFIG: Record<string, {
     title: "Junior Program — Daily",
     type: "junior_daily",
     description: "Single daily junior session (Fall/Spring).",
-    pricing: [{ label: "$80 per session (3:30–6:30 PM)", value: "daily", cents: 8000 }],
+    pricing: [{ label: "$75 per session (3:30–6:30 PM)", value: "daily", cents: 7500 }],
     timeInfo: "3:30 PM – 6:30 PM",
   },
   junior_weekly: {
     title: "Junior Program — Weekly Package",
     type: "junior_weekly",
     description: "Full week junior program (5 sessions, Fall/Spring).",
-    pricing: [{ label: "$350 per week (5 sessions)", value: "weekly", cents: 35000 }],
+    pricing: [{ label: "$375 per week (5 sessions)", value: "weekly", cents: 37500 }],
     timeInfo: "3:30 PM – 6:30 PM, Monday–Friday",
   },
   summer_camp_daily: {
@@ -133,12 +133,12 @@ const PROGRAM_CONFIG: Record<string, {
     timeInfo: "9:00 AM – 2:00 PM (After Camp: 2:30–5 PM)",
   },
   summer_camp_weekly: {
-    title: "Summer Camp — Daily",
-    type: "summer_camp_daily",
-    description: "Single day summer camp session. Half-day 9 AM–2 PM. Add After Camp for full day through 5 PM.",
+    title: "Summer Camp — Weekly Package",
+    type: "summer_camp_weekly",
+    description: "Full week summer camp. Half-day 9 AM–2 PM all week. Add After Camp for full day through 5 PM.",
     pricing: [
-      { label: "$99 per day (9 AM–2 PM)", value: "daily", cents: 9900 },
-      { label: "Bring a Friend / Sibling — $89 per day (9 AM–2 PM)", value: "friend_sibling", cents: 8900 },
+      { label: "$495 per week (9 AM–2 PM)", value: "weekly_half", cents: 49500 },
+      { label: "$625 per week (9 AM–5 PM, with After Camp)", value: "weekly_full", cents: 62500 },
     ],
     timeInfo: "9:00 AM – 2:00 PM (After Camp: 2:30–5 PM)",
   },
@@ -1511,7 +1511,7 @@ export default function BookingPage() {
                     {programType === "junior_daily" && (
                       <div>
                         <Label className="text-sm font-semibold">Select Your Days</Label>
-                        <p className="text-xs text-muted-foreground mb-3">Tap each day you want to attend ($80 per day). You can pick up to 5 days.</p>
+                        <p className="text-xs text-muted-foreground mb-3">Tap each day you want to attend ($75 per day). You can pick up to 5 days.</p>
                         <JuniorDatePicker
                           selectedDates={juniorSelectedDates}
                           onChange={setJuniorSelectedDates}
@@ -1528,7 +1528,7 @@ export default function BookingPage() {
                               ))}
                             </div>
                             <p className="text-xs text-green-700 font-medium">
-                              {juniorSelectedDates.length} day{juniorSelectedDates.length !== 1 ? "s" : ""} × $80 = <strong>${juniorSelectedDates.length * 80}</strong>
+                              {juniorSelectedDates.length} day{juniorSelectedDates.length !== 1 ? "s" : ""} × $75 = <strong>${juniorSelectedDates.length * 75}</strong>
                             </p>
                           </div>
                         )}

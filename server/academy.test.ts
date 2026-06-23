@@ -278,24 +278,32 @@ describe("Pricing constants", () => {
     expect(3500).toBe(3500); // $35 per 1.5-hour session
   });
 
-  it("Junior daily session is priced at $80 (8000 cents)", () => {
-    expect(8000).toBe(8000); // $80 per session
+  it("Junior daily session is priced at $75 (7500 cents)", () => {
+    expect(7500).toBe(7500); // $75 per session
   });
 
-  it("Junior weekly package is priced at $350 (35000 cents)", () => {
-    expect(35000).toBe(35000); // $350 per week
+  it("Junior weekly package is priced at $375 (37500 cents)", () => {
+    expect(37500).toBe(37500); // $375 per week ($75 x 5)
   });
 
-  it("Summer camp daily is priced at $90 (9000 cents)", () => {
-    expect(9000).toBe(9000); // $90 per day
+  it("Summer camp half-day daily is priced at $99 (9900 cents)", () => {
+    expect(9900).toBe(9900); // $99 per day (9AM-2PM)
   });
 
-  it("Summer camp weekly is priced at $420 (42000 cents)", () => {
-    expect(42000).toBe(42000); // $420 per week
+  it("Summer camp half-day weekly is priced at $495 (49500 cents)", () => {
+    expect(49500).toBe(49500); // $495 per week
   });
 
-  it("After camp add-on is $20 (2000 cents)", () => {
-    expect(2000).toBe(2000); // +$20 per day
+  it("Summer camp full-day daily is priced at $125 (12500 cents)", () => {
+    expect(12500).toBe(12500); // $125 per day (9AM-5PM)
+  });
+
+  it("Summer camp full-day weekly is priced at $625 (62500 cents)", () => {
+    expect(62500).toBe(62500); // $625 per week
+  });
+
+  it("After camp add-on is $26 (2600 cents)", () => {
+    expect(2600).toBe(2600); // +$26 per day
   });
 
   it("Tournament attendance coaching rate is $50/hr (5000 cents)", () => {

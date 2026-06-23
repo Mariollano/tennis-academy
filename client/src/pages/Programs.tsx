@@ -68,8 +68,8 @@ const programs = [
     photoAlt: "Junior player forehand — junior development program",
     description: "Fall and Spring junior development programs running 3:30–6:30 PM. Choose between daily sessions or commit to a full week package for the best value.",
     pricing: [
-      { label: "Daily Session", price: "$80" },
-      { label: "Weekly Package (5 days)", price: "$350" },
+      { label: "Daily Session", price: "$75" },
+      { label: "Weekly Package (5 days)", price: "$375" },
     ],
     highlights: [
       "Fall & Spring seasons",
@@ -349,7 +349,7 @@ export default function Programs() {
               { label: "Private Lesson", href: "/book/private_lesson", price: "$125/hr" },
               { label: "105 Clinic", href: "/book/clinic_105", price: "$35" },
               { label: "Doubles League", href: "/doubles-league", price: "$15" },
-              { label: "Junior Program", href: "/book/junior_daily", price: "$80/day" },
+              { label: "Junior Program", href: "/book/junior_daily", price: "$75/day" },
               { label: "Summer Camp", href: "/book/summer_camp_daily", price: "$99/day" },
             ].map(({ label, href, price }) => (
               <Link key={href} href={href}>
@@ -423,7 +423,7 @@ export default function Programs() {
                   { name: "Private Lesson", price: "$125/hr", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/book/private_lesson", popular: false },
                   { name: "105 Game Clinic", price: "$35/session", who: "Adults", schedule: "Mon/Wed/Fri/Sun 9–10:30 AM", size: "Up to 24", href: "/book/clinic_105", popular: true },
                   { name: "Doubles League", price: "$15/session", who: "All levels", schedule: "Tue/Thu 5:30–7 PM · Sat 9–11 AM", size: "Unlimited", href: "/doubles-league", popular: true },
-                  { name: "Junior Program", price: "$80/day · $350/wk", who: "Juniors", schedule: "3:30–6:30 PM", size: "Small group", href: "/book/junior_daily", popular: false },
+                  { name: "Junior Program", price: "$75/day · $375/wk", who: "Juniors", schedule: "3:30–6:30 PM", size: "Small group", href: "/book/junior_daily", popular: false },
                   { name: "Summer Camp", price: "$99/day · $125 full day", who: "All ages", schedule: "9 AM–2 PM daily", size: "Group", href: "/book/summer_camp_daily", popular: false },
                   { name: "Mental Coaching", price: "Contact Mario", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/mental-coaching", popular: false },
                 ].map((row, i) => (

@@ -65,8 +65,8 @@ function buildNewsletterHtml(nl: {
           <tbody>
             <tr style="background:rgba(255,255,255,0.05);"><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#F4F6F0;">Private Lesson</td><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#8A9BAD;">By appointment</td><td style="padding:8px 12px;border-bottom:1px solid #253545;text-align:right;color:#F4F6F0;">$125/hr</td></tr>
             <tr><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#F4F6F0;">105 Game Clinic</td><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#8A9BAD;">Mon/Wed/Fri/Sun</td><td style="padding:8px 12px;border-bottom:1px solid #253545;text-align:right;color:#F4F6F0;">$35/1.5hr</td></tr>
-            <tr style="background:rgba(255,255,255,0.05);"><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#F4F6F0;">Junior Program</td><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#8A9BAD;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #253545;text-align:right;color:#F4F6F0;">$80/day · $350/wk</td></tr>
-            <tr><td style="padding:8px 12px;color:#F4F6F0;">Summer Camp</td><td style="padding:8px 12px;color:#8A9BAD;">Mon–Fri, 9 AM–2 PM</td><td style="padding:8px 12px;text-align:right;color:#F4F6F0;">$90/day · $420/wk</td></tr>
+            <tr style="background:rgba(255,255,255,0.05);"><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#F4F6F0;">Junior Program</td><td style="padding:8px 12px;border-bottom:1px solid #253545;color:#8A9BAD;">Mon–Fri, 3:30–6:30 PM</td><td style="padding:8px 12px;border-bottom:1px solid #253545;text-align:right;color:#F4F6F0;">$75/day · $375/wk</td></tr>
+            <tr><td style="padding:8px 12px;color:#F4F6F0;">Summer Camp</td><td style="padding:8px 12px;color:#8A9BAD;">Mon–Fri, 9 AM–2 PM (half-day)</td><td style="padding:8px 12px;text-align:right;color:#F4F6F0;">$99/day · $495/wk</td></tr>
           </tbody>
         </table>
       </td></tr>`

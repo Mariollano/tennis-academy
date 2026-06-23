@@ -30,8 +30,8 @@ function generateGiftCode(): string {
 const GIFT_PROGRAMS = [
   { type: "private_lesson", label: "1 Private Lesson (1 hour)", amountInCents: 12000 },
   { type: "clinic_105", label: "1 x 105 Game Clinic Session", amountInCents: 3500 },
-  { type: "junior_daily", label: "1 Junior Program Day", amountInCents: 8000 },
-  { type: "summer_camp_daily", label: "1 Summer Camp Day", amountInCents: 9000 },
+  { type: "junior_daily", label: "1 Junior Program Day", amountInCents: 7500 },
+  { type: "summer_camp_daily", label: "1 Summer Camp Day (half-day)", amountInCents: 9900 },
 ];
 
 // Send gift card email to recipient
