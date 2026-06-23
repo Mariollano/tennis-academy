@@ -33,6 +33,7 @@ import Announcements from "./pages/Announcements";
 import NewsletterArchive from "./pages/NewsletterArchive";
 import NewsletterView from "./pages/NewsletterView";
 import SpringSummerProgram from "./pages/SpringSummerProgram";
+import SummerCamp from "./pages/SummerCamp";
 import DoublesLeague from "./pages/DoublesLeague";
 import CancelBooking from "./pages/CancelBooking";
 
@@ -60,7 +61,7 @@ function ReferralCapture() {
 
 function Router() {
   const [location] = useLocation();
-  const isLandingPage = location === "/spring-summer";
+  const isLandingPage = location === "/spring-summer" || location === "/summer-camp";
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {!isLandingPage && <Navbar />}
@@ -86,6 +87,7 @@ function Router() {
           <Route path="/newsletter" component={NewsletterArchive} />
           <Route path="/newsletter/:slug" component={NewsletterView} />
           <Route path="/spring-summer" component={SpringSummerProgram} />
+          <Route path="/summer-camp" component={SummerCamp} />
           <Route path="/doubles-league" component={DoublesLeague} />
           <Route path="/cancel-booking" component={CancelBooking} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>

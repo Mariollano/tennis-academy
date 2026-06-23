@@ -108,6 +108,7 @@ const programs = [
     ],
     bookHref: "/book/summer_camp_daily",
     bookLabel: "Book Summer Camp",
+    learnMoreHref: "/summer-camp",
     popular: false,
     bestValue: true,
     note: "Full day (9 AM–5 PM) = $99 + $26 After Camp add-on = $125 total.",
@@ -311,6 +312,13 @@ function ProgramCard({ program }: { program: typeof programs[0] }) {
             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </Link>
+        {(program as any).learnMoreHref && (
+          <Link href={(program as any).learnMoreHref}>
+            <Button variant="outline" className="w-full mt-2 rounded-xl font-semibold">
+              Learn More
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   );
