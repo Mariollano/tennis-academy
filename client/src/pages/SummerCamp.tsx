@@ -330,12 +330,20 @@ export default function SummerCamp() {
                   Just want to come for an hour? No problem. <strong className="text-white">Text Coach Mario at (401) 965-5873</strong> — preferably the day before — and he'll get you set up. No registration, no commitment.
                 </p>
               </div>
-              <a
-                href="sms:4019655873"
-                className="flex-shrink-0 bg-[#f59e0b] hover:bg-[#d97706] text-[#0a2240] font-black px-6 py-3 rounded-xl transition-colors text-sm whitespace-nowrap"
-              >
-                📱 Text to Book
-              </a>
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                <a
+                  href="sms:4019655873"
+                  className="bg-[#f59e0b] hover:bg-[#d97706] text-[#0a2240] font-black px-6 py-3 rounded-xl transition-colors text-sm whitespace-nowrap text-center"
+                >
+                  📱 Text to Book
+                </a>
+                <a
+                  href="sms:4019655873"
+                  className="bg-white/10 hover:bg-white/20 border border-[#f59e0b]/50 text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm whitespace-nowrap text-center"
+                >
+                  ⏱️ Book by the Hour
+                </a>
+              </div>
             </div>
           </div>
 
@@ -352,6 +360,34 @@ export default function SummerCamp() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Flexibility Banner ──────────────────────────────────────── */}
+      <section
+        className="py-14 relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #92400e 100%)' }}
+      >
+        <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-white/5" />
+        <div className="absolute -bottom-10 -right-10 w-56 h-56 rounded-full bg-white/5" />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
+          <p className="text-white/80 text-sm font-bold uppercase tracking-[0.25em] mb-3">Our Promise to You</p>
+          <h2
+            className="font-black text-white leading-tight mb-4"
+            style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}
+          >
+            We Are As Flexible As You Want To Be.
+          </h2>
+          <p className="text-white/90 text-lg sm:text-xl font-semibold mb-8">
+            Book Anytime. Any Day. As Many Hours As You Want.
+          </p>
+          <a
+            href="sms:4019655873"
+            className="inline-flex items-center gap-2 bg-[#0a2240] hover:bg-[#0d2d55] text-white font-black px-8 py-4 rounded-full text-base transition-all hover:scale-105 shadow-xl"
+          >
+            📱 Text Mario — (401) 965-5873
+          </a>
+          <p className="text-white/70 text-sm mt-4">Preferably the day before — no registration, no commitment.</p>
         </div>
       </section>
 
