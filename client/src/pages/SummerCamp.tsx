@@ -342,6 +342,29 @@ export default function SummerCamp() {
         </div>
       </section>
 
+      {/* ── How to Book callout ─────────────────────────────────── */}
+      <section className="py-12 bg-white border-y border-gray-100">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="bg-[#0a2240] rounded-2xl p-8 flex flex-col sm:flex-row items-center gap-6 shadow-xl">
+            <div className="w-16 h-16 rounded-full bg-[#4a9c5d]/20 flex items-center justify-center flex-shrink-0">
+              <Phone className="w-8 h-8 text-[#4a9c5d]" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h3 className="text-white font-black text-xl mb-1">Want to Come? Just Text Mario!</h3>
+              <p className="text-white/70 text-sm leading-relaxed">
+                You can book by the hour, by the day, or by the week. The easiest way is to <strong className="text-white">text Coach Mario the day before</strong> you plan to attend and he’ll get you set up.
+              </p>
+            </div>
+            <a
+              href="sms:4019655873"
+              className="flex-shrink-0 bg-[#4a9c5d] hover:bg-[#3d8a50] text-white font-bold px-6 py-3 rounded-xl transition-colors text-center"
+            >
+              📱 Text (401) 965-5873
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── FAQ ────────────────────────────────────────────────────── */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-4">
@@ -362,7 +385,15 @@ export default function SummerCamp() {
               },
               {
                 q: "Can I book just one or two days?",
-                a: "Absolutely! You can book individual days at $99/day (half-day) or $125/day (full-day). Weekly packages offer savings at $495/week and $625/week respectively.",
+                a: "Absolutely! You can book individual days at $99/day (half-day) or $125/day (full-day). Weekly packages offer savings at $495/week and $625/week respectively. You can also book by the hour — no need to commit to a full day. Simply text Coach Mario at (401) 965-5873, preferably the day before, and he’ll get you set up for however long works for you.",
+              },
+              {
+                q: "Can I book by the hour?",
+                a: "Yes! If you only want to come for an hour or two, that’s totally fine. Simply text Coach Mario at (401) 965-5873 — preferably the day before — and he’ll get you set up. No need to book a full day if you just want a quick session.",
+              },
+              {
+                q: "How do I let Coach Mario know I’m coming?",
+                a: "The easiest way is to text Coach Mario at (401) 965-5873, preferably the day before you plan to attend. He’ll confirm your spot and let you know if there’s anything you need to bring or know. You can also book online using the Book Now button above.",
               },
               {
                 q: "What's the difference between half-day and full-day?",
@@ -370,7 +401,7 @@ export default function SummerCamp() {
               },
               {
                 q: "How do I register?",
-                a: "Click the Book Now button above to reserve your spot online. Payment is processed securely via Stripe, or you can pay by cash/check at the court.",
+                a: "Text Coach Mario at (401) 965-5873 (preferably the day before) or click the Book Now button above to reserve your spot online. Payment is processed securely via Stripe, or you can pay by cash/check at the court.",
               },
             ].map(({ q, a }) => (
               <details key={q} className="group bg-white rounded-xl border border-gray-100 shadow-sm">

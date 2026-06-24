@@ -462,6 +462,21 @@ export default function Home() {
               </Link>
 
               {/* Voice Button hidden — coming soon */}
+
+              {/* 2026 Summer Program — 3D floating yellow button */}
+              <Link href="/summer-camp">
+                <button
+                  className="relative inline-flex items-center gap-2 font-black text-[#0a2240] px-7 py-3.5 rounded-full text-sm uppercase tracking-wide transition-all duration-150 hover:scale-105 active:scale-95 active:translate-y-0.5"
+                  style={{
+                    background: 'linear-gradient(180deg, #ffe066 0%, #f59e0b 60%, #d97706 100%)',
+                    boxShadow: '0 6px 0 #92400e, 0 8px 20px rgba(245,158,11,0.55), inset 0 1px 0 rgba(255,255,255,0.45)',
+                    textShadow: '0 1px 0 rgba(255,255,255,0.4)',
+                    animation: 'floatBounce 3s ease-in-out infinite',
+                  }}
+                >
+                  ☀️ 2026 Summer Program
+                </button>
+              </Link>
             </div>
 
             {/* Trust indicators */}
