@@ -315,6 +315,30 @@ export default function SummerCamp() {
             ))}
           </div>
 
+          {/* Hourly option — prominent callout */}
+          <div className="max-w-3xl mx-auto mb-10">
+            <div className="rounded-2xl border-2 border-[#f59e0b] bg-[#f59e0b]/10 p-6 flex flex-col sm:flex-row items-center gap-5">
+              <div className="flex-shrink-0 w-16 h-16 rounded-full bg-[#f59e0b]/20 flex items-center justify-center">
+                <Clock className="w-8 h-8 text-[#f59e0b]" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start mb-1">
+                  <span className="text-[#f59e0b] font-black text-2xl">$30 / hour</span>
+                  <span className="bg-[#f59e0b] text-[#0a2240] text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Drop-In</span>
+                </div>
+                <p className="text-white/80 text-sm leading-relaxed">
+                  Just want to come for an hour? No problem. <strong className="text-white">Text Coach Mario at (401) 965-5873</strong> — preferably the day before — and he'll get you set up. No registration, no commitment.
+                </p>
+              </div>
+              <a
+                href="sms:4019655873"
+                className="flex-shrink-0 bg-[#f59e0b] hover:bg-[#d97706] text-[#0a2240] font-black px-6 py-3 rounded-xl transition-colors text-sm whitespace-nowrap"
+              >
+                📱 Text to Book
+              </a>
+            </div>
+          </div>
+
           {/* Extra info */}
           <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-center">
             {[
@@ -385,11 +409,11 @@ export default function SummerCamp() {
               },
               {
                 q: "Can I book just one or two days?",
-                a: "Absolutely! You can book individual days at $99/day (half-day) or $125/day (full-day). Weekly packages offer savings at $495/week and $625/week respectively. You can also book by the hour — no need to commit to a full day. Simply text Coach Mario at (401) 965-5873, preferably the day before, and he’ll get you set up for however long works for you.",
+                a: "Absolutely! You can book by the hour ($30/hour), by the day ($99 half-day · $125 full-day), or by the week ($495 · $625). Just text Coach Mario at (401) 965-5873, preferably the day before, and he'll get you set up for however long works for you.",
               },
               {
                 q: "Can I book by the hour?",
-                a: "Yes! If you only want to come for an hour or two, that’s totally fine. Simply text Coach Mario at (401) 965-5873 — preferably the day before — and he’ll get you set up. No need to book a full day if you just want a quick session.",
+                a: "Yes! Drop-in for just $30/hour — no need to book a full day. Simply text Coach Mario at (401) 965-5873, preferably the day before, and he'll confirm your spot.",
               },
               {
                 q: "How do I let Coach Mario know I’m coming?",
