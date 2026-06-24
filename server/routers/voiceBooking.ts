@@ -128,7 +128,7 @@ Today's date is ${todayStr}.
 Programs available:
 - private_lesson: Private 1-on-1 lesson with Coach Mario ($125/hr)
 - clinic_105: 105 Game Adult Clinic (Mon/Wed/Fri/Sun, $35/1.5hr)
-- junior: Junior Program (Mon-Fri 3:30-6:30 PM, $75/day)
+- junior: Junior Program (Mon-Fri 9AM-2PM half-day $99/day, full-day 9AM-5PM $125/day)
 - summer_camp: Summer Camp (Mon-Fri 9AM-2PM half-day $99/day, full-day 9AM-5PM $125/day)
 - mental_coaching: Mental Coaching session
 - tournament: Tournament Attendance
@@ -458,9 +458,9 @@ If the request is unclear, set understood=false.`,
       const PRICE_MAP: Record<string, number> = {
         private_lesson: 12000,
         clinic_105: 3500,
-        junior_daily: 7500,
-        junior_weekly: 37500,
-        junior: 7500,
+        junior_daily: 9900,
+        junior_weekly: 49500,
+        junior: 9900,
         summer_camp_daily: 9900,
         summer_camp_weekly: 49500,
         summer_camp: 9900,

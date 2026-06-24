@@ -278,12 +278,20 @@ describe("Pricing constants", () => {
     expect(3500).toBe(3500); // $35 per 1.5-hour session
   });
 
-  it("Junior daily session is priced at $75 (7500 cents)", () => {
-    expect(7500).toBe(7500); // $75 per session
+  it("Junior daily half-day session is priced at $99 (9900 cents)", () => {
+    expect(9900).toBe(9900); // $99 per half-day session (9 AM–2 PM)
   });
 
-  it("Junior weekly package is priced at $375 (37500 cents)", () => {
-    expect(37500).toBe(37500); // $375 per week ($75 x 5)
+  it("Junior daily full-day session is priced at $125 (12500 cents)", () => {
+    expect(12500).toBe(12500); // $125 per full-day session (9 AM–5 PM)
+  });
+
+  it("Junior weekly half-day package is priced at $495 (49500 cents)", () => {
+    expect(49500).toBe(49500); // $495 per week half-day
+  });
+
+  it("Junior weekly full-day package is priced at $625 (62500 cents)", () => {
+    expect(62500).toBe(62500); // $625 per week full-day
   });
 
   it("Summer camp half-day daily is priced at $99 (9900 cents)", () => {

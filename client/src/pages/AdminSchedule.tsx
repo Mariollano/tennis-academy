@@ -507,7 +507,7 @@ function GenerateJuniorDialog({ onClose, onRefetch }: { onClose: () => void; onR
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Generate Junior Program Sessions</DialogTitle></DialogHeader>
-        <p className="text-sm text-muted-foreground">Creates sessions for <strong>Mon–Fri, 3:30–6:30 PM</strong> in the selected date range.</p>
+        <p className="text-sm text-muted-foreground">Creates sessions for <strong>Mon–Fri, 9 AM–2 PM (half-day) or 9 AM–5 PM (full day)</strong> in the selected date range.</p>
         <div className="space-y-3">
           <div>
             <Label>Program</Label>
