@@ -502,20 +502,24 @@ function AvailabilityPanelInner({
                               )}
                             </button>
                             {isFull && (
-                              <div className="mt-2 rounded-xl border-2 border-orange-400 bg-orange-50 dark:bg-orange-950/30 dark:border-orange-500 p-4 text-center space-y-1.5">
-                                <p className="text-orange-700 dark:text-orange-300 font-bold text-sm">
-                                  🎾 Session Full — 8/8 spots taken.
-                                </p>
-                                <p className="text-orange-600 dark:text-orange-400 text-sm leading-snug">
-                                  Still want to play?{" "}
-                                  <a
-                                    href="sms:+14019655873"
-                                    className="font-bold underline underline-offset-2 hover:text-orange-800 dark:hover:text-orange-200"
-                                  >
-                                    Text Coach Mario at (401) 965-5873
-                                  </a>{" "}
-                                  — he occasionally opens up extra spots for motivated players!
-                                </p>
+                              <div className="mt-2 space-y-2">
+                                <div className="rounded-xl border-2 border-orange-400 bg-orange-50 dark:bg-orange-950/30 dark:border-orange-500 p-4 text-center space-y-1.5">
+                                  <p className="text-orange-700 dark:text-orange-300 font-bold text-sm">
+                                    🎾 Session Full — {slot.maxParticipants}/{slot.maxParticipants} spots taken.
+                                  </p>
+                                  <p className="text-orange-600 dark:text-orange-400 text-sm leading-snug">
+                                    Still want to play?{" "}
+                                    <a
+                                      href="sms:+14019655873"
+                                      className="font-bold underline underline-offset-2 hover:text-orange-800 dark:hover:text-orange-200"
+                                    >
+                                      Text Coach Mario at (401) 965-5873
+                                    </a>{" "}
+                                    — he occasionally opens up extra spots for motivated players!
+                                  </p>
+                                </div>
+                                {/* Show who is in the full session */}
+                                <ClinicParticipantList slotId={slot.id} preBooking />
                               </div>
                             )}
                           </div>
