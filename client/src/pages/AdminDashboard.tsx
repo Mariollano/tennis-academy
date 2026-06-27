@@ -53,6 +53,12 @@ function TodayTab({ markPaidMutation, refetchBookings }: { markPaidMutation: any
     { refetchInterval: 30000 }
   );
 
+  // Fetch today's slot roster to show enrolled/capacity counts
+  const { data: todaySlots } = trpc.schedule.getRosterSummary.useQuery(
+    { from: todayStr, to: todayStr },
+    { refetchInterval: 30000 }
+  );
+
   const todayBookings = (bookings || []).filter(b => {
     const d = b.booking.sessionDate;
     if (!d) return false;
@@ -98,6 +104,45 @@ function TodayTab({ markPaidMutation, refetchBookings }: { markPaidMutation: any
           </CardContent>
         </Card>
       </div>
+
+      {/* Today's session capacity overview */}
+      {todaySlots && todaySlots.length > 0 && (
+        <Card className="border-l-4 border-l-blue-500">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              <Users className="w-4 h-4" /> Today's Sessions — Sign-up Count
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              {todaySlots.map(slot => {
+                const pct = slot.maxParticipants > 0 ? (slot.enrolled / slot.maxParticipants) * 100 : 0;
+                const isFull = slot.enrolled >= slot.maxParticipants;
+                const barColor = isFull ? "bg-red-500" : pct >= 75 ? "bg-amber-500" : "bg-green-500";
+                const startFmt = slot.startTime ? slot.startTime.slice(0, 5) : "";
+                const endFmt = slot.endTime ? slot.endTime.slice(0, 5) : "";
+                return (
+                  <div key={slot.slotId} className="flex items-center gap-3">
+                    <div className="w-28 shrink-0">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${PROGRAM_COLORS[slot.programType || ""] || "bg-gray-100 text-gray-800"}`}>
+                        {PROGRAM_LABELS[slot.programType || ""] || slot.programName || slot.programType}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground w-24 shrink-0">{startFmt} – {endFmt}</div>
+                    <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                      <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                    </div>
+                    <div className={`text-sm font-bold shrink-0 w-16 text-right ${isFull ? "text-red-600" : "text-foreground"}`}>
+                      {slot.enrolled} / {slot.maxParticipants}
+                      {isFull && <span className="ml-1 text-xs font-normal text-red-500">FULL</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {todayBookings.length === 0 ? (
         <Card>
