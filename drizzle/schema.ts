@@ -316,6 +316,7 @@ export const scheduledReminders = mysqlTable("scheduled_reminders", {
   bookingId: int("bookingId").notNull(),
   userId: int("userId").notNull(),
   sendAt: timestamp("sendAt").notNull(), // UTC time to fire the reminder
+  reminderType: mysqlEnum("reminderType", ["pre_session", "payment_reminder"]).notNull().default("pre_session"),
   status: mysqlEnum("status", ["pending", "sent", "failed", "cancelled"]).notNull().default("pending"),
   emailSent: boolean("emailSent").notNull().default(false),
   smsSent: boolean("smsSent").notNull().default(false),

@@ -673,6 +673,33 @@ export const appRouter = router({
         // Check if this is the user's first booking and reward the referrer if applicable
         maybeRewardReferrer(resolvedUserId).catch(() => {});
 
+        // ── Post-session payment reminder for 105 Clinic (cash/check bookings) ──
+        // Schedule a reminder to fire 1 hour after the session ends so the student
+        // doesn't forget to pay. Only for clinic_105 with a known session date/time.
+        if (
+          input.programType === "clinic_105" &&
+          (input.paymentMethod === "cash" || input.paymentMethod === "check") &&
+          input.sessionDate &&
+          input.sessionEndTime &&
+          newBookingId
+        ) {
+          try {
+            // Build UTC sendAt = session date + end time + 1 hour
+            const [endH, endM] = (input.sessionEndTime as string).split(":").map(Number);
+            const sessionEndUtc = new Date(`${input.sessionDate}T${String(endH).padStart(2,"0")}:${String(endM).padStart(2,"0")}:00-04:00`);
+            const sendAt = new Date(sessionEndUtc.getTime() + 60 * 60 * 1000); // +1 hour
+            await db.insert(scheduledReminders).values({
+              bookingId: newBookingId,
+              userId: resolvedUserId,
+              sendAt,
+              reminderType: "payment_reminder",
+              status: "pending",
+            });
+          } catch (remErr: any) {
+            console.error("[PaymentReminder] Failed to schedule:", remErr?.message);
+          }
+        }
+
         return { success: true, paymentMethod: input.paymentMethod, bookingId: newBookingId };
       }),
 

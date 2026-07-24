@@ -1,8 +1,8 @@
 {
   "build_command": "pnpm run build",
   "capabilities": [
-    "server",
     "db",
+    "server",
     "user"
   ],
   "dev_command": "pnpm run dev",
@@ -12,10 +12,11 @@
   "experiments": null,
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz",
-    "access_key_id": "ASIAZV3A2ECZGKY2MQEE",
-    "secret_access_key": "7SH1o9tiqDf+7lwg74g4RD8KoTo5h0B3Awu8v4d/",
-    "session_token": "IQoJb3JpZ2luX2VjENz//////////wEaCXVzLWVhc3QtMSJHMEUCIQD/qOI9BcGwiYfUoXk/06Iw9tSsx6sSIcivcFyJk526pgIgDDTLfQtdPQ69aqgSz7nugvPojyME+hl5EGAJ880fVZEq/wMIpP//////////ARAEGgw2NjUzODYwOTg4NjYiDO1EjjtS7pZvJic8CSrTA5fsXngFxZGgHqxBjzVC4SdxvG9iWVFNGMPDhYtSxCFhz6nQXRPLX3b4MGzCiuzksjKlE8GBDkO2DZmJ79QRBGyXLYbICTiShxhSVrqaoHh/8bdD/fmVDgDXdNg6u2jwMSg6r/pOd/9VZt0IzLmKRQJntjQ9rlFMUboiDkJSen63qzajwMXDRJyG6CSZt3kNDqKMfwiXtYSB5rIWhJabU2er/JNsuXGZVCPxVKzsMhvYLacWsF0hq1r1sQCMJtCyesiKAMoF4mArYQARmEC6qWJqY4rVzreyJqbaNjDp2idNUu2cwk8VaD0YoSvZJXQBbmY2KYrMut004FUvJBgSFzCxM3mDRVRcv1WAcWVFkfKyhc9e2OmReNHAVCGzJ02EYNyCQJFguOlIyC02uanqB5EDBVAovwtAh53HFf2zcIw4/9S8NXEtWKxwwPkWjGBV7HBoADgN9CGm9hzPwHipNW5E2UKgIyLiabWsUSKMuLV/YIvz0LleHwqrOPftZBfkJMGCk/l2a7V5/CSfyKkcVOUjsCD1AgtCZeaahyXiOQQhR/UP3saItgK9sZxJlKQ0vd9xficPxskRE+hYK3HUZIRZfl0Xiu0CdndlFNI1MqwYnBhqMJ/HptAGOp0B+qN0/zuCYaR0t+HrOIXEyeB0Tq3BQ+f+++znIAyB7KhezstJjFyK057mVRK2bUD9JsRtti0LxmmLsiaSm72ewNU4FKdfyeomVM3ywMg/qH5vq+3LjY479/o9rLHAOYrckFKXazv9mzNzOhR4HoDaPsPguApNgROUOeui5FABYemd2XuLMpEM3DIhYdOOddNZuZHfdGE6h9KxMAEKtw==",
-    "expiration": "2026-05-17T23:16:47.000Z"
+    "access_key_id": "ASIAZV3A2ECZALEM47ON",
+    "secret_access_key": "LN1RR+VltUOSw7yVBzLtoFKsX4zX/PItchmxf2xC",
+    "session_token": "IQoJb3JpZ2luX2VjEEUaCXVzLWVhc3QtMSJGMEQCICsxLtanE6UJxhcpLs7NpsYf2/oSJ9SXUPa22dUp2VNuAiARPK0Ol2/XSsslg4/SLDv/bgNst1vuk933x50wih1doSr2AwgNEAQaDDY2NTM4NjA5ODg2NiIMfIHMpLl1MJhHPX50KtMDqHuFtf2noaKXFVYWnqK93GJCxj60U5n6yYT4LDDg3C3HTAn5zp3JQQkBa/z9k0m3rImpKoT1eau2uZk++zcYJ24K5E1g5afWxaEi4Yn3ATQYG4JQIw+YssRll8+OJj3xJ7GS7Murgxww2+GI5d3lXrTSCoiTwh/8XlhrRdYwmu47yyNYXg2gJRxBOscPQ7I1XQBmMB4rMYskjjmho1phuPLK7M6xlMY4JMpaBiIAjvKOlvxVP+K5yOm9RBpA8fm/26dfexYh4P8zbFAJ8X1yjVqdzeMFyylVKxwkxCbJz0nRmL8m2We89PJRkOOnSZLbHhFJldfj+EvBV4wys5iJJ0Nn7MYbaF3JRXAhbyW/oVO2vQgAb3kBYTmuvDWzW0giQ332MlBpgILgLgaFjbSC54XX+OCio01mekYCZywoVOUdjyIr9jdClkOVxrDO8wOdsKX8fRxOSs/v/15xMuJL/BMtqnJFwu9fppu/l3QQhzudT3bitPpRadPmQYnX+hU38u1bVEcl9vG2ZG8iqxEMOdHnNhBbItXZc7+FwVkl2xGynHiT81BU0sdNpR4S6lYiQREAcq9sBrG0NQv7X79B+MaxzKvFvUH+H4ki+1klmcILqNkwxIqP0wY6ngEgoDOxsYskb0Wx/zviAyxtWIP4hLFDDCoBQxPypfdMoK2ih1diV/05e291OfW5d+DY6s548ovzdLRYlThdb8k5e8Ee37eL2a+CELCSMQhLTyTgQBwimfxOJv7W3qnhv/UbhoJa2KzuA+DVHPuu8ffBxlhp6Lldvo3CUxzfkPsdM/GOsazJCZn4hG59RV3Utr/q9Jbgx4HA13/DmHT/vA==",
+    "expiration": "2026-07-25T08:04:20.000Z",
+    "backend": "GIT_BACKEND_S3"
   },
   "name": "tennis-academy",
   "path": "/home/ubuntu/tennis-academy",

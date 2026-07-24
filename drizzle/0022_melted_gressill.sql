@@ -1,0 +1,1 @@
+ALTER TABLE `scheduled_reminders` ADD `reminderType` enum('pre_session','payment_reminder') DEFAULT 'pre_session' NOT NULL;

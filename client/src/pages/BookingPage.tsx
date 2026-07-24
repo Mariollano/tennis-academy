@@ -827,6 +827,10 @@ export default function BookingPage() {
       toast.error("Please enter your name and email to book.");
       return;
     }
+    if (!guestPhone.trim()) {
+      toast.error("Please enter your cell phone number — we need it to send you a payment reminder after the session.");
+      return;
+    }
     // Require date for clinic and private lesson
     if ((programType === "clinic_105" || programType === "private_lesson") && !sessionDate) {
       toast.error("Please pick a date from the calendar above before booking.");
@@ -869,7 +873,7 @@ export default function BookingPage() {
     const guestFields = {
       guestName: guestName.trim(),
       guestEmail: guestEmail.trim(),
-      guestPhone: guestPhone.trim() || undefined,
+      guestPhone: guestPhone.trim() || undefined, // validated as required above
     };
 
     if (programType === "junior_daily" && juniorSelectedDates.length > 0) {
@@ -1338,12 +1342,13 @@ export default function BookingPage() {
                       </div>
                     </div>
                     <div>
-                      <Label>Phone (optional — for SMS reminders)</Label>
+                      <Label>Phone <span className="text-red-500">*</span> <span className="text-xs text-muted-foreground font-normal">(required — for payment reminders)</span></Label>
                       <Input
                         value={guestPhone}
                         onChange={(e) => setGuestPhone(e.target.value)}
                         placeholder="+1 (401) 555-0000"
                         type="tel"
+                        required
                       />
                     </div>
 

@@ -95,35 +95,73 @@ export async function processScheduledReminders(): Promise<void> {
       let emailSent = false;
       let smsSent = false;
 
-      // Send reminder email
-      if (user?.email && isEmailConfigured()) {
-        try {
-          await sendBookingReminder({
-            toEmail: user.email,
-            toName: user.name || "Student",
-            programLabel: programName || "Tennis Session",
-            sessionDate,
-            sessionTime,
-            bookingId: booking.id,
-          });
-          emailSent = true;
-        } catch (e: any) {
-          console.error(`[ReminderScheduler] Email failed for reminder #${reminder.id}:`, e?.message);
-        }
-      }
+      const isPaymentReminder = reminder.reminderType === "payment_reminder";
 
-      // Send reminder SMS
-      if (user?.phone && isTwilioConfigured()) {
-        try {
-          const dateStr = sessionDate ? ` on ${sessionDate}` : "";
-          const timeStr = sessionTime ? ` at ${sessionTime}` : "";
-          await sendSms(
-            user.phone,
-            `🎾 Reminder: Hi ${user.name || "there"}, your ${programName || "tennis session"} is TODAY${dateStr}${timeStr}. Please arrive 5–10 min early. See you on the court! — Coach Mario`
-          );
-          smsSent = true;
-        } catch (e: any) {
-          console.error(`[ReminderScheduler] SMS failed for reminder #${reminder.id}:`, e?.message);
+      if (isPaymentReminder) {
+        // ── Payment reminder: fires 1 hour after session ends ──
+        const studentName = user?.name || "there";
+        const paymentMsg = `Hi ${studentName}! 🎾 Hope you had a great 105 Clinic today! Just a friendly reminder to pay Coach Mario for today's session ($30/hour or the agreed amount). You can pay by cash or check at the next session, or text Mario at (401) 965-5873 to arrange. Thank you! — Coach Mario`;
+
+        // Send payment reminder SMS
+        if (user?.phone && isTwilioConfigured()) {
+          try {
+            await sendSms(user.phone, paymentMsg);
+            smsSent = true;
+          } catch (e: any) {
+            console.error(`[ReminderScheduler] Payment SMS failed for reminder #${reminder.id}:`, e?.message);
+          }
+        }
+
+        // Send payment reminder email
+        if (user?.email && isEmailConfigured()) {
+          try {
+            await sendBookingReminder({
+              toEmail: user.email,
+              toName: user.name || "Student",
+              programLabel: "Payment Reminder — 105 Clinic",
+              sessionDate,
+              sessionTime,
+              bookingId: booking.id,
+              customMessage: `Thank you for joining today's 105 Clinic! This is a friendly reminder to pay for today's session. You can pay by cash or check at the next session, or text Coach Mario at (401) 965-5873 to arrange payment. We appreciate you!`,
+            });
+            emailSent = true;
+          } catch (e: any) {
+            console.error(`[ReminderScheduler] Payment email failed for reminder #${reminder.id}:`, e?.message);
+          }
+        }
+      } else {
+        // ── Pre-session reminder: fires 2 hours before session ──
+
+        // Send reminder email
+        if (user?.email && isEmailConfigured()) {
+          try {
+            await sendBookingReminder({
+              toEmail: user.email,
+              toName: user.name || "Student",
+              programLabel: programName || "Tennis Session",
+              sessionDate,
+              sessionTime,
+              bookingId: booking.id,
+            });
+            emailSent = true;
+          } catch (e: any) {
+            console.error(`[ReminderScheduler] Email failed for reminder #${reminder.id}:`, e?.message);
+          }
+        }
+
+        // Send reminder SMS
+        if (user?.phone && isTwilioConfigured()) {
+          try {
+            const dateStr = sessionDate ? ` on ${sessionDate}` : "";
+            const timeStr = sessionTime ? ` at ${sessionTime}` : "";
+            await sendSms(
+              user.phone,
+              `🎾 Reminder: Hi ${user.name || "there"}, your ${programName || "tennis session"} is TODAY${dateStr}${timeStr}. Please arrive 5–10 min early. See you on the court! — Coach Mario`
+            );
+            smsSent = true;
+          } catch (e: any) {
+            console.error(`[ReminderScheduler] SMS failed for reminder #${reminder.id}:`, e?.message);
+          }
         }
       }
 

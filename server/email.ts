@@ -81,6 +81,7 @@ export interface BookingConfirmationData {
   pricingOption?: string;
   bookingId: number;
   cancelLink?: string;
+  customMessage?: string; // Optional override message body for special reminder types
 }
 
 // ─── HTML helpers ──────────────────────────────────────────────────────────
