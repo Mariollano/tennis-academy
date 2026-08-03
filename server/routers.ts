@@ -497,13 +497,35 @@ export const appRouter = router({
             }
           }
 
-          // 3. Check permanent program rules (same logic as getUnavailableHours)
+          // 3. Check active schedule slots on the same date (clinic_105, doubles league, etc.)
+          // This catches ALL scheduled group sessions — not just hardcoded times.
+          const activeSlots = await db.select({
+            startTime: scheduleSlots.startTime,
+            endTime: scheduleSlots.endTime,
+          }).from(scheduleSlots).where(and(
+            sql`DATE(${scheduleSlots.slotDate}) = ${dateStr}`,
+            eq(scheduleSlots.isAvailable, true),
+          ));
+          for (const slot of activeSlots) {
+            if (!slot.startTime || !slot.endTime) continue;
+            const [sSh, sSm] = (slot.startTime as string).split(':').map(Number);
+            const [sEh, sEm] = (slot.endTime as string).split(':').map(Number);
+            const sStart = sSh * 60 + sSm;
+            const sEnd = sEh * 60 + sEm;
+            if (overlaps(lessonStartMins, lessonEndMins, sStart, sEnd)) {
+              throw new TRPCError({
+                code: "CONFLICT",
+                message: "Sorry, that time is reserved for a group session. Please choose a different time.",
+              });
+            }
+          }
+
+          // 4. Check permanent program rules (fallback for days without explicit slots)
           const [y, mo, d] = dateStr.split('-').map(Number);
           const dayOfWeek = new Date(Date.UTC(y, mo - 1, d)).getUTCDay();
           const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
-          const isSunday = dayOfWeek === 0;
           const isMonWedFriSun = [0, 1, 3, 5].includes(dayOfWeek);
-          // 105 Clinic: Mon/Wed/Fri/Sun 9:00–10:30 AM
+          // 105 Clinic: Mon/Wed/Fri/Sun 9:00–10:30 AM (hardcoded fallback)
           if (isMonWedFriSun && overlaps(lessonStartMins, lessonEndMins, 9 * 60, 10 * 60 + 30)) {
             throw new TRPCError({ code: "CONFLICT", message: "That time is reserved for the 105 Clinic. Please choose a different time." });
           }
