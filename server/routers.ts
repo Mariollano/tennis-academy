@@ -14,6 +14,7 @@ import { sendSms, sendBulkSms, isTwilioConfigured } from "./sms";
 import { sendEmail, sendBookingConfirmation, sendBookingCancelled, sendBookingReminder, sendBookingReservedCash, sendBookingConfirmed, sendOwnerNewBookingAlert, isEmailConfigured } from "./email";
 import { maybeRewardReferrer } from "./referral";
 import { postAnnouncement, getAnnouncements, markAnnouncementRead, getUnreadCount, deleteAnnouncement } from "./announcements";
+import { shouldShowScheduledSlot } from "./availability";
 
 // Convert "HH:MM:SS" or "HH:MM" to "9:00 AM" style
 function formatTime12h(t: string): string {
@@ -1144,22 +1145,24 @@ export const appRouter = router({
           }
         }
 
-        // Filter out slots that overlap any block on that date
+        // Filter out unbooked slots that overlap a synced calendar block. A
+        // session that already has players must stay visible in the calendar.
         const filteredSlots = slots.filter(s => {
+          const activeBookings = Number(s.activeBookings ?? 0);
           const raw = s.slot.slotDate as any;
           const dateStr = typeof raw === "string" ? raw.slice(0, 10)
             : `${new Date(raw).getUTCFullYear()}-${String(new Date(raw).getUTCMonth()+1).padStart(2,'0')}-${String(new Date(raw).getUTCDate()).padStart(2,'0')}`;
           const dayBlocks = blocksByDate[dateStr];
-          if (!dayBlocks || dayBlocks.length === 0) return true;
+          if (!dayBlocks || dayBlocks.length === 0) return shouldShowScheduledSlot(activeBookings, false);
           const [ssh, ssm] = (s.slot.startTime as string).split(':').map(Number);
           const [seh, sem] = (s.slot.endTime as string).split(':').map(Number);
           const slotStart = ssh * 60 + ssm;
           const slotEnd = seh * 60 + sem;
           for (const blk of dayBlocks) {
-            if (blk.isAllDay) return false;
-            if (slotStart < blk.end && slotEnd > blk.start) return false;
+            if (blk.isAllDay) return shouldShowScheduledSlot(activeBookings, true);
+            if (slotStart < blk.end && slotEnd > blk.start) return shouldShowScheduledSlot(activeBookings, true);
           }
-          return true;
+          return shouldShowScheduledSlot(activeBookings, false);
         });
 
         return filteredSlots.map(s => {
@@ -2238,4 +2241,3 @@ Be friendly, helpful, and knowledgeable. Keep answers concise.`;
 });
 
 export type AppRouter = typeof appRouter;
-
