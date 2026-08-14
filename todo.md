@@ -633,3 +633,7 @@
 - [x] Route: /doubles-league registered in App.tsx
 - [x] Initial sessions seeded: Tue/Thu 5:30–7 PM, Sat 9–11 AM through Aug 2026
 - [x] Date formatting fix: normalizeDate() handles MySQL Date objects returning as Date vs string
+
+## Roster Visibility and Publication Fixes (Aug 2026)
+- [x] Investigate and restore the admin roster for today's 9 AM 105 Clinic so Mario can see booked player names and emails
+- [ ] Create a fresh checkpoint after the roster fix and confirm the Publish control is available in the Management UI

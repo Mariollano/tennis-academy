@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { toLocalDateKey } from "@/lib/calendarDate";
 import { toast } from "sonner";
 import { Link } from "wouter";
 
@@ -46,7 +47,9 @@ const PROGRAM_COLORS: Record<string, string> = {
 
 function TodayTab({ markPaidMutation, refetchBookings }: { markPaidMutation: any; refetchBookings: () => void }) {
   const today = new Date();
-  const todayStr = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+  // Use the device's local calendar date. UTC changes several hours before the
+  // end of Coach Mario's day in Rhode Island and could otherwise hide today's roster.
+  const todayStr = toLocalDateKey(today);
 
   const { data: bookings, isLoading } = trpc.booking.adminList.useQuery(
     { limit: 200 },
@@ -144,6 +147,11 @@ function TodayTab({ markPaidMutation, refetchBookings }: { markPaidMutation: any
         </Card>
       )}
 
+      {/* Keep today's 105 roster open so the coach can see names, emails, and phones without changing tabs. */}
+      {todaySlots?.filter(slot => slot.programType === "clinic_105").map(slot => (
+        <TodayClinicRoster key={slot.slotId} slot={slot} />
+      ))}
+
       {todayBookings.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
@@ -210,6 +218,63 @@ function TodayTab({ markPaidMutation, refetchBookings }: { markPaidMutation: any
         ))
       )}
     </div>
+  );
+}
+
+function TodayClinicRoster({ slot }: { slot: {
+  slotId: number;
+  startTime: string | null;
+  endTime: string | null;
+  enrolled: number;
+  maxParticipants: number;
+} }) {
+  const { data: enrollees, isLoading } = trpc.schedule.getEnrollees.useQuery(
+    { slotId: slot.slotId },
+    { refetchInterval: 30000 }
+  );
+
+  const formatTime = (value: string | null) => {
+    if (!value) return "";
+    const [hours, minutes] = value.split(":");
+    const hour = Number(hours);
+    return `${hour % 12 || 12}:${minutes} ${hour >= 12 ? "PM" : "AM"}`;
+  };
+
+  return (
+    <Card className="border-2 border-primary/30 bg-primary/[0.03]">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex flex-wrap items-center gap-2 text-base">
+          <Users className="w-5 h-5 text-primary" />
+          <span>105 Game — Who Is Signed Up</span>
+          <Badge className="bg-primary/10 text-primary border-primary/20">
+            {formatTime(slot.startTime)}{slot.endTime ? ` – ${formatTime(slot.endTime)}` : ""}
+          </Badge>
+          <span className="text-sm font-normal text-muted-foreground">{slot.enrolled}/{slot.maxParticipants} booked</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-1">
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading today's player list…</p>
+        ) : !enrollees?.length ? (
+          <p className="text-sm text-muted-foreground">No one has signed up for this 105 session yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {enrollees.map((enrollee, index) => (
+              <div key={enrollee.bookingId} className="rounded-lg border border-border bg-background p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground">{index + 1}. {enrollee.studentName || "Guest"}</p>
+                  <p className="text-sm text-muted-foreground break-all">{enrollee.studentEmail || "No email on file"}</p>
+                  <p className="text-sm text-muted-foreground">{enrollee.studentPhone || "No phone on file"}</p>
+                </div>
+                <Badge className={`mt-2 sm:mt-0 ${enrollee.status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                  {enrollee.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
