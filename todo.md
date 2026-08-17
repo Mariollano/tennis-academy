@@ -640,4 +640,8 @@
 
 ## Public 105 Calendar Visibility (Aug 2026)
 - [x] Investigate and restore today's morning 105 Game session in the public booking calendar
-- [ ] Verify the public availability response and save a checkpoint for the calendar fix
+- [x] Verify the public availability response and save a checkpoint for the calendar fix
+
+## August 16 105 Capacity Correction
+- [ ] Inspect the August 16 9 AM clinic slot and restore its 12-player capacity
+- [ ] Verify seven enrolled players shows five spots open in public availability
