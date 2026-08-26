@@ -9,13 +9,15 @@
   "env_vars": {
     "DATABASE_URL": "mysql://mUSTnZHSjH9Rc4V.ee5fccb85a53:5QQg6Ip4z4b2bjZd9YOX@gateway04.us-east-1.prod.aws.tidbcloud.com:4000/kzZFsCRUb4iWMZR8LEwAKz?ssl={\"rejectUnauthorized\":true}"
   },
-  "experiments": null,
+  "experiments": [
+    "no_db_push"
+  ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz",
-    "access_key_id": "ASIAZV3A2ECZALEM47ON",
-    "secret_access_key": "LN1RR+VltUOSw7yVBzLtoFKsX4zX/PItchmxf2xC",
-    "session_token": "IQoJb3JpZ2luX2VjEEUaCXVzLWVhc3QtMSJGMEQCICsxLtanE6UJxhcpLs7NpsYf2/oSJ9SXUPa22dUp2VNuAiARPK0Ol2/XSsslg4/SLDv/bgNst1vuk933x50wih1doSr2AwgNEAQaDDY2NTM4NjA5ODg2NiIMfIHMpLl1MJhHPX50KtMDqHuFtf2noaKXFVYWnqK93GJCxj60U5n6yYT4LDDg3C3HTAn5zp3JQQkBa/z9k0m3rImpKoT1eau2uZk++zcYJ24K5E1g5afWxaEi4Yn3ATQYG4JQIw+YssRll8+OJj3xJ7GS7Murgxww2+GI5d3lXrTSCoiTwh/8XlhrRdYwmu47yyNYXg2gJRxBOscPQ7I1XQBmMB4rMYskjjmho1phuPLK7M6xlMY4JMpaBiIAjvKOlvxVP+K5yOm9RBpA8fm/26dfexYh4P8zbFAJ8X1yjVqdzeMFyylVKxwkxCbJz0nRmL8m2We89PJRkOOnSZLbHhFJldfj+EvBV4wys5iJJ0Nn7MYbaF3JRXAhbyW/oVO2vQgAb3kBYTmuvDWzW0giQ332MlBpgILgLgaFjbSC54XX+OCio01mekYCZywoVOUdjyIr9jdClkOVxrDO8wOdsKX8fRxOSs/v/15xMuJL/BMtqnJFwu9fppu/l3QQhzudT3bitPpRadPmQYnX+hU38u1bVEcl9vG2ZG8iqxEMOdHnNhBbItXZc7+FwVkl2xGynHiT81BU0sdNpR4S6lYiQREAcq9sBrG0NQv7X79B+MaxzKvFvUH+H4ki+1klmcILqNkwxIqP0wY6ngEgoDOxsYskb0Wx/zviAyxtWIP4hLFDDCoBQxPypfdMoK2ih1diV/05e291OfW5d+DY6s548ovzdLRYlThdb8k5e8Ee37eL2a+CELCSMQhLTyTgQBwimfxOJv7W3qnhv/UbhoJa2KzuA+DVHPuu8ffBxlhp6Lldvo3CUxzfkPsdM/GOsazJCZn4hG59RV3Utr/q9Jbgx4HA13/DmHT/vA==",
-    "expiration": "2026-07-25T08:04:20.000Z",
+    "access_key_id": "ASIAZV3A2ECZPP6NW3OR",
+    "secret_access_key": "9mtNWIqHiGaD4N2twU/Psy5Bkn+ij2qTHqIQq+GL",
+    "session_token": "IQoJb3JpZ2luX2VjEFUaCXVzLWVhc3QtMSJHMEUCIFY3bLmsP1JI9q9n1J1yXSq4IaNryHXUi4owt/MAiYcvAiEA6P8tzqhw4Enp1+8PxG3FpAqrAOEwlOp2aiHsiz1Ea2Aq9gMIHRAEGgw2NjUzODYwOTg4NjYiDPEay1J3DZ9uKXPwcirTA4ZYhHsezO4F/8EI0ktJ3f6wYAQfouXijSCdxlaPUNtIR0Kqa//S7YKNMcKnCYRiQhd6Jv164IKudw3ls+LLMuXXmC6gwEuK/r7KkQsEn4RVnEFtGHpx+OjtNH/P6pl4ntXIBF4dGwu+bECgLbjeBfgw6z+L7WjbSt5ZIYyOKSh7BihAf1wu3dVjCyVO50nifxkhG08i8YDjYPHPnXLIhcGC6SNdLY3ewQSQ/ZUpGd7xXip4jeQw2d7lYs6GJCn05VqYeiLdA0Q5sSIoX/wpvUwntg01ejL0zFOoHcmxQjWvI5Bfr6apgb7qyqPm8tNfdJ2RVRSlC5eB9tqrc8x4Ez0FSnpDzui9sc49TptLWGppJOUVL5GlvbrUu80z0Iqx3uDBuv3iGp2r2BBvcuWxdsJCJP09wDB+dK+BZd39cMtVKZQ/LME4vUNMrEwQ105G/5mqdg8P24bfHfJXrJQAsna5szpsDMy12qo4zolz+iterKSqU74QjMVpF+ciWqZ1Tq7V0s1zpCByVP/QuNYt3Rzao9Vazn4aUwSq9yj2J/BqVIyxsKP9DSHvUnwgURLF+TiLpyC9kiv5deT+RaxC8VLxLKSXVk69AV0CRQI/4Ygp6xYXMI+0u9QGOp0B6Dt1FI50SaucFkbc786fDaRbSoNwY+F5ZleLK93vqAP2kQEYgqxnvOa0KpGa3qRQuaSk1O8+E7Q172Caugauotlph8ZmQn4Hum5nie4Kd8aatDJDBE04hYayoYIu47RK4JhalhmHnKJj1sQ5AqP+6qB7w0id8+Yv7mDF9tloYxX5aR73jAx0zR9pKwSAhthkKXkonefKYT/lRqLkFA==",
+    "expiration": "2026-08-27T00:20:31.000Z",
     "backend": "GIT_BACKEND_S3"
   },
   "name": "tennis-academy",
