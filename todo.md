@@ -645,3 +645,8 @@
 ## August 16 105 Capacity Correction
 - [ ] Inspect the August 16 9 AM clinic slot and restore its 12-player capacity
 - [ ] Verify seven enrolled players shows five spots open in public availability
+
+## Private Clinic
+- [x] Add a Private Clinic priced at $35 to the public Programs and booking menu
+- [x] Display the invitation-only Private Clinic schedule for Tuesdays and Saturdays, 9:00–10:30 AM, with a text-to-inquire option instead of public booking slots
+- [x] Test the Private Clinic configuration and save a checkpoint

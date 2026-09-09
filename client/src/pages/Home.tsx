@@ -14,6 +14,7 @@ import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import { PRIVATE_CLINIC } from "@/lib/privateClinic";
 
 function useCountUp(target: number, duration = 1500, start = false) {
   const [count, setCount] = useState(0);
@@ -99,6 +100,17 @@ const programs = [
     href: "/book/clinic_105",
     img: photos.smile,
     color: "from-amber-500 to-orange-600",
+  },
+  {
+    icon: Users,
+    title: PRIVATE_CLINIC.title,
+    desc: "A small-group clinic for invited players. Tuesdays and Saturdays, 9:00–10:30 AM.",
+    price: `${PRIVATE_CLINIC.price}/session`,
+    badge: PRIVATE_CLINIC.availability,
+    href: "/programs",
+    cta: "View & Text Mario",
+    img: photos.highFive,
+    color: "from-rose-500 to-pink-700",
   },
   {
     icon: Star,
@@ -204,7 +216,7 @@ function InstallAppButton() {
 }
 
 const faqItems = [
-  { q: "What programs do you offer?", a: "We offer Private Lessons ($125/hr), 105 Game Adult Clinics ($35/session), Junior Summer Program ($99/day half-day · $125/day full day · $495/week), Summer Camp ($99/day half-day · $125 full day), Doubles League ($15/session), and Mental Coaching. All programs are available for online booking." },
+  { q: "What programs do you offer?", a: "We offer Private Lessons ($125/hr), 105 Game Adult Clinics ($35/session), Private Clinic ($35/session, Tuesdays and Saturdays 9:00–10:30 AM, by invitation only), Junior Summer Program ($99/day half-day · $125/day full day · $495/week), Summer Camp ($99/day half-day · $125 full day), Doubles League ($15/session), and Mental Coaching. Private Clinic inquiries should be sent to Coach Mario by text." },
   { q: "How do I book a session?", a: "Simply click 'Book Now' in the navigation, choose your program, pick an available date and time, and pay securely online. You'll receive instant email and SMS confirmation." },
   { q: "What is the 105 Game Clinic?", a: "The 105 Game Clinic is Coach Mario's signature adult group program. It runs on Mondays, Wednesdays, Fridays (12 spots) and Sundays (24 spots), 9:00–10:30 AM. It combines competitive drills, match play, and technique work in a fun group setting." },
   { q: "Do you offer beginner lessons?", a: "Absolutely! Coach Mario works with all skill levels, from complete beginners to competitive tournament players. Private lessons are the best starting point for beginners." },
@@ -541,6 +553,7 @@ export default function Home() {
             {[
               { label: "Private Lesson", price: "$125/hr", href: "/book/private_lesson", color: "bg-blue-600", emoji: "🎾", external: false },
               { label: "105 Clinic", price: "$35", href: "/book/clinic_105", color: "bg-amber-500", emoji: "👥", external: false },
+              { label: "Private Clinic", price: "Invite only · $35", href: "/programs", color: "bg-rose-600", emoji: "🔒", external: false },
               { label: "Doubles League", price: "$15", href: "/doubles-league", color: "bg-cyan-600", emoji: "🎾", external: false },
               { label: "Junior Program", price: "$99/day", href: "/book/junior_daily", color: "bg-green-600", emoji: "⭐", external: false },
               { label: "Summer Camp", price: "$99/day", href: "/book/summer_camp_daily", color: "bg-orange-500", emoji: "☀️", external: false },
@@ -625,7 +638,7 @@ export default function Home() {
                         <div className="flex items-center justify-between">
                           <span className="text-accent font-bold text-sm">{program.price}</span>
                           <div className="flex items-center gap-1 text-white/70 text-sm group-hover:text-white transition-colors">
-                            <span>Book Now</span>
+                          <span>{"cta" in program ? program.cta : "Book Now"}</span>
                             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                           </div>
                         </div>
