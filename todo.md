@@ -650,3 +650,4 @@
 - [x] Add a Private Clinic priced at $35 to the public Programs and booking menu
 - [x] Display the invitation-only Private Clinic schedule for Tuesdays and Saturdays, 9:00–10:30 AM, with a text-to-inquire option instead of public booking slots
 - [x] Test the Private Clinic configuration and save a checkpoint
+- [x] Verify the Private Clinic is visible on the deployed public site
