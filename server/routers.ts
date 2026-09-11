@@ -37,6 +37,7 @@ import { leaderboardRouter } from "./routers/leaderboard";
 import { voiceBookingRouter } from "./routers/voiceBooking";
 import { icalSyncRouter } from "./routers/icalSync";
 import { doublesLeagueRouter } from "./routers/doublesLeague";
+import { donationRouter } from "./routers/donation";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
 
 function buildProgramScheduleHtml(): string {
@@ -79,6 +80,7 @@ export const appRouter = router({
   icalSync: icalSyncRouter,
   promoCodes: promoCodeRouter,
   doublesLeague: doublesLeagueRouter,
+  donation: donationRouter,
 
   // ─── Announcements ──────────────────────────────────────────────────────────
   announcements: router({

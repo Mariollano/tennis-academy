@@ -651,3 +651,10 @@
 - [x] Display the invitation-only Private Clinic schedule for Tuesdays and Saturdays, 9:00–10:30 AM, with a text-to-inquire option instead of public booking slots
 - [x] Test the Private Clinic configuration and save a checkpoint
 - [x] Verify the Private Clinic is visible on the deployed public site
+
+## $35 Donation Payment
+- [x] Add a public Donate $35 payment option without scheduling or approval
+- [x] Add a prominent Donate $35 button in the homepage hero section
+- [x] Remove the Private Clinic public menu entries to avoid confusing this with the donation payment
+- [x] Send a thank-you email after a successful donation payment
+- [x] Test the $35 Stripe donation checkout and save a checkpoint

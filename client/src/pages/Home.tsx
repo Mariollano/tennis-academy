@@ -7,14 +7,13 @@ import {
   Calendar, MessageSquare, Play, Zap, Download,
   MapPin, Phone, Mail, ArrowRight, CheckCircle,
   Clock, DollarSign, Shield, Award, TrendingUp, Mic,
-  Lightbulb, RefreshCw, Swords
+  Lightbulb, RefreshCw, Swords, Heart
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
-import { PRIVATE_CLINIC } from "@/lib/privateClinic";
 
 function useCountUp(target: number, duration = 1500, start = false) {
   const [count, setCount] = useState(0);
@@ -100,17 +99,6 @@ const programs = [
     href: "/book/clinic_105",
     img: photos.smile,
     color: "from-amber-500 to-orange-600",
-  },
-  {
-    icon: Users,
-    title: PRIVATE_CLINIC.title,
-    desc: "A small-group clinic for invited players. Tuesdays and Saturdays, 9:00–10:30 AM.",
-    price: `${PRIVATE_CLINIC.price}/session`,
-    badge: PRIVATE_CLINIC.availability,
-    href: "/programs",
-    cta: "View & Text Mario",
-    img: photos.highFive,
-    color: "from-rose-500 to-pink-700",
   },
   {
     icon: Star,
@@ -473,6 +461,16 @@ export default function Home() {
                 </Button>
               </Link>
 
+              {/* One-time donation — no schedule or approval required */}
+              <Link href="/donate">
+                <button
+                  className="relative inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-black uppercase tracking-wide text-white transition-all duration-150 hover:scale-105 active:translate-y-0.5 active:scale-95"
+                  style={{ background: "linear-gradient(180deg, #fb7185 0%, #e11d48 65%, #be123c 100%)", boxShadow: "0 6px 0 #881337, 0 8px 20px rgba(225,29,72,0.45), inset 0 1px 0 rgba(255,255,255,0.35)", textShadow: "0 1px 0 rgba(0,0,0,0.25)" }}
+                >
+                  <Heart className="h-4 w-4 fill-current" /> Donate $35
+                </button>
+              </Link>
+
               {/* Voice Button hidden — coming soon */}
 
               {/* 2026 Summer Program — 3D floating yellow button */}
@@ -553,7 +551,7 @@ export default function Home() {
             {[
               { label: "Private Lesson", price: "$125/hr", href: "/book/private_lesson", color: "bg-blue-600", emoji: "🎾", external: false },
               { label: "105 Clinic", price: "$35", href: "/book/clinic_105", color: "bg-amber-500", emoji: "👥", external: false },
-              { label: "Private Clinic", price: "Invite only · $35", href: "/programs", color: "bg-rose-600", emoji: "🔒", external: false },
+              { label: "Donate $35", price: "Support the Academy", href: "/donate", color: "bg-rose-600", emoji: "❤️", external: false },
               { label: "Doubles League", price: "$15", href: "/doubles-league", color: "bg-cyan-600", emoji: "🎾", external: false },
               { label: "Junior Program", price: "$99/day", href: "/book/junior_daily", color: "bg-green-600", emoji: "⭐", external: false },
               { label: "Summer Camp", price: "$99/day", href: "/book/summer_camp_daily", color: "bg-orange-500", emoji: "☀️", external: false },
@@ -638,7 +636,7 @@ export default function Home() {
                         <div className="flex items-center justify-between">
                           <span className="text-accent font-bold text-sm">{program.price}</span>
                           <div className="flex items-center gap-1 text-white/70 text-sm group-hover:text-white transition-colors">
-                          <span>{"cta" in program ? program.cta : "Book Now"}</span>
+                          <span>Book Now</span>
                             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                           </div>
                         </div>

@@ -20,7 +20,7 @@ import { startReminderScheduler } from "../reminderScheduler";
 import { syncIcalCalendar } from "../icalSync";
 import { storagePut, storageGet } from "../storage";
 import { sendSms, isTwilioConfigured } from "../sms";
-import { sendBookingConfirmation, sendBookingConfirmed, isEmailConfigured } from "../email";
+import { sendBookingConfirmation, sendBookingConfirmed, sendDonationThankYou, isEmailConfigured } from "../email";
 import { handleIcalFeed } from "../ical";
 import { sdk } from "./sdk";
 
@@ -89,6 +89,26 @@ async function startServer() {
     }
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // ── $35 donation payment ──────────────────────────────────────────────
+      if (session.metadata?.type === "donation_35") {
+        const donorEmail = session.customer_details?.email || session.customer_email || "";
+        const donorName = session.customer_details?.name || "Supporter";
+        const amountLabel = `$${((session.amount_total || 0) / 100).toFixed(2)}`;
+
+        try {
+          await notifyOwner({
+            title: "❤️ $35 Donation Received",
+            content: `Supporter: ${donorName}\nEmail: ${donorEmail || "Not provided"}\nAmount: ${amountLabel}`,
+          });
+        } catch {}
+
+        if (donorEmail && isEmailConfigured()) {
+          sendDonationThankYou({ toEmail: donorEmail, toName: donorName, amountLabel }).catch(() => {});
+        }
+
+        return res.json({ received: true });
+      }
 
       // ── Doubles League payment ────────────────────────────────────────────
       if (session.metadata?.type === "doubles_league") {

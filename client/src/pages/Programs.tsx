@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Star, Sun, Brain, Clock, DollarSign, CheckCircle, MapPin, ArrowRight, ChevronDown, ChevronUp, Swords } from "lucide-react";
-import { PRIVATE_CLINIC, privateClinicSmsHref } from "@/lib/privateClinic";
 
 const CDN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz";
 
@@ -55,31 +54,6 @@ const programs = [
     bookHref: "/book/clinic_105",
     bookLabel: "Book the 105 Clinic",
     popular: true,
-    bestValue: false,
-  },
-  {
-    id: "private_clinic",
-    icon: Users,
-    title: PRIVATE_CLINIC.title,
-    subtitle: PRIVATE_CLINIC.schedule,
-    category: "private",
-    badge: PRIVATE_CLINIC.availability,
-    accentColor: "from-rose-500 to-pink-700",
-    photo: `${CDN}/IMG_2891_c12742f2.jpg`,
-    photoAlt: "Tennis players celebrating after group practice",
-    objectPosition: "center top",
-    description: "A focused small-group clinic reserved for Coach Mario's invited players. Interested in joining a future group? Text Mario to inquire.",
-    pricing: [{ label: PRIVATE_CLINIC.sessionLength, price: PRIVATE_CLINIC.price }],
-    highlights: [
-      "Tuesdays & Saturdays: 9:00 – 10:30 AM",
-      "Reserved for invited players",
-      "Small-group coaching and matchplay",
-      "Text Coach Mario to ask about an invitation",
-    ],
-    bookHref: privateClinicSmsHref,
-    bookLabel: "Text Coach Mario to Inquire",
-    inquiryOnly: true,
-    popular: false,
     bestValue: false,
   },
   {
@@ -235,7 +209,6 @@ const categories = [
 function ProgramCard({ program }: { program: typeof programs[0] }) {
   const [expanded, setExpanded] = useState(false);
   const Icon = program.icon;
-  const isInquiryOnly = "inquiryOnly" in program && program.inquiryOnly;
 
   return (
     <div className={`group relative rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 bg-card border border-border card-lift ${program.popular ? "ring-2 ring-accent" : ""}`}>
@@ -335,21 +308,12 @@ function ProgramCard({ program }: { program: typeof programs[0] }) {
           )}
         </div>
 
-        {isInquiryOnly ? (
-          <a href={program.bookHref} className="block">
-            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-xl group">
-              {program.bookLabel}
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </a>
-        ) : (
-          <Link href={program.bookHref}>
-            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-xl group">
-              {program.bookLabel}
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
-        )}
+        <Link href={program.bookHref}>
+          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-xl group">
+            {program.bookLabel}
+            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </Link>
         {(program as any).learnMoreHref && (
           <Link href={(program as any).learnMoreHref}>
             <Button variant="outline" className="w-full mt-2 rounded-xl font-semibold">
@@ -394,7 +358,7 @@ export default function Programs() {
             {[
               { label: "Private Lesson", href: "/book/private_lesson", price: "$125/hr" },
               { label: "105 Clinic", href: "/book/clinic_105", price: "$35" },
-              { label: "Private Clinic", href: "/programs", price: "Invite only · $35" },
+              { label: "Donate $35", href: "/donate", price: "Support the Academy" },
               { label: "Doubles League", href: "/doubles-league", price: "$15" },
               { label: "Junior Program", href: "/book/junior_daily", price: "$99/day" },
               { label: "Summer Camp", href: "/book/summer_camp_daily", price: "$99/day" },
@@ -469,7 +433,7 @@ export default function Programs() {
                 {[
                   { name: "Private Lesson", price: "$125/hr", who: "All levels", schedule: "Flexible", size: "1-on-1", href: "/book/private_lesson", popular: false },
                   { name: "105 Game Clinic", price: "$35/session", who: "Adults", schedule: "Mon/Wed/Fri/Sun 9–10:30 AM", size: "Up to 24", href: "/book/clinic_105", popular: true },
-                  { name: "Private Clinic", price: "$35/session", who: "Invited players", schedule: "Tue/Sat 9–10:30 AM", size: "Invitation only", href: "/programs", popular: false },
+                  { name: "Donate to the Academy", price: "$35", who: "Supporters", schedule: "Anytime", size: "No booking needed", href: "/donate", popular: false },
                   { name: "Doubles League", price: "$15/session", who: "All levels", schedule: "Tue/Thu 6:30–8 PM · Sat 9–11 AM", size: "Unlimited", href: "/doubles-league", popular: true },
                   { name: "Junior Program", price: "$99/day · $495/wk", who: "Juniors", schedule: "9 AM–2 PM", size: "Small group", href: "/book/junior_daily", popular: false },
                   { name: "Summer Camp", price: "$99/day · $125 full day", who: "All ages", schedule: "9 AM–2 PM daily", size: "Group", href: "/book/summer_camp_daily", popular: false },

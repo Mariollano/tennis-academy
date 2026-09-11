@@ -379,6 +379,36 @@ export async function sendBookingConfirmed(data: BookingConfirmationData): Promi
   }
 }
 
+// ─── Donation thank-you ──────────────────────────────────────────────────────
+export async function sendDonationThankYou(data: { toEmail: string; toName: string; amountLabel: string }): Promise<{ success: boolean; error?: string }> {
+  try {
+    const bodyHtml = `
+      <h2 style="margin:0 0 8px;color:#1a3a8f;font-size:20px;">Thank You for Supporting RI Tennis Academy! ❤️</h2>
+      <p style="margin:0 0 24px;color:#444;font-size:15px;">
+        Hi ${data.toName || "there"},<br><br>
+        Coach Mario truly appreciates your ${data.amountLabel} donation. Your support helps RI Tennis Academy continue creating a welcoming tennis community for players of all ages.
+      </p>
+      <div style="background:#f1f5f9;border-radius:10px;padding:16px 18px;margin:0 0 22px;">
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-weight:bold;margin-bottom:5px;">Donation received</div>
+        <div style="font-size:24px;color:#1a3a8f;font-weight:bold;">${data.amountLabel}</div>
+      </div>
+      ${contactBlock}`;
+
+    await sendEmail({
+      to: data.toEmail,
+      toName: data.toName || "Supporter",
+      subject: `❤️ Thank You for Your ${data.amountLabel} Donation | RI Tennis Academy`,
+      html: buildEmailShell(bodyHtml),
+      text: `Hi ${data.toName || "there"},\n\nThank you for your ${data.amountLabel} donation to RI Tennis Academy. Coach Mario truly appreciates your support!\n\n— RI Tennis Academy`,
+    });
+
+    return { success: true };
+  } catch (err: any) {
+    console.error(`[Email] Failed to send donation thank-you email to ${data.toEmail}:`, err?.message || err);
+    return { success: false, error: err?.message || "Unknown error" };
+  }
+}
+
 // ─── Owner: new booking alert ──────────────────────────────────────────────
 export interface OwnerBookingAlertData {
   studentName: string;
