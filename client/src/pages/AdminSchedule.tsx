@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { CLINIC_105_WEEKDAY_CAP, CLINIC_105_MORNING_END_TIME, CLINIC_105_MORNING_START_TIME } from "@shared/clinic105Schedule";
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 function startOfWeek(d: Date) {
@@ -417,10 +418,10 @@ function Generate105Dialog({ onClose, onRefetch }: { onClose: () => void; onRefe
     programId: prefs.programId || "",
     fromDate: isoDate(new Date()),
     toDate: isoDate(addDays(new Date(), 30)),
-    weekdayCap: prefs.weekdayCap || "12",
+    weekdayCap: prefs.weekdayCap || String(CLINIC_105_WEEKDAY_CAP),
     sundayCap: prefs.sundayCap || "24",
-    startTime: prefs.startTime || "09:00",
-    endTime: prefs.endTime || "10:30",
+    startTime: prefs.startTime || CLINIC_105_MORNING_START_TIME,
+    endTime: prefs.endTime || CLINIC_105_MORNING_END_TIME,
   });
   const gen = trpc.schedule.generate105Slots.useMutation({
     onSuccess: (d) => { toast.success(`Created ${d.created} sessions!`); onRefetch(); onClose(); },
@@ -434,7 +435,7 @@ function Generate105Dialog({ onClose, onRefetch }: { onClose: () => void; onRefe
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Generate 105 Clinic Sessions</DialogTitle></DialogHeader>
-        <p className="text-sm text-muted-foreground">Creates sessions for <strong>Mon, Wed, Fri &amp; Sun</strong> in the selected date range. Weekday cap applies to Mon/Wed/Fri; Sunday cap applies to Sundays.</p>
+        <p className="text-sm text-muted-foreground">Creates <strong>morning-only</strong> sessions for <strong>Mon, Wed, Fri &amp; Sun</strong> in the selected date range. Weekday cap applies to Mon/Wed/Fri; Sunday cap applies to Sundays.</p>
         <div className="space-y-3">
           <div>
             <Label>Program</Label>
@@ -451,10 +452,10 @@ function Generate105Dialog({ onClose, onRefetch }: { onClose: () => void; onRefe
           <div className="grid grid-cols-2 gap-3">
             <div><Label>From date</Label><Input type="date" value={form.fromDate} onChange={e => set("fromDate", e.target.value)} /></div>
             <div><Label>To date</Label><Input type="date" value={form.toDate} onChange={e => set("toDate", e.target.value)} /></div>
-            <div><Label>Mon / Wed / Fri cap (spots)</Label><Input type="number" min={1} max={100} value={form.weekdayCap} onChange={e => set("weekdayCap", e.target.value)} /></div>
+            <div><Label>Mon / Wed / Fri morning cap (spots)</Label><Input type="number" min={1} max={100} value={form.weekdayCap} onChange={e => set("weekdayCap", e.target.value)} /></div>
             <div><Label>Sunday cap</Label><Input type="number" min={1} max={100} value={form.sundayCap} onChange={e => set("sundayCap", e.target.value)} /></div>
-            <div><Label>Start time</Label><Input type="time" value={form.startTime} onChange={e => set("startTime", e.target.value)} /></div>
-            <div><Label>End time</Label><Input type="time" value={form.endTime} onChange={e => set("endTime", e.target.value)} /></div>
+            <div><Label>Start time</Label><Input type="time" max="11:59" value={form.startTime} onChange={e => set("startTime", e.target.value)} /></div>
+            <div><Label>End time</Label><Input type="time" max="11:59" value={form.endTime} onChange={e => set("endTime", e.target.value)} /></div>
           </div>
         </div>
         <DialogFooter>

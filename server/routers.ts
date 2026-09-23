@@ -39,6 +39,7 @@ import { icalSyncRouter } from "./routers/icalSync";
 import { doublesLeagueRouter } from "./routers/doublesLeague";
 import { donationRouter } from "./routers/donation";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
+import { CLINIC_105_WEEKDAY_CAP, isMorningClinicWindow } from "@shared/clinic105Schedule";
 
 function buildProgramScheduleHtml(): string {
   return `
@@ -1513,6 +1514,22 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const matchingProgram = await db.select({ type: programs.type })
+          .from(programs)
+          .where(eq(programs.id, input.programId))
+          .limit(1);
+        if (!matchingProgram.length) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Program not found." });
+        }
+        if (
+          matchingProgram[0].type === "clinic_105" &&
+          !isMorningClinicWindow(input.startTime, input.endTime)
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "105 Clinic sessions are mornings only. Choose times before 12 PM.",
+          });
+        }
         await db.insert(scheduleSlots).values({
           programId: input.programId,
           title: input.title || null,
@@ -1560,7 +1577,7 @@ export const appRouter = router({
         programId: z.number(),
         fromDate: z.string(),
         toDate: z.string(),
-        weekdayCap: z.number().default(12),    // Mon/Wed/Fri
+        weekdayCap: z.number().default(CLINIC_105_WEEKDAY_CAP),    // Mon/Wed/Fri morning
         sundayCap: z.number().default(12),
         startTime: z.string().default("09:00:00"),
         endTime: z.string().default("10:30:00"),
@@ -1568,6 +1585,12 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        if (!isMorningClinicWindow(input.startTime, input.endTime)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "105 Clinic sessions are mornings only. Choose times before 12 PM.",
+          });
+        }
         const start = new Date(input.fromDate);
         const end = new Date(input.toDate);
         const toInsert: any[] = [];

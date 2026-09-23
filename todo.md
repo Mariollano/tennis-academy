@@ -658,3 +658,4 @@
 - [x] Remove the Private Clinic public menu entries to avoid confusing this with the donation payment
 - [x] Send a thank-you email after a successful donation payment
 - [x] Test the $35 Stripe donation checkout and save a checkpoint
+- [x] Verify the deployed donation button and donation page are visible on the live site

@@ -16,3 +16,11 @@ The development preview was checked visually after the donation flow was added.
 - The homepage hero shows a prominent pink **Donate $35** button beside Book a Session and Mental Coaching.
 - The hero Quick Book strip includes **Donate $35 — Support the Academy**.
 - The `/donate` page renders a single **Donate $35 Securely** Stripe checkout button, without time selection, schedules, or approval controls.
+
+## Live Donation Verification — September 11, 2026
+
+The deployed site was checked directly at `https://tennispromario.com`.
+
+- The **Donate $35** hero button is visible between **Mental Coaching** and **2026 Summer Program**.
+- The Quick Book strip includes **Donate $35 — Support the Academy**.
+- `https://tennispromario.com/donate` displays the single secure Stripe payment button and no scheduling form.
