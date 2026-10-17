@@ -266,7 +266,7 @@ function AvailabilityPanelInner({
     }
   }, [initialDate, programType, onSelectSlot]);
 
-  const { data: slots, isLoading } = trpc.schedule.listAvailable.useQuery(
+  const { data: slots, isLoading, isError } = trpc.schedule.listAvailable.useQuery(
     { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
     { enabled: true }
   );
@@ -397,6 +397,12 @@ function AvailabilityPanelInner({
         {isLoading ? (
           <div className="flex items-center justify-center py-6 gap-2 text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading schedule…
+          </div>
+        ) : isError ? (
+          <div className="text-center py-6 text-muted-foreground">
+            <AlertCircle className="w-8 h-8 mx-auto mb-2 text-red-500" />
+            <p className="text-sm font-medium text-foreground">The booking schedule is temporarily unavailable.</p>
+            <p className="text-xs mt-1">Please try again in a moment or call Coach Mario at (401) 965-5873.</p>
           </div>
         ) : !slots || slots.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">

@@ -18,6 +18,7 @@ import { eq } from "drizzle-orm";
 import { notifyOwner } from "./notification";
 import { startReminderScheduler } from "../reminderScheduler";
 import { syncIcalCalendar } from "../icalSync";
+import { runIcalSyncSafely } from "../icalSyncScheduler";
 import { storagePut, storageGet } from "../storage";
 import { sendSms, isTwilioConfigured } from "../sms";
 import { sendBookingConfirmation, sendBookingConfirmed, sendDonationThankYou, isEmailConfigured } from "../email";
@@ -436,15 +437,11 @@ async function startServer() {
     startReminderScheduler();
     // Start the iCal sync scheduler — runs every 5 minutes
     const ICAL_SYNC_INTERVAL_MS = 5 * 60 * 1000;
-    setTimeout(async () => {
-      console.log("[iCalSync] Running initial sync...");
-      const result = await syncIcalCalendar();
-      console.log(`[iCalSync] Initial sync: ${result.message}`);
+    setTimeout(() => {
+      void runIcalSyncSafely({ trigger: "initial", sync: syncIcalCalendar });
     }, 5000); // wait 5s after startup
-    setInterval(async () => {
-      console.log("[iCalSync] Running scheduled sync...");
-      const result = await syncIcalCalendar();
-      console.log(`[iCalSync] Scheduled sync: ${result.message}`);
+    setInterval(() => {
+      void runIcalSyncSafely({ trigger: "scheduled", sync: syncIcalCalendar });
     }, ICAL_SYNC_INTERVAL_MS);
   });
 }
