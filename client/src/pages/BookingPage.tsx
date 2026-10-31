@@ -12,6 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { getFirstBookableSlotDate } from "@/lib/bookingCalendar";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { StoryCard } from "@/components/StoryCard";
@@ -255,8 +256,14 @@ function AvailabilityPanelInner({
     const [y, m, d] = initialDate.split("-").map(Number);
     return new Date(y, m - 1, d);
   });
+  const [visibleMonth, setVisibleMonth] = useState<Date | undefined>(() => {
+    if (!initialDate) return undefined;
+    const [y, m] = initialDate.split("-").map(Number);
+    return new Date(y, m - 1, 1);
+  });
   const timeSlotsRef = useRef<HTMLDivElement>(null);
   const didAutoSelect = useRef(false);
+  const didOpenFirstBookableDate = useRef(false);
 
   // Auto-trigger onSelectSlot for private lesson when initialDate is provided
   useEffect(() => {
@@ -270,6 +277,28 @@ function AvailabilityPanelInner({
     { programType: programType as "clinic_105" | "private_lesson", from: fromDate, to: toDate },
     { enabled: true }
   );
+
+  // When the current month has no 105 session left (for example, on October 31
+  // when the next game is November 1), open the calendar directly on the first
+  // date a player can book instead of making them hunt through empty months.
+  useEffect(() => {
+    if (
+      programType !== "clinic_105" ||
+      didOpenFirstBookableDate.current ||
+      initialDate ||
+      selectedDay ||
+      !slots?.length
+    ) {
+      return;
+    }
+
+    const firstBookableDate = getFirstBookableSlotDate(slots);
+    if (!firstBookableDate) return;
+
+    didOpenFirstBookableDate.current = true;
+    setSelectedDay(firstBookableDate);
+    setVisibleMonth(new Date(firstBookableDate.getFullYear(), firstBookableDate.getMonth(), 1));
+  }, [initialDate, programType, selectedDay, slots]);
 
   // Fetch blocked dates for the 90-day window so we can highlight them on the calendar
   const { data: blockedDatesData } = trpc.schedule.getBlockedDates.useQuery(
@@ -416,6 +445,8 @@ function AvailabilityPanelInner({
             <div className="flex-shrink-0">
               <Calendar
                 mode="single"
+                month={visibleMonth}
+                onMonthChange={setVisibleMonth}
                 selected={selectedDay}
                 onSelect={(day) => setSelectedDay(day)}
                 disabled={(date) => {
