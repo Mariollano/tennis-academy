@@ -37,6 +37,7 @@ import SummerCamp from "./pages/SummerCamp";
 import DoublesLeague from "./pages/DoublesLeague";
 import CancelBooking from "./pages/CancelBooking";
 import Donate from "./pages/Donate";
+import AIForWorkingTennisPro from "./pages/AIForWorkingTennisPro";
 
 // Scroll to top on every route change
 function ScrollToTop() {
@@ -92,6 +93,7 @@ function Router() {
           <Route path="/doubles-league" component={DoublesLeague} />
           <Route path="/cancel-booking" component={CancelBooking} />
           <Route path="/donate" component={Donate} />
+          <Route path="/ai-for-the-working-tennis-pro" component={AIForWorkingTennisPro} />
           <Route path="/dashboard">{() => <Redirect to="/admin" />}</Route>
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
