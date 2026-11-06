@@ -14,6 +14,7 @@ import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import WorkingTennisProBanner from "@/components/WorkingTennisProBanner";
 
 function useCountUp(target: number, duration = 1500, start = false) {
   const [count, setCount] = useState(0);
@@ -366,6 +367,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      <WorkingTennisProBanner />
       {/* ═══════════════════════════════════════════════════════════════
           HERO SECTION — Full-bleed with action photo
       ═══════════════════════════════════════════════════════════════ */}

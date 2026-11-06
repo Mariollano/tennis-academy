@@ -7,22 +7,25 @@
   ],
   "dev_command": "pnpm run dev",
   "env_vars": {
-    "DATABASE_URL": "mysql://mUSTnZHSjH9Rc4V.ee5fccb85a53:5QQg6Ip4z4b2bjZd9YOX@gateway04.us-east-1.prod.aws.tidbcloud.com:4000/kzZFsCRUb4iWMZR8LEwAKz?ssl={\"rejectUnauthorized\":true}"
+    "DATABASE_URL": "mysql://4XM7XDiq9uwc6Qv.0e5c507a95fe:i3tz93fBNEDOwG8K5J8e@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/kzZFsCRUb4iWMZR8LEwAKz?ssl={\"rejectUnauthorized\":true}",
+    "DRIZZLE_DATABASE_URL": "mysql://4XM7XDiq9uwc6Qv.0e5c507a95fe:i3tz93fBNEDOwG8K5J8e@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/kzZFsCRUb4iWMZR8LEwAKz?ssl={\"rejectUnauthorized\":true}",
+    "MANUS_WEBDEV_PROJECT_ID": "kzZFsCRUb4iWMZR8LEwAKz"
   },
   "experiments": [
     "no_db_push"
   ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz",
-    "access_key_id": "ASIAZV3A2ECZBMJJLC3Z",
-    "secret_access_key": "Ny8NbpnnJEWhat1yqWibN7OC/afLJndLZ0B92KHf",
-    "session_token": "IQoJb3JpZ2luX2VjEBsaCXVzLWVhc3QtMSJGMEQCIBrobNHN9x29q/uTA7p8GkTSLsEbC8d38bitjHtvE6fNAiBowJk4xlLAGq3wmyQ12eXW7f+Mdmt2iviXj1OCQwWg4ir/Awjk//////////8BEAQaDDY2NTM4NjA5ODg2NiIMpRVZAzTtHaWdU/6DKtMDy6Rq++zM0XSWrRdmhN8Iu1mKH7Z/I+Crvk66yhoMFX4Ft1/JjR3SWaJnRbHkOme7pTnkLxG4gAnKJA+1Y26fx+Tz5IPpAxOI5VhcpzatacqgwmSA+s+m9DPwY9HnNH3J9fk/0/qx+C97ol/n6jevPA9eV7FWp1KNn3DIpKCTKbbZjhhXjaLRhYyshVAO6loNF+FETyF6f/rb+KnmZX8du8tJWQcNdtF0PH1KJRnOwAyVHv6xNOgmO7Z/CgSpOH6KboS7ywXnLbwdHastE3yKoE2UvKr9S1BlBnszZULFP9NMiJuMDjalsSFLaXQi6rRLkp2jNgVYXsSLY9hTz69yJxIPRaGtHbWJ31hqicRbQOf0vnWfVHf3jhylm538N9ZGCCGBQMlN9B5/cRWZ9KVx2tAHgRAqsozA1QvJk+Jzp1VCc7IyskkEdyWSKiwkRfgH1qaArlrciysLCCUCDAcVLwLwzqfwsPHHP2NRgsf+BBq/5qRpa/BOlGY3Uxb4UPXq1VCjdzCO3ZOsyDKmZxTUp5EXW/QsVMKth3zwcnArMTUVAZ+FP3twn96Y7dv/Md1P32nhIsmlfgs+vf/dIvMwF1hKP2emHBmEZFYx5+l9U2SSxLEwvojn1AY6ngGy7xwGrcKCMf+Moe7ObhD2YibYRtqcqW387HrE0jVDRwI/+zsfiFwhBLmvBL8iSDtfIsYK01IDnCbK+HsELe+6nRCJCVWQWaDkw3nBdyW6+5o7H6HA4itLqporYq+9EWUJJq57SotWJVkfToWPwqRxRuHwJKVZ9ZB73YWwK8I76Irian8fzLZvGEAD8HfzA3XRAUq4nc9cgtQh9gZ/uw==",
-    "expiration": "2026-09-04T07:02:22.000Z",
+    "access_key_id": "ASIAZV3A2ECZCPH25NGW",
+    "secret_access_key": "jYY0TuKWBjeG8lV+gdagE9nMIj0UrXnbipRIjJGg",
+    "session_token": "IQoJb3JpZ2luX2VjEBgaCXVzLWVhc3QtMSJHMEUCIQCXtLxuOL494hqt4fCoLnLLJ6rc7TqcJZB+6AoTmL5dlwIgY7OguFEt0p6MwKGb7REzibsbe+S9uuSerAu3Wdt6Aikq/wMI4f//////////ARAEGgw2NjUzODYwOTg4NjYiDEv9eFK3IPRA30hYmCrTA1Vqf19L3vvVYzw1WuX3wjAsovrxOdHREUQA2O95rIwUhg0N3+bekZabMvtpwM4siXliS/bimjhNe+jEJ90aocK2u/uTwm3B1JEvAvBvOI7zvQRhxv/3w54WeKvB1CbtL6+qbX9eM9Bit7ib9l6z3xL1C9LmBXVbMI3tH/Vy/9D2k2V8/7oBe4KWBVjsvnUyDVO99c+NiCBG1TO9SAudJhjBPOuao9APcPVATb1dMfZE4u0B7ww5CKDyrth4glREFOUCtYG3IE3u/AT113bKAIlXQNesqG0y61zVi15DMePXIQ7PyX1jGCyA/sJTnuHZ2MxvpcrfA7POZfkpk9i95WI/2NNXX3RfQhL+sL0zCfXXyDQT3FT7sSyM+czE3w9HFPw1VXpvwQ0xMrCKhG/wRk+6unleMdBGHVmkmE+Roxir68HHH9bXgZdNwIXHypedIuaYFy8B9wZFe2OpMJRhemJaRhgOEZTznfaQDeJnG/twUkT5plYIhm2xiEPBCXjYdXgO/fie8ifeusvef4NtQD3OBkdz89bkJcnYngFYA1ALp/xo2IVgxCO8yy9kOk+Ma8ARlafFHFrsFk3yR/hWT8VK8uPTskHR/XIa99YE7fCvVKYNMLLmt9cGOp0BDzdqBYDlRTmWEMSb2FCf7zPky5bgZzo3Z11D9Tvz7mtAFu8up/edrcCoqLRhoVPLUluYSeSX9Ycnx0350B/btKNt0V6Usyb7RLhWwE5cHlj56Q0bBW6LkeHH+I8Xy595vS/vD+piAnyZkMN7jSVcdQq6ehRbA7kLO1cNfM+I6kU3+VZtaLdEULKuVbbPIvFSnhxnhaBdJcocGUU4tA==",
+    "expiration": "2026-11-07T03:33:06.000Z",
     "backend": "GIT_BACKEND_S3"
   },
   "name": "tennis-academy",
   "path": "/home/ubuntu/tennis-academy",
   "port": 3000,
+  "runtime_endpoints": null,
   "secrets": {
     "BUILT_IN_FORGE_API_KEY": "jWkenAa4y9N5PJDGU58JZk",
     "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
@@ -34,7 +37,7 @@
     "OWNER_OPEN_ID": "CXhdcctKRsifRuwsJQYmmb",
     "RESEND_API_KEY": "re_SWHuzgur_G3yQwfNEBEsxTBgSqNqijsv2",
     "STRIPE_SECRET_KEY": "sk_test_51T5kuMGqNizWQ5DESKOs94zIBrTzi8ESqdFU2vRWrsp6brCZFj9SmfmFruCFqdPErHavqVnmyGZXO8xzWRg0PyvK00gxkw5yPo",
-    "STRIPE_WEBHOOK_SECRET": "whsec_5P638EmRMuLXX3U8C8FeYFLN7SlXflpH",
+    "STRIPE_WEBHOOK_SECRET": "whsec_ISatM7bQDrn9mExNdj8ALauFHn6khGCp",
     "TWILIO_ACCOUNT_SID": "AC1987d13be48c274d2e6c35062b94f9e6",
     "TWILIO_AUTH_TOKEN": "863e1484c0b8a14aa98cc9afafcc7630",
     "TWILIO_PHONE_NUMBER": "+14012891427",
