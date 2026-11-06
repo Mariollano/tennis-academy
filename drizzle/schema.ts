@@ -430,3 +430,57 @@ export const doublesLeagueSignups = mysqlTable("doubles_league_signups", {
 });
 export type DoublesLeagueSignup = typeof doublesLeagueSignups.$inferSelect;
 export type InsertDoublesLeagueSignup = typeof doublesLeagueSignups.$inferInsert;
+
+// ─── AI coaching membership (separate from tennis bookings / Manus logins) ───
+export const aiMembers = mysqlTable("ai_members", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  name: varchar("name", { length: 200 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export const aiSubscriptions = mysqlTable("ai_subscriptions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  memberId: int("memberId").notNull(),
+  customerId: varchar("customerId", { length: 255 }).notNull(),
+  status: varchar("status", { length: 40 }).notNull(),
+  paidThrough: timestamp("paidThrough"),
+  cancelAtPeriodEnd: boolean("cancelAtPeriodEnd").default(false).notNull(),
+  livemode: boolean("livemode").default(false).notNull(),
+  welcomeSentAt: timestamp("welcomeSentAt"),
+  welcomeLeaseAt: timestamp("welcomeLeaseAt"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export const aiLoginTokens = mysqlTable("ai_login_tokens", {
+  hash: varchar("hash", { length: 64 }).primaryKey(),
+  memberId: int("memberId").notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  usedAt: timestamp("usedAt"),
+});
+export const aiMemberSessions = mysqlTable("ai_member_sessions", {
+  hash: varchar("hash", { length: 64 }).primaryKey(),
+  memberId: int("memberId").notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+});
+export const aiCheckoutIntents = mysqlTable("ai_checkout_intents", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  claimHash: varchar("claimHash", { length: 64 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  origin: varchar("origin", { length: 255 }).notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+});
+export const aiGuideAssets = mysqlTable("ai_guide_assets", {
+  slot: varchar("slot", { length: 40 }).primaryKey(),
+  encryptedStorageKey: varchar("encryptedStorageKey", { length: 500 }).notNull(),
+  filename: varchar("filename", { length: 255 }).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export const aiMembershipSettings = mysqlTable("ai_membership_settings", {
+  id: int("id").primaryKey(),
+  checkoutEnabled: boolean("checkoutEnabled").default(false).notNull(),
+  verifiedWebhookSecretHash: varchar("verifiedWebhookSecretHash", { length: 64 }),
+  stripeWebhookEndpointId: varchar("stripeWebhookEndpointId", { length: 255 }),
+  stripeWebhookAccountId: varchar("stripeWebhookAccountId", { length: 255 }),
+  encryptedWebhookSecret: text("encryptedWebhookSecret"),
+  promptLibrary: mediumtext("promptLibrary"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});

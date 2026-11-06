@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FileText, Clapperboard, Megaphone, CalendarCheck, BookOpen, Lightbulb } from "lucide-react";
-import { toast } from "sonner";
+import MemberJoinButton from "@/components/MemberJoinButton";
 
 const MARIO_PHOTO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz/mario-us-open_68ad2763.jpg";
 const headingStyle = { fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700 };
@@ -44,27 +44,12 @@ export const membershipGuides = [
   },
 ];
 
-export const MEMBERSHIP_CHECKOUT_NOTICE = "Membership checkout is coming soon. No payment has been taken.";
-
-/** Checkout is intentionally not connected until the later payment step. */
-export function showMembershipCheckoutNotice() {
-  toast.info(MEMBERSHIP_CHECKOUT_NOTICE);
-}
-
 export function scrollToMembershipGuides(hash: string, target: Pick<HTMLElement, "scrollIntoView"> | null) {
   if (hash === "#guides") target?.scrollIntoView({ block: "start", behavior: "instant" });
 }
 
 function JoinButton() {
-  return (
-    <button
-      type="button"
-      onClick={showMembershipCheckoutNotice}
-      className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#F3C85D] bg-[#F3C85D] px-6 py-3 text-base font-semibold text-[#0D1B2A] transition-colors duration-150 hover:bg-[#FFDC83] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F3C85D]"
-    >
-      Join — $20/month
-    </button>
-  );
+  return <MemberJoinButton />;
 }
 
 export default function AIForWorkingTennisPro() {

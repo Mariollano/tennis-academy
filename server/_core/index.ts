@@ -24,6 +24,7 @@ import { sendSms, isTwilioConfigured } from "../sms";
 import { sendBookingConfirmation, sendBookingConfirmed, sendDonationThankYou, isEmailConfigured } from "../email";
 import { handleIcalFeed } from "../ical";
 import { sdk } from "./sdk";
+import { registerMembershipRoutes, registerMembershipWebhook } from "../aiMembershipRoutes";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -74,6 +75,7 @@ async function startServer() {
 
   // ─── Stripe Webhook (MUST be before body parser) ─────────────────────────
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2026-02-25.clover" });
+  registerMembershipWebhook(app);
   app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
     const sig = req.headers["stripe-signature"];
     let event: Stripe.Event;
@@ -220,6 +222,7 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  registerMembershipRoutes(app);
 
   // ─── Voice Audio Upload Endpoint ─────────────────────────────────────────
   const audioUpload = multer({

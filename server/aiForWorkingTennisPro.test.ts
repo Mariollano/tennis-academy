@@ -2,22 +2,16 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-
-const { info } = vi.hoisted(() => ({ info: vi.fn() }));
-vi.mock("sonner", () => ({ toast: { info } }));
+import { describe, expect, it, vi } from "vitest";
+vi.mock("../client/src/components/MemberJoinButton", () => ({ default: () => createElement("button", { type: "button" }, "Join — $20/month") }));
 
 import AIForWorkingTennisPro, {
-  MEMBERSHIP_CHECKOUT_NOTICE,
   scrollToMembershipGuides,
-  showMembershipCheckoutNotice,
 } from "../client/src/pages/AIForWorkingTennisPro";
 
 const root = new URL("../", import.meta.url);
 const html = renderToStaticMarkup(createElement(AIForWorkingTennisPro));
 const text = html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/\s+/g, " ");
-
-beforeEach(() => info.mockClear());
 
 describe("AI for the Working Tennis Pro membership page", () => {
   it("renders the five requested sections in order", () => {
@@ -65,10 +59,8 @@ describe("AI for the Working Tennis Pro membership page", () => {
     expect(html.match(/<button type="button"/g)).toHaveLength(2);
     expect(html).not.toContain("checkout.stripe.com");
     expect(html).not.toContain("download=");
-    showMembershipCheckoutNotice();
-    expect(info).toHaveBeenCalledOnce();
-    expect(info).toHaveBeenCalledWith(MEMBERSHIP_CHECKOUT_NOTICE);
-    expect(MEMBERSHIP_CHECKOUT_NOTICE).toContain("No payment has been taken.");
+    const source = readFileSync(new URL("client/src/pages/AIForWorkingTennisPro.tsx", root), "utf8");
+    expect(source).toContain("return <MemberJoinButton />;");
   });
 
   it("supports the homepage See the guides link without scrolling unrelated hashes", () => {
@@ -95,7 +87,13 @@ describe("AI for the Working Tennis Pro membership page", () => {
     expect(app).toContain('<Route path="/ai-for-the-working-tennis-pro" component={AIForWorkingTennisPro} />');
     const withoutAddition = app
       .replace('import AIForWorkingTennisPro from "./pages/AIForWorkingTennisPro";\n', "")
-      .replace('          <Route path="/ai-for-the-working-tennis-pro" component={AIForWorkingTennisPro} />\n', "");
+      .replace('          <Route path="/ai-for-the-working-tennis-pro" component={AIForWorkingTennisPro} />\n', "")
+      .replace('import AIMembers from "./pages/AIMembers";\n', "")
+      .replace('import AIMemberSignIn from "./pages/AIMemberSignIn";\n', "")
+      .replace('import AdminAIMembers from "./pages/AdminAIMembers";\n', "")
+      .replace('          <Route path="/ai-members/sign-in" component={AIMemberSignIn} />\n', "")
+      .replace('          <Route path="/ai-members" component={AIMembers} />\n', "")
+      .replace('          <Route path="/admin/ai-members" component={AdminAIMembers} />\n', "");
     const original = execFileSync("git", ["show", "98d58635:client/src/App.tsx"], { cwd: root, encoding: "utf8" });
     expect(withoutAddition).toBe(original);
     const home = readFileSync(new URL("client/src/pages/Home.tsx", root), "utf8");

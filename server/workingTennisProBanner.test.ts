@@ -2,7 +2,8 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+vi.mock("../client/src/components/MemberJoinButton", () => ({ default: () => createElement("button", { type: "button", className: "bg-[#F3C85D]" }, "Join — $20/month") }));
 import WorkingTennisProBanner from "../client/src/components/WorkingTennisProBanner";
 
 const root = new URL("../", import.meta.url);
@@ -26,12 +27,14 @@ describe("working tennis pro homepage announcement", () => {
       expect(html).toContain(text);
     }
     expect(html).not.toContain("let&#x27;s do this");
-    expect(html.match(/<a\s/g)).toHaveLength(2);
+    expect(html.match(/<a\s/g)).toHaveLength(1);
+    expect(html.match(/<button\s/g)).toHaveLength(1);
   });
 
   it("links to the Part 2 membership page and its guides anchor", () => {
     const html = renderBanner();
-    expect(html).toContain('href="/ai-for-the-working-tennis-pro"');
+    const source = readFileSync(new URL("client/src/components/WorkingTennisProBanner.tsx", root), "utf8");
+    expect(source).toContain("<MemberJoinButton");
     expect(html).toContain('href="/ai-for-the-working-tennis-pro#guides"');
   });
 

@@ -1,4 +1,5 @@
 import * as React from "react";
+import MemberJoinButton from "./MemberJoinButton";
 
 /** Homepage announcement only. The membership page and #guides list arrive in Part 2. */
 export default function WorkingTennisProBanner() {
@@ -29,12 +30,7 @@ export default function WorkingTennisProBanner() {
             Everything I use AI for at my academy — the app that runs my billing, the daily videos that market it, the assistant that keeps my days straight — written up as step-by-step guides any working pro can follow.
           </p>
           <div className="grid max-w-md grid-cols-2 gap-3 sm:flex sm:max-w-none">
-            <a
-              href="/ai-for-the-working-tennis-pro"
-              className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#F3C85D] bg-[#F3C85D] px-3 py-3 text-center text-sm font-semibold text-[#0D1B2A] transition-colors duration-150 hover:bg-[#FFDC83] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F3C85D] sm:px-6 sm:text-base"
-            >
-              Join — $20/month
-            </a>
+            <MemberJoinButton className="px-3 sm:px-6" />
             <a
               href="/ai-for-the-working-tennis-pro#guides"
               className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/75 bg-transparent px-3 py-3 text-center text-sm font-semibold text-white transition-colors duration-150 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-6 sm:text-base"

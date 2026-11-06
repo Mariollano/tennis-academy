@@ -1,0 +1,1 @@
+ALTER TABLE `ai_membership_settings` ADD `verifiedWebhookSecretHash` varchar(64);

@@ -38,6 +38,7 @@ import { voiceBookingRouter } from "./routers/voiceBooking";
 import { icalSyncRouter } from "./routers/icalSync";
 import { doublesLeagueRouter } from "./routers/doublesLeague";
 import { donationRouter } from "./routers/donation";
+import { aiMembershipRouter } from "./routers/aiMembership";
 import { eq, desc, and, sql, gte, lte, or } from "drizzle-orm";
 import { CLINIC_105_WEEKDAY_CAP, isMorningClinicWindow } from "@shared/clinic105Schedule";
 
@@ -82,6 +83,7 @@ export const appRouter = router({
   promoCodes: promoCodeRouter,
   doublesLeague: doublesLeagueRouter,
   donation: donationRouter,
+  aiMembership: aiMembershipRouter,
 
   // ─── Announcements ──────────────────────────────────────────────────────────
   announcements: router({
