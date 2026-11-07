@@ -1,6 +1,12 @@
-# AI membership: checkout enabled
+# AI membership: verified and enabled; publication still needed
 
 Updated November 6, 2026, after the corrected Gmail credentials were saved directly to this website.
+
+## Public-site status
+
+The project is ready and enrollment is enabled in its database. However, a signed-in admin check on the public website confirms its running service still rejects the old email credentials. Its public checkout status remains unavailable. The latest checkpoint must be published to apply the corrected email Settings to production. No further Stripe or Gmail credential entry is needed.
+
+The assistant tried to open the project publishing controls in the cloud browser, but Manus requires the owner's login. Publishing can be done from the owner's already signed-in Manus app. After publication, the public Join dialog and Stripe redirect must be retested before calling the public launch complete.
 
 ## Completed
 
@@ -13,6 +19,7 @@ Updated November 6, 2026, after the corrected Gmail credentials were saved direc
 - A real owner email account was created for this sign-in test. No subscription or paid access was granted by the test.
 - Membership readiness passed with no blockers, and enrollment was enabled in the membership settings.
 - All 191 focused membership, catalog, landing-page, and tennis booking regression tests passed. The two separate real-provider connection tests also passed. TypeScript checks passed.
+- The enabled checkout procedure created a real live Stripe session with the correct product, quantity one, and $20 USD monthly price. No card was entered and payment remained unpaid. That unused owner test session was expired immediately afterward.
 
 ## Payment and onboarding behavior
 
@@ -42,7 +49,7 @@ The separately stored `AI_MEMBERSHIP_STRIPE_SECRET_KEY` is used only by this mem
 
 No card has been charged. No real subscription purchase or complete paid customer onboarding has been performed. Payment fulfillment, immediate welcome email, cancellation, sign-in token consumption, and download authorization are covered by isolated regression tests. Live checks verify the real providers, signed webhook transport, and owner onboarding email.
 
-A real paid end-to-end test requires permission before charging any card. The live Join-to-Stripe browser check stops before card entry or payment and its unused checkout session can be expired afterward.
+A real paid end-to-end test requires permission before charging any card. The server-side Join-to-Stripe check passed without card entry or payment, and its unused checkout session was expired. The public browser check is still blocked by production's old email settings and needs publication before it can be completed.
 
 ## Repeatable owner launch check
 
