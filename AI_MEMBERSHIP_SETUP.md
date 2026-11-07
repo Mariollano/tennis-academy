@@ -1,54 +1,63 @@
-# AI membership: built, enrollment closed
+# AI membership: Stripe connected; welcome email still blocked
 
-The membership feature is built and tested, but it is **not accepting payments yet**. Do not announce enrollment as open until the Stripe and email setup below is completed and the real delivery flow has been checked.
+Updated November 6, 2026.
 
-## What is ready
+## Completed in the real Stripe account
 
-Both homepage and membership-page Join buttons use the same guarded checkout control. When enrollment is safely opened, Stripe Checkout charges **$20.00 USD each month** for **AI for the Working Tennis Pro — Membership**. The visitor sees the monthly billing terms and the fact that unfinished guides say “Coming soon” before paying.
+The live Stripe key passed account verification: payments are enabled and the required business details have been submitted. A dedicated membership key is stored securely as `AI_MEMBERSHIP_STRIPE_SECRET_KEY`; the platform-managed tennis payment key is unchanged.
 
-A completed paid checkout creates a member account using the email returned by Stripe. The welcome email contains a private, one-use sign-in link and the member-library link. A payment-confirmation URL alone never signs someone in: the subscriber uses the emailed link to prove they control that email.
+The live product **AI for the Working Tennis Pro — Membership** and its fixed **$20.00 USD/month** recurring price are created. All membership Join buttons use that single price when enrollment opens. Members can cancel future renewal from the member library.
 
-The library at `/ai-members` has Guide 1 through Guide 5 plus New Guides. All six PDF slots start as **Coming soon**. Prompt Library also says Coming soon until Mario adds prompts. Non-members see a short membership message, the Join button, and an email sign-in form—not the downloads or prompts.
+- [Open the live product in Stripe](https://dashboard.stripe.com/products/prod_ai_working_tennis_pro_membership_v1)
+- Product ID: `prod_ai_working_tennis_pro_membership_v1`
+- Price ID: `price_1UYzWeDYnfcpZzYJIUFhmIZF`
+- Price lookup key: `ai_working_tennis_pro_monthly_v1`
 
-Members can cancel future renewal from the library. They retain access through the paid month. Downloaded PDFs are theirs to keep.
+A separate live subscription webhook is registered at `https://tennispromario.com/api/ai-members/stripe-webhook`, with checkout completion, subscription changes, and invoice paid/failed events. Its endpoint-specific signing secret is encrypted in the membership settings table. The original tennis webhook and signing secret were not changed.
 
-Mario can upload or replace PDFs and paste Prompt Library text at `/admin/ai-members`. PDFs are encrypted in file storage and served through an authenticated server endpoint, not a public PDF link.
+## Only remaining blocker: Gmail
 
-Existing tennis homepage sections, prices, booking procedures, SMS/email services, and original tennis Stripe webhook handlers are unchanged.
+Google still rejects the saved account/password combination for **ritennismario@gmail.com** with authentication error 535. The password was also tested without spaces; this is not a formatting problem. Resend is not a working fallback.
 
-## What you need to do first
+A second secure email form was declined, so no corrected email credentials were supplied.
 
-1. **Open your Stripe Dashboard.** Finish business and bank-account activation if Stripe asks for it. Switch from test mode to live mode and obtain the live secret key. The saved project key checked during this task starts with `sk_test_`, not `sk_live_`.
-2. **Restore welcome-email sending.** The saved Gmail password was rejected with authentication error 535; the Resend key was also invalid. Use a current Google App Password for the academy’s sending Gmail account, or a valid Resend key with a verified sender domain. Supply secrets through the project’s secure secrets form, never ordinary chat or source code.
-3. **Publish the saved membership code with enrollment still closed.** Then open `/admin/ai-members` and click **Connect membership webhook**. It creates a separate live endpoint at `https://tennispromario.com/api/ai-members/stripe-webhook`, on the connected account, and saves its Stripe-returned signing secret encrypted. It does not change the existing `/api/stripe/webhook` or its signing secret. You do not need to create a membership product or price manually; Checkout creates the correctly named monthly price automatically.
-4. **Check actual delivery before opening to the public.** Recheck setup. Preview the welcome email. Confirm that a real email can be delivered and that the end-to-end Stripe checkout, emailed sign-in, member access, and cancellation flow work. Unit tests used in-memory records and mocked Stripe/email responses; they did not charge a card or send a real email. Any paid live test requires your explicit approval first.
-5. When ready, use **Open enrollment** in membership administration. Even after that switch is on, the server refuses new checkout requests if live Stripe, the dedicated webhook, database/encryption, or email verification fails.
+**Enrollment is intentionally closed.** A member needs their private emailed sign-in link to prove they own the checkout email. Opening payment before that email can be sent would risk someone paying but being unable to sign in.
 
-The website’s current public version may remain older until the checkpoint is published. Preview links below show the implementation without opening enrollment.
+## Mario’s next step
+
+1. Open [Google App Passwords](https://myaccount.google.com/apppasswords).
+2. Check the Google account shown at the top. The address must exactly match the academy’s configured sender, normally **ritennismario@gmail.com**. If you created the password in another Google account, use that same account as the sending address instead.
+3. Create a **new** App Password named **RI Tennis Academy**. Google requires 2-Step Verification. This is a 16-character App Password, not your usual Google password.
+4. Supply the Gmail address and matching App Password through the secure secrets form. Do not paste the password into ordinary chat. You do not need to provide the Stripe key again.
+
+After Google accepts the credentials, the remaining work is to send and verify a genuine welcome/sign-in email, recheck membership readiness, and open enrollment. An end-to-end paid checkout test requires explicit permission before any real card charge; no real charge has been performed.
+
+## Member delivery already implemented
+
+Paid checkout fulfillment creates a member account from the email returned by Stripe, then attempts the branded welcome email immediately. That email includes a one-use sign-in link, a member-library link, and three getting-started instructions. Failed welcome delivery remains retryable through Stripe; repeat webhooks do not create duplicate accounts.
+
+The member library at `/ai-members` has Guide 1 through Guide 5 plus New Guides, all showing **Coming soon** until a PDF is uploaded. Prompt Library also shows Coming soon until Mario adds prompts. Non-members cannot obtain the PDF downloads or prompt text. Admin uploads are at `/admin/ai-members`.
+
+The server checks paid subscription access before serving decrypted PDFs. The publicly stored file bytes are encrypted. A checkout-success URL alone cannot sign in to an existing email account.
+
+## Validation and deployment
+
+All 191 focused membership/catalog/landing-page and existing tennis booking regression tests passed. TypeScript checks and the production build also passed. The separate read-only live Stripe connection test passed; the real email-authentication test remains failed and is the stated blocker, not a completed test.
+
+No live subscription purchase, real charge, successful welcome email, or fabricated member record was created. The only external configuration changes made were the authorized membership product, monthly price, and dedicated Stripe webhook.
+
+Publishing the latest saved checkpoint deploys the isolated key support and permanent-price checkout. It does **not** open enrollment automatically. Readiness refuses checkout if email authentication or the fixed Stripe product/webhook checks fail.
 
 ## Preview links
 
 - [Member library](https://3000-ijfrnb4kjrjdv31x41kvv-81656936.us1.manus.computer/ai-members)
-- [Manage PDFs and membership setup](https://3000-ijfrnb4kjrjdv31x41kvv-81656936.us1.manus.computer/admin/ai-members)
+- [Membership administration](https://3000-ijfrnb4kjrjdv31x41kvv-81656936.us1.manus.computer/admin/ai-members)
 - [Welcome email preview](https://3000-ijfrnb4kjrjdv31x41kvv-81656936.us1.manus.computer/api/ai-members/welcome-preview)
-
-## Validation completed
-
-44 membership/landing-page tests passed. Another 14 focused tests for tennis booking calendars, clinic scheduling, donation rules, availability, and safe calendar-sync handling passed. TypeScript checks and the production build passed.
-
-The browser showed the non-member library correctly and confirmed that Join shows “Membership enrollment is not open yet” with no payment action. Direct unauthenticated PDF requests returned HTTP 401.
-
-No live Stripe checkout, real charge, real welcome email, or PDF upload to live storage was performed. No fabricated member or payment was inserted into the production database. Schema changes only added the membership tables and fields.
 
 ## Technical maintenance notes
 
-The membership has separate accounts and session cookies; it does not grant tennis-admin privileges. Login tokens are hashed, expiring, and transactionally one-use. Server-side access requires a live, active subscription with a confirmed paid period in the future. Protected requests reconcile the latest Stripe status; changed products, failed payments, and canceled subscriptions do not keep stale access.
+Preserve the persistent server `JWT_SECRET` when backing up or migrating the site; it protects encrypted PDFs and the membership webhook signing secret. Existing tennis booking/payment handlers, academy prices, and SMS/email service code were not edited for this Stripe connection.
 
-PDF bytes and the dedicated webhook signing secret are encrypted using a key derived from the existing persistent server `JWT_SECRET`. Preserve that secret with secure backups; rotate it only with a planned migration of the encrypted assets and webhook secret. The existing Stripe webhook signing secret is not changed.
+The membership product is found using its fixed lookup key and validated for live mode, active status, the exact product name, $20 USD monthly recurrence, and quantity one. An unexpected price/product fails closed rather than silently being changed. Public readiness checks only read the catalog; product creation is an owner/admin action.
 
-Membership rate limits trust only loopback proxy peers by default. If deployment uses another proxy address, allowlist its exact peer IP in `MEMBERSHIP_TRUSTED_PROXY_IPS`; never indiscriminately trust visitor-supplied forwarding headers. Rate limits are bounded in-memory, not distributed across instances.
-
-## Stripe references used
-
-- [Subscription webhooks and paid access](https://docs.stripe.com/billing/subscriptions/webhooks)
-- [Subscription Checkout](https://docs.stripe.com/payments/checkout/build-subscriptions)
+Membership rate limits trust loopback proxies by default. If deployment uses another proxy, allowlist its exact peer address through `MEMBERSHIP_TRUSTED_PROXY_IPS`, not arbitrary forwarding headers.

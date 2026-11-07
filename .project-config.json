@@ -16,10 +16,10 @@
   ],
   "git_remote": {
     "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663342968318/kzZFsCRUb4iWMZR8LEwAKz",
-    "access_key_id": "ASIAZV3A2ECZCPH25NGW",
-    "secret_access_key": "jYY0TuKWBjeG8lV+gdagE9nMIj0UrXnbipRIjJGg",
-    "session_token": "IQoJb3JpZ2luX2VjEBgaCXVzLWVhc3QtMSJHMEUCIQCXtLxuOL494hqt4fCoLnLLJ6rc7TqcJZB+6AoTmL5dlwIgY7OguFEt0p6MwKGb7REzibsbe+S9uuSerAu3Wdt6Aikq/wMI4f//////////ARAEGgw2NjUzODYwOTg4NjYiDEv9eFK3IPRA30hYmCrTA1Vqf19L3vvVYzw1WuX3wjAsovrxOdHREUQA2O95rIwUhg0N3+bekZabMvtpwM4siXliS/bimjhNe+jEJ90aocK2u/uTwm3B1JEvAvBvOI7zvQRhxv/3w54WeKvB1CbtL6+qbX9eM9Bit7ib9l6z3xL1C9LmBXVbMI3tH/Vy/9D2k2V8/7oBe4KWBVjsvnUyDVO99c+NiCBG1TO9SAudJhjBPOuao9APcPVATb1dMfZE4u0B7ww5CKDyrth4glREFOUCtYG3IE3u/AT113bKAIlXQNesqG0y61zVi15DMePXIQ7PyX1jGCyA/sJTnuHZ2MxvpcrfA7POZfkpk9i95WI/2NNXX3RfQhL+sL0zCfXXyDQT3FT7sSyM+czE3w9HFPw1VXpvwQ0xMrCKhG/wRk+6unleMdBGHVmkmE+Roxir68HHH9bXgZdNwIXHypedIuaYFy8B9wZFe2OpMJRhemJaRhgOEZTznfaQDeJnG/twUkT5plYIhm2xiEPBCXjYdXgO/fie8ifeusvef4NtQD3OBkdz89bkJcnYngFYA1ALp/xo2IVgxCO8yy9kOk+Ma8ARlafFHFrsFk3yR/hWT8VK8uPTskHR/XIa99YE7fCvVKYNMLLmt9cGOp0BDzdqBYDlRTmWEMSb2FCf7zPky5bgZzo3Z11D9Tvz7mtAFu8up/edrcCoqLRhoVPLUluYSeSX9Ycnx0350B/btKNt0V6Usyb7RLhWwE5cHlj56Q0bBW6LkeHH+I8Xy595vS/vD+piAnyZkMN7jSVcdQq6ehRbA7kLO1cNfM+I6kU3+VZtaLdEULKuVbbPIvFSnhxnhaBdJcocGUU4tA==",
-    "expiration": "2026-11-07T03:33:06.000Z",
+    "access_key_id": "ASIAZV3A2ECZABV4MN5Z",
+    "secret_access_key": "wC41gLsbRZLGT1JzU2kDsfS6FHxcAYnpEVt9ooJg",
+    "session_token": "IQoJb3JpZ2luX2VjECMaCXVzLWVhc3QtMSJIMEYCIQDOe8JGwLWxHogZs7ZqDZ6hnfKwgEfwnjSh+TW71v/lrgIhANG1iFYX0AFT8ebc9ONnV7wgkAXcIo4cEzC449jD+pngKv8DCOv//////////wEQBBoMNjY1Mzg2MDk4ODY2IgyCqjDQRRl6hqpa3kIq0wMlC9SsvokTJYzt6uvQKKPA2CpJ4yYgWxpinLk/6a4GiaoF6zfB4/Uy5qKVucF8a59kaH6IdbFZzQsE36rJC/Qr/0ORW0z1ohg/ngogCFlRuXeQwZGNYeaivL2IIpz6KpItft39Nj6tv001C/vliDLZ1BJQ9TTNyZUMEMjoIy3Hi4yNX6uQus/EbFEdF9XUif68c0XYkG4rkm+ObPmKVoI/d18u1Dm9LcFhNEKjdzxws5oiCROSTZqWCu13fg2X3eeJYr4cAKUhsytw+QiQiQXQ2FRKfKzinLHKXtLBVEh09M2agxLssRzLFgaCUldYlG/ofJjNaDK5VUdf15HFDN3ea671tylv2RMJMOpgCAbYzBzKh+OkLUMDWj1ilJGkdcvIn0XTixQRwyH75MqE9SO67yliJ8Dz78Dy0euwj90cNkJ/W8DmnX/D+BbcV7wgufYnG2JAnJ2PjEWCy7Azf7cskMWpghvHWIbJxuO9eZx4ccwy+0pPLrkmJnUcotAW0Xqh7WstjZZjqAmUukNdemdnJ5fRJ/NQ9fJHS92yJ2AUMDYmehjAbIKl2DWAl0d//QSjnH44DBWwlU+SkVChw/RwnqAm5VmLuhwJGgHQqVWETIfRZTCimrrXBjqcAZZZGQkuvkqJBPtYIf0ifkaQKbYBHBJInASZeUkLUb3ZvojBdenV/4mE2ANlLkxFVAYqv/HrnDlDcd87IYs2Oa80BnBSkEPc3EjXCcqFaZbziYPdFbZ7o24XTYl/5o7CbUDbTLAn5UhHnMlirtO+F0PdSCFxLLKV7+g5/jCvzIMYHiWjjlpvaNNwWMk2Fpa5aSm1NlO6fiqcF4HzPQ==",
+    "expiration": "2026-11-07T14:29:54.000Z",
     "backend": "GIT_BACKEND_S3"
   },
   "name": "tennis-academy",
@@ -27,6 +27,7 @@
   "port": 3000,
   "runtime_endpoints": null,
   "secrets": {
+    "AI_MEMBERSHIP_STRIPE_SECRET_KEY": "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",
     "BUILT_IN_FORGE_API_KEY": "jWkenAa4y9N5PJDGU58JZk",
     "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
     "EMAIL_APP_PASSWORD": "mgzatnlgwbjoxdfi",
@@ -37,7 +38,7 @@
     "OWNER_OPEN_ID": "CXhdcctKRsifRuwsJQYmmb",
     "RESEND_API_KEY": "re_SWHuzgur_G3yQwfNEBEsxTBgSqNqijsv2",
     "STRIPE_SECRET_KEY": "sk_test_51T5kuMGqNizWQ5DESKOs94zIBrTzi8ESqdFU2vRWrsp6brCZFj9SmfmFruCFqdPErHavqVnmyGZXO8xzWRg0PyvK00gxkw5yPo",
-    "STRIPE_WEBHOOK_SECRET": "whsec_ISatM7bQDrn9mExNdj8ALauFHn6khGCp",
+    "STRIPE_WEBHOOK_SECRET": "whsec_1Afk7qlt62n8QI4BBcGI7m5zTbUQgDZf",
     "TWILIO_ACCOUNT_SID": "AC1987d13be48c274d2e6c35062b94f9e6",
     "TWILIO_AUTH_TOKEN": "863e1484c0b8a14aa98cc9afafcc7630",
     "TWILIO_PHONE_NUMBER": "+14012891427",

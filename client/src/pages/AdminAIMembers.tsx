@@ -23,6 +23,7 @@ function AdminContent() {
   const save = trpc.aiMembership.library.savePrompts.useMutation({ onSuccess: () => { toast.success("Prompt Library saved."); void utils.aiMembership.library.adminLibrary.invalidate(); } });
   const enrollment = trpc.aiMembership.library.setEnrollment.useMutation({ onSuccess: () => { void utils.aiMembership.library.adminLibrary.invalidate(); void utils.aiMembership.library.readiness.invalidate(); toast.success("Enrollment setting saved."); } });
   const connect = trpc.aiMembership.library.connectWebhook.useMutation({ onSuccess: () => { toast.success("Dedicated membership webhook connected."); void utils.aiMembership.library.readiness.invalidate(); } });
+  const product = trpc.aiMembership.library.connectProduct.useMutation({ onSuccess: () => { toast.success("Live $20/month membership product connected."); void utils.aiMembership.library.readiness.invalidate(); } });
   const uploadPdf = async (file: File, slot: Slot) => {
     if (!file.name.toLowerCase().endsWith(".pdf") || file.size > 10 * 1024 * 1024) { toast.error("Choose a PDF up to 10 MB."); return; }
     setUploading(slot);
@@ -40,7 +41,10 @@ function AdminContent() {
         <h2 className="mb-3 text-xl font-semibold">Enrollment setup</h2>
         <p className="mb-4 text-sm">Enrollment is {library.data?.enabled ? "enabled" : "closed"}. Even when enabled, checkout stays blocked if any readiness check fails.</p>
         {readiness.isLoading ? <p>Checking Stripe and email…</p> : readiness.error ? <p className="text-red-700">Setup checks could not complete.</p> : readiness.data?.ready ? <p className="text-green-700">All setup checks passed.</p> : <ul className="list-disc space-y-3 pl-5 text-sm leading-relaxed">{readiness.data?.blockers.map(blocker => <li key={blocker}>{blocker}</li>)}</ul>}
+        {readiness.data?.catalog && <p className="mt-4 text-sm text-green-700">Stripe product connected: {readiness.data.catalog.productName} — $20.00 USD/month. <a className="underline" href={`https://dashboard.stripe.com/products/${readiness.data.catalog.productId}`} target="_blank" rel="noreferrer">Open in Stripe</a></p>}
         <div className="mt-5 flex flex-wrap gap-3"><Button variant="outline" disabled={readiness.isFetching} onClick={() => void readiness.refetch()}>Recheck setup</Button><Button variant="outline" disabled={connect.isPending} onClick={() => connect.mutate()}>{connect.isPending ? "Connecting…" : "Connect membership webhook"}</Button><a className="inline-flex min-h-10 items-center text-sm underline" href="/api/ai-members/welcome-preview" target="_blank" rel="noreferrer">Preview the welcome email</a></div>
+        <Button className="mt-3" variant="outline" disabled={product.isPending} onClick={() => product.mutate()}>{product.isPending ? "Connecting product…" : "Connect membership product"}</Button>
+        {product.error && <p role="alert" className="mt-3 text-sm text-red-700">{product.error.message}</p>}
         {connect.error && <p role="alert" className="mt-3 text-sm text-red-700">{connect.error.message}</p>}
         <Label className="mt-5 flex items-start gap-2 text-sm leading-relaxed"><input type="checkbox" checked={acknowledge} onChange={event => setAcknowledge(event.target.checked)} />I understand unfinished PDFs and prompts show Coming soon, and I have checked the member-access and email setup before opening enrollment.</Label>
         <Button className="mt-4" disabled={enrollment.isPending || (!library.data?.enabled && (!readiness.data?.ready || !acknowledge))} onClick={() => enrollment.mutate({ enabled: !library.data?.enabled, acknowledgePlaceholders: acknowledge })}>{library.data?.enabled ? "Close enrollment" : "Open enrollment"}</Button>

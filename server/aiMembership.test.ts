@@ -8,11 +8,13 @@ const mock = vi.hoisted(() => ({
   account: vi.fn(), endpoints: vi.fn(), checkout: vi.fn(), session: vi.fn(), subscription: vi.fn(), cancel: vi.fn(),
   endpointCreate: vi.fn(), endpointRetrieve: vi.fn(), constructEvent: vi.fn(),
   verifyEmail: vi.fn(), sendEmail: vi.fn(), storagePut: vi.fn(), storageGet: vi.fn(),
+  catalog: vi.fn(),
 }));
 vi.mock("./db", () => ({ getDb: async () => mock.db }));
 vi.mock("stripe", () => ({ default: vi.fn(() => ({ accounts: { retrieve: mock.account }, webhookEndpoints: { list: mock.endpoints, create: mock.endpointCreate, retrieve: mock.endpointRetrieve }, webhooks: { constructEvent: mock.constructEvent }, checkout: { sessions: { create: mock.checkout, retrieve: mock.session } }, subscriptions: { retrieve: mock.subscription, update: mock.cancel } })) }));
 vi.mock("./aiMembershipEmail", async original => ({ ...await original<any>(), verifyMembershipEmail: mock.verifyEmail, sendMemberEmail: mock.sendEmail }));
 vi.mock("./storage", () => ({ storagePut: mock.storagePut, storageGet: mock.storageGet }));
+vi.mock("./aiMembershipCatalog", () => ({ getOrCreateMembershipPrice: mock.catalog }));
 import { AI_MEMBERSHIP, AI_GUIDES, isMembershipOrigin, normalizeMemberEmail, subscriptionGrantsAccess } from "../shared/aiMembership";
 import { aiMembers, aiSubscriptions, aiCheckoutIntents, aiMemberSessions, aiLoginTokens, aiMembershipSettings, aiGuideAssets } from "../drizzle/schema";
 import { encryptGuide, decryptGuide, validatePdf, newToken, hashToken, tokensMatch, createLoginToken, consumeLoginToken, createMemberSession, getSignedInMember, MEMBER_COOKIE, CLAIM_COOKIE, rateLimit, membershipClientAddress } from "./aiMembershipSecurity";
@@ -53,6 +55,7 @@ async function sessionCookie(memberId: number) {
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubEnv("AI_MEMBERSHIP_STRIPE_SECRET_KEY", "");
   vi.stubEnv("STRIPE_SECRET_KEY", "sk_live_unit_test_not_real");
   vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_unit_test_not_real");
   vi.stubEnv("JWT_SECRET", "unit-test-persistent-encryption-secret");
@@ -69,6 +72,7 @@ beforeEach(() => {
   mock.subscription.mockImplementation(async () => sub);
   mock.cancel.mockImplementation(async () => { sub.cancel_at_period_end = true; return sub; });
   mock.storagePut.mockResolvedValue({ key: "encrypted", url: "https://storage.example/encrypted" });
+  mock.catalog.mockResolvedValue({ productId: "prod_members", priceId: "price_members_monthly", productName: AI_MEMBERSHIP.productName, amountCents: 2000, currency: "usd", interval: "month", livemode: true });
 });
 afterEach(() => vi.unstubAllEnvs());
 
@@ -153,7 +157,8 @@ describe("safe membership enrollment", () => {
     const request = mock.checkout.mock.calls[0][0];
     expect(request.mode).toBe("subscription");
     expect(request.customer_email).toBe("coach@example.com");
-    expect(request.line_items[0].price_data).toMatchObject({ unit_amount: 2000, currency: "usd", recurring: { interval: "month", interval_count: 1 }, product_data: { name: AI_MEMBERSHIP.productName } });
+    expect(request.line_items[0]).toEqual({ quantity: 1, price: "price_members_monthly" });
+    expect(mock.catalog).toHaveBeenCalled();
     expect(request.subscription_data.metadata.type).toBe(AI_MEMBERSHIP.type);
     expect(request.custom_text.submit.message).toContain("Coming soon");
     expect(ctx.res.cookie.mock.calls[0][0]).toBe(CLAIM_COOKIE);
@@ -359,5 +364,33 @@ describe("membership security review regressions", () => {
     mock.constructEvent.mockImplementation(() => { throw new Error("bad signature"); });
     await handler(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
+  });
+});
+
+
+describe("live product connection and launch safety", () => {
+  it("uses the separate live membership key while preserving platform-managed tennis credentials", async () => {
+    vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_tennis_not_real");
+    vi.stubEnv("AI_MEMBERSHIP_STRIPE_SECRET_KEY", "sk_live_membership_not_real");
+    enableReady();
+    expect((await getMembershipReadiness()).ready).toBe(true);
+    expect(process.env.STRIPE_SECRET_KEY).toBe("sk_test_tennis_not_real");
+  });
+  it("requires the permanent catalog price before opening enrollment or checkout", async () => {
+    enableReady(); mock.catalog.mockRejectedValue(new Error("Missing catalog"));
+    expect((await getMembershipReadiness()).ready).toBe(false);
+    await expect(caller().api.billing.createCheckout({ email: "coach@example.com", origin })).rejects.toThrow();
+    expect(mock.checkout).not.toHaveBeenCalled();
+    expect(db.rows(aiCheckoutIntents)).toHaveLength(0);
+  });
+  it("connects products only for admins and does not open enrollment", async () => {
+    await expect(caller().api.library.connectProduct()).rejects.toThrow();
+    expect(await caller(true).api.library.connectProduct()).toHaveProperty("priceId", "price_members_monthly");
+    expect(db.rows(aiMembershipSettings)).toHaveLength(0);
+  });
+  it("keeps checkout blocked when Stripe is connected but the welcome sender fails", async () => {
+    enableReady(); mock.verifyEmail.mockResolvedValue({ ready: false, provider: null });
+    await expect(caller().api.billing.createCheckout({ email: "coach@example.com", origin })).rejects.toThrow();
+    expect(mock.checkout).not.toHaveBeenCalled();
   });
 });

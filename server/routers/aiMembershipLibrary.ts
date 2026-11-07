@@ -8,6 +8,7 @@ import { membershipDb, validatePdf, encryptGuide, newToken, requireSameSite } fr
 import { storagePut } from "../storage";
 import { requireActiveMember } from "./aiMembershipAccount";
 import { getMembershipReadiness, connectMembershipWebhook } from "../aiMembershipReadiness";
+import { getOrCreateMembershipPrice } from "../aiMembershipCatalog";
 
 const slotSchema = z.enum(["guide-1", "guide-2", "guide-3", "guide-4", "guide-5", "new-guides"]);
 export const aiMembershipLibraryRouter = router({
@@ -26,6 +27,11 @@ export const aiMembershipLibraryRouter = router({
     return { guides: AI_GUIDES.map(guide => ({ ...guide, filename: assets.find(asset => asset.slot === guide.slot)?.filename || null })), promptLibrary: settings?.promptLibrary || "", enabled: !!settings?.checkoutEnabled };
   }),
   readiness: adminProcedure.query(getMembershipReadiness),
+  connectProduct: adminProcedure.mutation(async ({ ctx }) => {
+    requireSameSite(ctx.req);
+    try { return await getOrCreateMembershipPrice(); }
+    catch { throw new TRPCError({ code: "PRECONDITION_FAILED", message: "The live membership product could not be connected. Check Stripe activation and the exact $20 USD monthly price; no existing product was changed." }); }
+  }),
   connectWebhook: adminProcedure.mutation(async ({ ctx }) => {
     requireSameSite(ctx.req);
     try { return await connectMembershipWebhook(); }

@@ -8,6 +8,7 @@ import { AI_MEMBERSHIP, normalizeMemberEmail, subscriptionGrantsAccess } from ".
 import { membershipDb, newToken, hashToken, tokensMatch, requireMembershipOrigin, requireSameSite, setClaimCookie, readMemberCookie, CLAIM_COOKIE, getSignedInMember, rateLimit, membershipClientAddress } from "../aiMembershipSecurity";
 import { getMembershipReadiness, membershipStripe } from "../aiMembershipReadiness";
 import { fulfillMembershipCheckout, findMemberSubscriptions, synchronizeSubscription } from "../aiMembershipFulfillment";
+import { getOrCreateMembershipPrice } from "../aiMembershipCatalog";
 
 export const aiMembershipBillingRouter = router({
   checkoutStatus: publicProcedure.query(async () => {
@@ -30,6 +31,7 @@ export const aiMembershipBillingRouter = router({
         throw new TRPCError({ code: "CONFLICT", message: "Please sign in to the existing membership for this email rather than paying twice." });
       }
     }
+    const catalog = await getOrCreateMembershipPrice();
     const intentId = randomUUID();
     const claim = newToken();
     await db.insert(aiCheckoutIntents).values({ id: intentId, claimHash: hashToken(claim), email, origin: input.origin, expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) });
@@ -37,7 +39,7 @@ export const aiMembershipBillingRouter = router({
       mode: "subscription",
       payment_method_types: ["card"],
       customer_email: email,
-      line_items: [{ quantity: 1, price_data: { currency: AI_MEMBERSHIP.currency, unit_amount: AI_MEMBERSHIP.amountCents, recurring: { interval: AI_MEMBERSHIP.interval, interval_count: 1 }, product_data: { name: AI_MEMBERSHIP.productName, description: "Member PDF guides and Prompt Library. New guides are added as Coach Mario finishes them; unuploaded guides show Coming soon." } } }],
+      line_items: [{ quantity: 1, price: catalog.priceId }],
       metadata: { type: AI_MEMBERSHIP.type, intentId },
       subscription_data: { metadata: { type: AI_MEMBERSHIP.type, intentId } },
       custom_text: { submit: { message: "$20 USD billed every month. Cancel future renewal anytime from your member library. Guide slots not uploaded yet show Coming soon." } },
