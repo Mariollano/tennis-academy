@@ -1,12 +1,14 @@
-# AI membership: verified and enabled; publication still needed
+# AI membership: live checkout verified
 
-Updated November 6, 2026, after the corrected Gmail credentials were saved directly to this website.
+Updated November 6, 2026, at 10:28 p.m. Eastern after Mario published the corrected website Settings.
 
 ## Public-site status
 
-The project is ready and enrollment is enabled in its database. However, a signed-in admin check on the public website confirms its running service still rejects the old email credentials. Its public checkout status remains unavailable. The latest checkpoint must be published to apply the corrected email Settings to production. No further Stripe or Gmail credential entry is needed.
+**Public membership checkout is open.** The live API on tennispromario.com returns `available: true`. The homepage banner Join dialog displays the email field and Continue to Stripe button, not the old closed-enrollment message.
 
-The assistant tried to open the project publishing controls in the cloud browser, but Manus requires the owner's login. Publishing can be done from the owner's already signed-in Manus app. After publication, the public Join dialog and Stripe redirect must be retested before calling the public launch complete.
+The public membership-page Join button was tested in an ordinary visitor browser. It redirected successfully to Stripe Checkout, displaying **AI for the Working Tennis Pro — Membership**, **$20.00 per month**, and cancel-anytime wording. The resulting live session was independently checked through Stripe for quantity one and the correct USD monthly price. No card was entered, payment stayed unpaid, and the unused owner verification session was expired. No more credential entry or publication is required for this setup.
+
+The published member library displays the non-member message and no PDF download links. Both the guide-download endpoint and the Prompt Library API returned HTTP 401 for an unsigned visitor. This final update changes documentation only; it does not change the already-published application.
 
 ## Completed
 
@@ -49,7 +51,7 @@ The separately stored `AI_MEMBERSHIP_STRIPE_SECRET_KEY` is used only by this mem
 
 No card has been charged. No real subscription purchase or complete paid customer onboarding has been performed. Payment fulfillment, immediate welcome email, cancellation, sign-in token consumption, and download authorization are covered by isolated regression tests. Live checks verify the real providers, signed webhook transport, and owner onboarding email.
 
-A real paid end-to-end test requires permission before charging any card. The server-side Join-to-Stripe check passed without card entry or payment, and its unused checkout session was expired. The public browser check is still blocked by production's old email settings and needs publication before it can be completed.
+A real paid end-to-end test requires permission before charging any card. Both the server-side and public browser Join-to-Stripe checks passed without card entry or payment, and their unused checkout sessions were expired. The live Gmail connection and owner sign-in email were verified earlier; a complete paid customer welcome-email/access lifecycle has not been performed with a real charge.
 
 ## Repeatable owner launch check
 
